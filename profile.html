@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WeBooth Profile</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+
+  /* Reset and basic styling */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin-top: 0px;
+    margin-right: 100px;
+    margin-left: 100px;
+    padding: 10px;
+    background: #f8e8f6;
+    user-select: none;
+    color: black;
+  }
+  .font-fredoka {
+            font-family: 'Fredoka One', cursive;
+        }
+        .text-brand-pink {
+            color: #c32d6c;
+  }
+  button {
+    cursor: pointer;
+  }
+
+  /* Layout */
+  .app {
+    display: flex;
+    min-height: 100vh;
+  }
+  /* Sidebar */
+  nav.sidebar {
+    width: 70px;
+    background: #f8e8f6;
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 0;
+    gap: 70px;
+    border: 1px solid pink;
+  }
+  nav.sidebar button {
+    background: none;
+    border: none;
+    color: #eb64a0;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s ease;
+    outline-offset: 2px;
+  }
+  nav.sidebar button img {
+  filter: invert(32%) sepia(73%) saturate(2302%) hue-rotate(324deg) brightness(96%) contrast(89%);
+  width: 44px;
+  height: 44px;
+}
+  nav.sidebar button span {
+    writing-mode: horizontal-lr;
+    transform: rotate(360deg);
+    user-select:none;
+  }
+  nav.sidebar button.active,
+  nav.sidebar button:hover {
+    color: #bf1b63;
+  }
+  nav.sidebar button.logout-btn {
+    margin-top: auto;
+  }
+  nav.sidebar button.logo-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 0%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 28px;
+  }
+  nav.sidebar button.logo-btn:hover {
+    background: #bf1b63;
+  }
+
+  /* Main panel */
+  main.main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  header.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: -40px;
+    margin-top: -50px;
+  }
+   h1.greeting {
+    font-family: 'Fredoka One', cursive;
+    text-align: center;
+    font-weight:bold;
+    font-size: 60px;
+    user-select:none;
+    color:#c32d6c;
+    margin-left: 60px;
+    margin-top: 60px;
+    margin-bottom: -50px;
+  }
+  .buttons {
+    margin-top: 5px;
+    margin-right:10px;
+    display: flex;
+    gap: 4px;
+  }
+  .nav-button {
+            display: flex;
+            align-items: center;
+            background-color: #feefff;
+            border-radius: 0.75rem; 
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            color:#c32d6c;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+            border: 2px solid #dd3d93; 
+        }
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:active {
+            transform: scale(0.95);
+            opacity: 0.9;
+        }
+        .nav-button img {
+            width: 1.25rem; 
+            height: 1.25rem; 
+            margin-right: 0.5rem; 
+        }
+        
+        
+        .active-nav-button {
+        background-color: #dd3d93; /* MODIFIED: Set to requested active color */
+        color: white; 
+        box-shadow: 0 4px 6px -1px rgba(221, 61, 147, 0.4), 0 2px 4px -2px rgba(221, 61, 147, 0.2); /* Adjusted shadow for new color */
+        border-color: #dd3d93; /* ADDED: Match border to background */
+    }
+    .active-nav-button img {
+       
+       filter: brightness(0) invert(1);
+    }
+    .active-nav-button:hover {
+        
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(221, 61, 147, 0.6), 0 4px 6px -4px rgba(221, 61, 147, 0.3); /* Adjusted shadow for new color */
+    }
+    .active-nav-button:active {
+        transform: scale(0.95);
+        opacity: 0.9;
+    }
+
+    
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 2rem;
+        border-radius: 9999px;
+        font-size: 1.125rem; 
+        font-weight: 700; 
+        box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+        
+        background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+        color: white;
+        cursor: pointer;
+        margin-bottom: 15px;
+        transition: background 0.3s ease;
+        text-decoration: none; 
+    }
+    .action-button:hover {
+        background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);
+    }
+    .action-button:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+  /* Profile info */
+  section.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    margin-left: 1170px;
+  }
+  .profile-img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px solid #d72b7e;
+    background: url('https://via.placeholder.com/72x72.png?text=') center/cover no-repeat;
+  }
+  .profile-bio {
+    flex-grow: 1;
+  }
+  .profile-bio strong {
+    font-weight: 900;
+    font-size: 18px;
+    user-select:none;
+  }
+  .profile-bio span {
+    user-select:none;
+  }
+  button.btn-edit-profile {
+    margin-right: 30px;
+    border-radius: 8px;
+    background: #f2e7e9;
+    border: none;
+    color: #444;
+    padding: 6px 14px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select:none;
+  }
+  button.btn-edit-profile svg {
+    width: 20px;
+    height: 20px;
+    fill: #666;
+  }
+  button.btn-edit-profile:hover {
+    background: #e3d6db;
+  }
+
+  /* Tabs (Photo Library / Albums) */
+  nav.tabs-main {
+    display: flex;
+    gap: 32px;
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #d894bc;
+    user-select:none;
+  }
+  nav.tabs-main button {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding-bottom: 6px;
+    color: #d72b7e;
+    cursor: pointer;
+    font-family: 'Fredoka One', cursive;
+  }
+  nav.tabs-main button.active {
+    border-color: #d72b7e;
+    font-weight: 900;
+  }
+
+  /* Sections container */
+  .section {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+  .hidden {
+    display: none !important;
+  }
+
+  /* Photo Library grid */
+  .photo-library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+    gap: 14px;
+  }
+  .photo-card {
+    background-color: #ffffff;
+            border-radius: 0.75rem;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem; 
+            width: 100%;
+            max-width: 150px; 
+            margin-bottom: 1.5rem; 
+           background-size: cover;
+           background-position: center;
+           transition: background-color 0.3s ease, background-image 0.3s ease;
+  }
+  .photo-card.even {
+    background: #5ca43b;
+    border-color: #2e7c18;
+  }
+  .photo-card img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    display: block;
+  }
+  .photo-card:focus {
+    outline: 2px solid #a31a62;
+    outline-offset: 2px;
+  }
+
+  /* Albums grid */
+  .albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 20px;
+  }
+  .album-card {
+    border-radius: 10px;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    user-select:none;
+  }
+  .album-card .album-title {
+    padding-top: 6px;
+    font-size: 13px;
+    color: #bf1b63;
+    border-bottom: 1px dotted #bf1b63;
+    cursor: text;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    outline: none;
+  }
+  .album-card .album-title[contenteditable="true"] {
+    border-bottom: 1px dotted #d72b7e;
+    background: #ffe6f1;
+  }
+  .album-card .album-title svg {
+    width: 15px;
+    height: 15px;
+    fill: #d72b7e;
+    cursor: pointer;
+  }
+  .photo-grid-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-grow: 1;
+    height: 120px;
+  }
+  .photo-grid-inner img {
+    width: 100%;
+    height: 60px;
+    object-fit: cover;
+  }
+
+  /* Sidebar icons with IDs for easy replacement */
+  svg.icon-camera {
+    width: 24px; height: 24px;
+  }
+  svg.icon-user, svg.icon-logout, svg.icon-templates, svg.icon-favorites, svg.icon-activity {
+    width: 24px; height: 24px;
+  }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    user-select:none;
+  }
+  .modal-bg.active {
+    display: flex;
+  }
+  .modal {
+    background: #fef9fb;
+    border-radius: 14px;
+    width: 720px;
+    max-width: 95vw;
+    max-height: 90vh;
+    display: flex;
+    overflow: hidden;
+    user-select:none;
+  }
+  .modal-left {
+    width: 180px;
+    background: #f9d7e7;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .modal-left img {
+   background-color: #ffffff;
+            border-radius: 0.75rem;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem; 
+            width: 100%;
+            max-width: 150px; 
+            margin-bottom: 1.5rem; 
+          background-size: cover;
+       background-position: center;
+       transition: background-color 0.3s ease, background-image 0.3s ease;
+  }
+  .modal-left img.selected,
+  .modal-left img:hover {
+    border-color: #d72b7e;
+  }
+  .modal-right {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 24px 12px 24px;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-header .username {
+    font-weight: 700;
+    color: #d72b7e;
+    user-select:none;
+  }
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    color: #d72b7e;
+    user-select:none;
+  }
+  .comments {
+    flex-grow: 1;
+    overflow-y: auto;
+    border-top: 1px solid #f3c7d9;
+    border-bottom: 1px solid #f3c7d9;
+    margin: 12px 0;
+    padding: 10px 0;
+  }
+  .no-comments {
+    color: #faaad9;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 40px;
+    user-select:none;
+  }
+  .comment {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .comment .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: url('https://via.placeholder.com/40x40.png?text=') center/cover no-repeat;
+    flex-shrink: 0;
+    user-select:none;
+  }
+  .comment-content {
+    flex-grow: 1;
+  }
+  .comment-author {
+    font-weight: 700;
+    font-size: 14px;
+    color: #d72b7e;
+    user-select:none;
+  }
+  .comment-text {
+    font-size: 13px;
+    margin-top: 4px;
+    color: #444;
+    white-space: pre-wrap;
+    user-select:none;
+  }
+  .comment-footer {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 6px;
+    user-select:none;
+  }
+  .comment-footer button {
+    border: none;
+    background: none;
+    color: #d72b7e;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    font-size: 12px;
+  }
+  .comment-footer button:disabled {
+    cursor: default;
+    color: #f9b4d5;
+  }
+  .heart-icon, .bookmark-icon {
+    cursor: pointer;
+    stroke: #d72b7e;
+    stroke-width: 1.5;
+    fill: transparent;
+    width: 18px;
+    height: 18px;
+    transition: fill 0.3s ease;
+    user-select:none;
+  }
+  .heart-icon.liked {
+    fill: #d72b7e;
+    stroke: #a4154f;
+  }
+  .bookmark-icon.active {
+    fill: #d72b7e;
+  }
+  /* Comments footer */
+  .reaction-footer {
+    padding-top: 8px;
+    font-weight: 700;
+    color: #d72b7e;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .reaction-footer div.likes-text {
+    font-weight: 900;
+    margin-left: auto;
+    color: #a41753;
+    user-select:none;
+  }
+  /* Comment form */
+  .comment-form {
+    display: flex;
+    gap: 12px;
+  }
+  .comment-form textarea {
+    flex-grow: 1;
+    border-radius: 10px;
+    border: 1px solid #f3c7d9;
+    background: #fff0f8;
+    padding: 10px 14px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 48px;
+    outline: none;
+    color: #d72b7e;
+    font-family: inherit;
+  }
+  .comment-form textarea::placeholder {
+    color: #f9c5db;
+  }
+  .comment-form button {
+    border: none;
+    background: transparent;
+    font-weight: 700;
+    font-size: 14px;
+    color: #d72b7e;
+    cursor: pointer;
+    opacity: 0.75;
+    user-select:none;
+  }
+  .comment-form button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .comment-form button:hover:not(:disabled) {
+    opacity: 1;
+  }
+
+  /* Templates Section */
+  #section-templates {
+    overflow-y: auto;
+  }
+  #section-templates h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 30px;
+    user-select:none;
+    margin-top: 0;
+    color:#c32d6c ;
+  }
+  nav.templates-tabs {
+    display: flex;
+    gap: 30px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    user-select:none;
+  }
+  nav.templates-tabs button {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    color: #d72b7e;
+    cursor: pointer;
+  }
+  nav.templates-tabs button.active {
+    border-color: #d72b7e;
+    font-weight: 900;
+  }
+  .templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px,1fr));
+    gap: 14px;
+    user-select:none;
+  }
+  .template-card {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .template-card .template-frame {
+    width: 100%;
+    display: block;
+    border-radius: 12px;
+    user-select:none;
+  }
+  .template-card .template-controls {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .template-card:hover .template-controls {
+    opacity: 1;
+  }
+  .template-control-btn {
+    background: #f9d7e2;
+    border-radius: 20px;
+    padding: 4px 8px;
+    font-weight: 600;
+    font-size: 12px;
+    color: #bf1b63;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: none;
+  }
+  .use-template-btn {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: #d72b7e;
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    user-select:none;
+  }
+  .use-template-btn:hover {
+    background: #a41753;
+  }
+  .upload-card {
+    border: 2px dashed #fccce6;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #d72b7e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select:none;
+  }
+  .upload-card:hover {
+    background: #ffe6f1;
+  }
+  
+  /* Upload/Edit template modal */
+  .modal.template-modal {
+    width: auto;
+    max-width: 720px;
+    padding: 20px;
+  }
+  .template-modal-content {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+  }
+  .template-left {
+    width: 220px;
+    background: #f9d7e7;
+    padding: 16px;
+    border-radius: 14px 0 0 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-right:1px dotted #d72b7e ;
+  }
+  .template-left img {
+    width: 100%;
+    border-radius: 12px;
+    cursor: pointer;
+    user-select:none;
+  }
+  .template-right {
+    flex-grow: 1;
+    background: #fef9fb;
+    border-radius: 0 14px 14px 0;
+    padding: 0px 0px 0px 0px;
+    display: flex;
+    flex-direction: column;
+  }
+  .template-right h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    margin: 0 0 18px 0;
+    user-select:none;
+    color:#c32d6c ;
+    border-bottom: 1px dotted #d72b7e;
+    
+
+  }
+  .template-control-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+
+  }
+  .template-control-group > div {
+    flex-grow: 1;
+    min-width: 100px;
+    background: #f2e7e9;
+    border-radius: 18px;
+    padding: 10px 14px;
+    font-weight: 700;
+    color: #444;
+    user-select:none;
+
+  }
+  select {
+    border: none;
+    background: transparent;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    color: #444;
+  }
+  select option {
+    color: #222;
+  }
+  .effect-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  .effect-button {
+    border-radius: 20px;
+    padding: 10px 18px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid #d72b7e;
+    background: #fde9f6;
+    color: #d72b7e;
+    font-weight: 900;
+    user-select:none;
+    font-family: 'Fredoka One', cursive;
+  }
+  .effect-button.selected {
+    background: #d72b7e;
+    color: white;
+    border-color: transparent;
+  }
+  .upload-boxes {
+    border: 1.5px dashed #fccce6;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: #faaad9;
+    cursor: pointer;
+    user-select:none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 80px;
+  }
+  .upload-boxes:hover {
+    background: #ffe6f1;
+  }
+  .upload-boxes.selected {
+    color: #bf1b63;
+  }
+  .share-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    font-weight: 700;
+    font-size: 18px;
+    user-select:none;
+    border-bottom: 1px dotted #d72b7e;
+    border-top:1px dotted #d72b7e ;
+  }
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+
+  }
+  .switch input {
+    opacity: 0;
+    width: 0; height: 0;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #f9d7e7;
+    border-radius: 26px;
+    transition: 0.3s;
+
+  }
+  .slider:before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    top: 3px;
+    background-color: #bf1b63;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  input:checked + .slider {
+    background-color: #d72b7e;
+  }
+  input:checked + .slider:before {
+    transform: translateX(22px);
+  }
+  .tags-publish {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tags-publish input {
+    flex-grow: 1;
+    font-style: italic;
+    font-size: 14px;
+    border: none;
+    background: transparent;
+    padding: 6px 8px 4px 8px;
+    color: #f9c5db;
+    outline: none;
+  }
+  .tags-publish input::placeholder {
+    color: #f9c5db;
+  }
+  .publish-btn {
+    font-weight: 700;
+    font-family: 'Fredoka One', cursive;
+    color: #d72b7e;
+    cursor: pointer;
+    padding: px px;
+    user-select:none;
+    border: none;
+    background: transparent;
+
+  }
+  .publish-btn:hover {
+    color: #a41753;
+  }
+
+  /* Favorites Section */
+  #section-favorites {
+    user-select:none;
+  }
+  #section-favorites h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 30px;
+    margin-top: 0;
+    color:#c32d6c ;
+  }
+  .favorites-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+    padding-top: 30px;
+  }
+  .favorite-photo-card {
+    border-radius: 10px;
+    border: 5px solid #f9d7a8;
+    background: #f9d7a8;
+    user-select:none;
+  }
+  .favorite-photo-card img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+  }
+  .favorite-photo-card:focus {
+    outline: 2px solid #a31a62;
+    outline-offset: 2px;
+  }
+  .no-favorites-msg {
+    font-style: italic;
+    color: #f9acdb;
+    user-select:none;
+  }
+
+  /* Activity Section */
+  #section-activity {
+    user-select:none;
+  }
+  #section-activity h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 30px;
+    margin-top: 0;
+    color:#c32d6c ;
+  }
+  .activity-container {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .activity-post {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid #f3c7d9;
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.3;
+    color: #d72b7e;
+    white-space: pre-line;
+    word-break: break-word;
+  }
+  .activity-post.empty {
+    font-style: italic;
+    color: #f29dcc;
+    border-color: #fddaeb;
+  }
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #f9d7e7;
+    border-radius: 6px;
+  }
+  /* Accessibility focus for buttons */
+  button:focus-visible {
+    outline: 2px solid #a31a62;
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar" aria-label="Main Navigation">
+    <button class="logo-btn" aria-label="Home"><img src="Icons/11.svg" alt="logo"></button>
+    </button>
+    <button class="sidebar-btn" data-target="templates" aria-label="Templates page" title="Templates">
+      <img src="Icons 2/templates.svg" alt="templates">
+      <span>Templates</span>
+    </button>
+    <button class="sidebar-btn" data-target="favorites" aria-label="Favorites page" title="Favorites">
+      <img src="Icons 2/favorites.svg" alt="favorites">
+      <span>Favorites</span>
+    </button>
+    <button class="sidebar-btn" data-target="activity" aria-label="Activity page" title="Activity">
+      <img src="Icons 2/Activity.svg" alt="Activity">
+      <span>Activity</span>
+    </button>
+    <button class="sidebar-btn logout-btn" data-target="logout" aria-label="Logout" title="Logout">
+      <img src="Icons 2/Logout.svg" alt="logout">
+      <span>Logout</span>
+    </button>
+  </nav>
+  <main class="main" role="main" tabindex="-1">
+
+    <!-- Header -->
+<header class="header" role="banner">
+  <h1 class="greeting" aria-live="polite">Hi, <span id="username-display">Username</span>!</h1>
+  <div class="buttons" role="navigation" aria-label="Page Actions">
+   
+      <button class="nav-button active-nav-button" onclick="window.location.href='booth.html'">
+                        <img src="Icons/2.svg" alt="Booth"
+                            onerror="this.outerHTML = '<div class=\'icon-fallback\'>B</div>'">
+                        Booth
+                    </button>
+             
+            <button class="nav-button">
+                <img src="Icons/4.svg" alt="Profile"
+                     onerror="this.outerHTML = '<div class=\'icon-fallback\'>P</div>'">
+                Profile
+            </button>
+  </div>
+</header>
+
+<!-- Profile info -->
+<section class="profile-info" aria-label="User profile info">
+  <div class="profile-img" aria-hidden="true" id="profile-img" style="background-image: url('https://via.placeholder.com/72x72.png?text=');"></div>
+  <div class="profile-bio">
+    <strong id="profile-username">Username</strong>
+    <div>
+    <span id="profile-bio-text">bio sample sample sample<br>0 photo</span>
+    </div>
+  </div>
+  <button class="btn-edit-profile" id="btn-edit-profile" aria-label="Edit Profile" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+    </svg>
+    Edit Profile
+  </button>
+</section>
+
+<!-- Main tabs -->
+<nav class="tabs-main" role="tablist" aria-label="Main Content Tabs">
+  <button role="tab" id="tab-photolib-btn" aria-controls="tab-photolib" aria-selected="true" class="active">Photo Library</button>
+  <button role="tab" id="tab-albums-btn" aria-controls="tab-albums" aria-selected="false">Albums</button>
+</nav>
+
+<!-- Photo Library Section -->
+<section id="tab-photolib" role="tabpanel" aria-labelledby="tab-photolib-btn" class="section">
+  <div class="photo-library-grid" aria-live="polite" aria-label="Photo Library Grid"></div>
+</section>
+
+<!-- Albums Section -->
+<section id="tab-albums" role="tabpanel" aria-labelledby="tab-albums-btn" class="section hidden">
+  <div class="albums-grid" aria-live="polite" aria-label="Albums Grid"></div>
+</section>
+
+<!-- Templates Section -->
+<section id="section-templates" class="section hidden" role="region" aria-label="Templates Section">
+  <h2>Templates</h2>
+  <nav class="templates-tabs" role="tablist" aria-label="Templates Tabs">
+    <button role="tab" id="tab-shared-community-btn" aria-controls="tab-shared-community" aria-selected="true" class="active">Shared to Community</button>
+    <button role="tab" id="tab-my-templates-btn" aria-controls="tab-my-templates" aria-selected="false">My Templates</button>
+  </nav>
+  <div id="tab-shared-community" role="tabpanel" aria-labelledby="tab-shared-community-btn" class="templates-grid" aria-live="polite">
+    <div class="template-card upload-card" tabindex="0" role="button" aria-label="Upload your template">
+      +<br>Upload your template
+    </div>
+  </div>
+  <div id="tab-my-templates" role="tabpanel" aria-labelledby="tab-my-templates-btn" class="templates-grid hidden" aria-live="polite">
+    <div class="template-card upload-card" tabindex="0" role="button" aria-label="Upload your template">
+      +<br>Upload your template
+    </div>
+  </div>
+</section>
+
+<!-- Favorites Section -->
+<section id="section-favorites" class="section hidden" role="region" aria-label="Favorites Section">
+  <h2>Favorites</h2>
+  <div class="favorites-grid" aria-live="polite"></div>
+</section>
+
+<!-- Activity Section -->
+<section id="section-activity" class="section hidden" role="region" aria-label="Activity Log Section">
+  <h2>Activity</h2>
+  <div class="activity-container" aria-live="polite"></div>
+</section>
+  </main>
+</div>
+
+<!-- Post Modal -->
+<div class="modal-bg" id="post-modal" role="dialog" aria-modal="true" aria-labelledby="post-modal-title" tabindex="-1">
+  <div class="modal" role="document">
+    <div class="modal-left" aria-label="Photo thumbnails"></div>
+    <div class="modal-right">
+      <div class="modal-header">
+        <div class="username" id="modal-username"></div>
+        <button class="modal-close-btn" aria-label="Close modal" id="post-modal-close-btn">×</button>
+      </div>
+      <div class="comments" id="comments-container">
+        <div class="no-comments" id="no-comments-text">No comments yet.</div>
+      </div>
+      <div class="reaction-footer" id="reaction-footer"></div>
+      <form class="comment-form" id="comment-form" aria-label="Add a comment">
+        <textarea id="comment-input" placeholder="Add a comment..." rows="1" aria-label="Add a comment"></textarea>
+        <button type="submit" disabled id="comment-post-btn">Post</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Template Modal -->
+<div class="modal-bg" id="template-modal" role="dialog" aria-modal="true" aria-labelledby="template-modal-title" tabindex="-1">
+  <div class="modal template-modal" role="document" style="width:auto; max-width: 720px;">
+    <div class="template-modal-content">
+      <div class="template-left" id="template-left-thumbs" aria-label="Template previews"></div>
+      <div class="template-right">
+        <h2 id="template-modal-title">Upload Template</h2>
+        <div class="template-control-group">
+          <div>
+            <img src="Icons/6.svg" alt="size">Frame Size<br>
+            <select id="frame-size-select" aria-label="Frame size">
+              <option value="">Frame Size</option>
+              <option value="small">1:1 (Square)</option>
+              <option value="medium">4:3 (Classic)</option>
+              <option value="large">16:9 (Wide)</option>
+            </select>
+          </div>
+          <div>
+            <img src="Icons/7.svg" alt="sHOTS">Shots<br>
+            <select id="shots-select" aria-label="Number of Shots">
+              <option value="">Shots</option>
+              <option value="1">1 Shot</option>
+              <option value="2">3 Shots</option>
+              <option value="3">4 Shots</option>
+            </select>
+          </div>
+        </div>
+        <div class="template-control-group" style="justify-content: space-between; flex-wrap: nowrap;">
+          <div>
+            Effects<br>
+            <div class="effect-buttons" role="group" aria-label="Effect options">
+              <button type="button" class="effect-button selected" data-effect="none">None</button>
+              <button type="button" class="effect-button" data-effect="bw">B&amp;W</button>
+              <button type="button" class="effect-button" data-effect="warm">Warm</button>
+              <button type="button" class="effect-button" data-effect="cool">Cool</button>
+              <button type="button" class="effect-button" data-effect="retro">Retro</button>
+              <button type="button" class="effect-button" data-effect="noir">Noir</button>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction: column; gap: 12px; flex-grow: 1; margin-left: 16px;">
+            <div class="upload-boxes" id="upload-bg-img" tabindex="0" aria-label="Upload background image here in jpg or png format">Upload background image here<br>in .jpeg or .png format</div>
+            <div class="upload-boxes" id="upload-sticker-pack" tabindex="0" aria-label="Upload sticker pack design here in png format">Upload sticker pack design here<br>in .png format</div>
+          </div>
+        </div>
+        <label class="share-toggle" for="share-toggle-input" tabindex="0">
+          <span>Share to community</span>
+          <div class="switch">
+            <input type="checkbox" id="share-toggle-input" />
+            <span class="slider"></span>
+          </div>
+        </label>
+        <div class="tags-publish">
+          <input type="text" placeholder="Add #tags..." aria-label="Add tags to template" id="template-tags" />
+          <button type="button" class="publish-btn" id="publish-btn">Publish</button>
+        </div>
+      </div>
+    </div>
+    <button class="modal-close-btn" aria-label="Close template modal" id="template-close-btn" style="position:absolute;top:12px;right:12px;">×</button>
+  </div>
+</div>
+
+<script>
+  // Data store
+  const state = {
+    user: {
+      username: 'Username',
+      bio: 'bio sample sample sample',
+      photoCount: 0,
+      profileImg: 'https://via.placeholder.com/72x72.png?text='
+    },
+    photos: [
+      { id: 1, src: 'https://via.placeholder.com/150?text=1', liked: false, favorite: false, date: '2024-10-29', comments: [] },
+      { id: 2, src: 'https://via.placeholder.com/150?text=2', liked: false, favorite: false, date: '2024-10-29', comments: [] },
+      { id: 3, src: 'https://via.placeholder.com/150?text=3', liked: false, favorite: false, date: '2024-10-29', comments: [] },
+      { id: 4, src: 'https://via.placeholder.com/150?text=4', liked: false, favorite: false, date: '2024-10-29', comments: [] },
+      { id: 5, src: 'https://via.placeholder.com/150?text=5', liked: false, favorite: false, date: '2024-10-29', comments: [] },
+      { id: 6, src: 'https://via.placeholder.com/150?text=6', liked: false, favorite: false, date: '2024-10-29', comments: [] }
+    ],
+    albums: [
+      { id: 1, title: "Album Title", photoIds: [1, 2, 3] },
+      { id: 2, title: "Album Title", photoIds: [4, 5] },
+      { id: 3, title: "Album Title", photoIds: [6] }
+    ],
+    templates: [
+      { id: 'tpl1', shared: true, images: ['https://via.placeholder.com/140x200?text=T1', 'https://via.placeholder.com/140x145?text=T1-2', 'https://via.placeholder.com/140x145?text=T1-3'], bgColor: '#B9D86F', tags:'' },
+      { id: 'tpl2', shared: true, images: ['https://via.placeholder.com/140x200?text=T2', 'https://via.placeholder.com/140x145?text=T2-2', 'https://via.placeholder.com/140x145?text=T2-3'], bgColor: '#D2FFA8', tags:'' }
+    ],
+    myTemplates: [
+      { id: 'mytpl1', shared: false, images: ['https://via.placeholder.com/140x200?text=MT1', 'https://via.placeholder.com/140x145?text=MT1-2', 'https://via.placeholder.com/140x145?text=MT1-3'], bgColor: '#F2BACB', tags:'' }
+    ],
+    activities: []
+  };
+
+  // ----------------------------------
+  // Manage UI updating and event handlers
+  // ----------------------------------
+
+  // Sidebar buttons interaction
+  const sidebarButtons = document.querySelectorAll('nav.sidebar button.sidebar-btn');
+  sidebarButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.target === 'logout') {
+        alert('Logging out...');
+        return;
+      }
+      sidebarButtons.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      switchSection(btn.dataset.target);
+    });
+  });
+
+  function switchSection(target) {
+    const main = document.querySelector('main.main');
+    main.querySelectorAll('section.section').forEach(section=>{
+      section.classList.add('hidden');
+    });
+    // Always hide main tabs nav by default
+    document.querySelector('nav.tabs-main').classList.add('hidden');
+
+    // Show correct section(s)
+    if(target === 'main') {
+      document.querySelector('nav.tabs-main').classList.remove('hidden');
+      // Show photo library tab and hide albums tab by default
+      showMainTab('photolib');
+    } else if(target === 'templates') {
+      document.getElementById('section-templates').classList.remove('hidden');
+    } else if(target === 'favorites') {
+      document.getElementById('section-favorites').classList.remove('hidden');
+    } else if(target === 'activity') {
+      document.getElementById('section-activity').classList.remove('hidden');
+    }
+  }
+
+  // Main tabs (Photo Library / Albums)
+  const tabPhotolibBtn = document.getElementById('tab-photolib-btn');
+  const tabAlbumsBtn = document.getElementById('tab-albums-btn');
+  tabPhotolibBtn.addEventListener('click', ()=>{ showMainTab('photolib'); });
+  tabAlbumsBtn.addEventListener('click', ()=>{ showMainTab('albums'); });
+
+  function showMainTab(tab) {
+    if(tab === 'photolib') {
+      tabPhotolibBtn.classList.add('active');
+      tabPhotolibBtn.setAttribute('aria-selected','true');
+      tabAlbumsBtn.classList.remove('active');
+      tabAlbumsBtn.setAttribute('aria-selected','false');
+      document.getElementById('tab-photolib').classList.remove('hidden');
+      document.getElementById('tab-albums').classList.add('hidden');
+    } else {
+      tabAlbumsBtn.classList.add('active');
+      tabAlbumsBtn.setAttribute('aria-selected','true');
+      tabPhotolibBtn.classList.remove('active');
+      tabPhotolibBtn.setAttribute('aria-selected','false');
+      document.getElementById('tab-albums').classList.remove('hidden');
+      document.getElementById('tab-photolib').classList.add('hidden');
+    }
+  }
+
+  // Templates tabs
+  const tplSharedBtn = document.getElementById('tab-shared-community-btn');
+  const tplMyBtn = document.getElementById('tab-my-templates-btn');
+  tplSharedBtn.addEventListener('click', ()=>{ showTemplateTab('shared'); });
+  tplMyBtn.addEventListener('click', ()=>{ showTemplateTab('my'); });
+
+  function showTemplateTab(tab) {
+    if(tab==='shared') {
+      tplSharedBtn.classList.add('active');
+      tplSharedBtn.setAttribute('aria-selected', 'true');
+      tplMyBtn.classList.remove('active');
+      tplMyBtn.setAttribute('aria-selected', 'false');
+      document.getElementById('tab-shared-community').classList.remove('hidden');
+      document.getElementById('tab-my-templates').classList.add('hidden');
+    } else {
+      tplMyBtn.classList.add('active');
+      tplMyBtn.setAttribute('aria-selected', 'true');
+      tplSharedBtn.classList.remove('active');
+      tplSharedBtn.setAttribute('aria-selected', 'false');
+      document.getElementById('tab-my-templates').classList.remove('hidden');
+      document.getElementById('tab-shared-community').classList.add('hidden');
+    }
+  }
+
+  // Profile edit button
+  document.getElementById('btn-edit-profile').addEventListener('click', ()=>{
+    const newUsername = prompt('Edit Username:', state.user.username);
+    if (newUsername !== null && newUsername.trim() !== '') {
+      state.user.username = newUsername.trim();
+    }
+    const newBio = prompt('Edit Bio:', state.user.bio);
+    if (newBio !== null) {
+      state.user.bio = newBio.trim();
+    }
+    updateUserUI();
+  });
+
+  // Update user info UI
+  function updateUserUI() {
+    document.getElementById('username-display').textContent = state.user.username;
+    document.getElementById('profile-username').textContent = state.user.username;
+    document.getElementById('profile-bio-text').innerHTML = state.user.bio.replace(/\n/g, '<br>') + `<br>${state.user.photoCount} photo${state.user.photoCount !== 1 ? "s" : ""}`;
+    document.getElementById('profile-img').style.backgroundImage = `url('${state.user.profileImg}')`;
+  }
+  updateUserUI();
+
+  // ===============================
+  // Photo library
+  // ===============================
+  const photoLibraryGrid = document.querySelector('.photo-library-grid');
+  function renderPhotoLibrary() {
+    photoLibraryGrid.innerHTML = '';
+    state.photos.forEach(photo=>{
+      const div = document.createElement('div');
+      div.classList.add('photo-card');
+      if(photo.id % 2 === 0) div.classList.add('even');
+      div.dataset.photoId = photo.id;
+      div.setAttribute('tabindex', '0');
+      div.setAttribute('role', 'button');
+      div.setAttribute('aria-label', `Photo ${photo.id}`);
+      const img = document.createElement('img');
+      img.src = photo.src;
+      img.alt = `Photo ${photo.id}`;
+      div.appendChild(img);
+      photoLibraryGrid.appendChild(div);
+
+      div.addEventListener('click', ()=> openPostModal(photo.id));
+      div.addEventListener('keydown', e=>{
+        if(e.key === 'Enter') openPostModal(photo.id);
+      });
+    });
+  }
+  renderPhotoLibrary();
+
+  // ===============================
+  // Albums
+  // ===============================
+  const albumsGrid = document.querySelector('.albums-grid');
+  function renderAlbums() {
+    albumsGrid.innerHTML = '';
+    // Add a card for "Add new album"
+    const addAlbumCard = document.createElement('div');
+    addAlbumCard.className = 'album-card';
+    addAlbumCard.style.border = '1px dashed #d7a0be';
+    addAlbumCard.style.display = 'flex';
+    addAlbumCard.style.justifyContent = 'center';
+    addAlbumCard.style.alignItems = 'center';
+    addAlbumCard.style.color = '#d7a0be';
+    addAlbumCard.style.fontSize = '14px';
+    addAlbumCard.style.cursor = 'pointer';
+    addAlbumCard.textContent = '+ Add new album';
+    addAlbumCard.setAttribute('tabindex','0');
+    addAlbumCard.setAttribute('role','button');
+    addAlbumCard.addEventListener('click', addNewAlbum);
+    addAlbumCard.addEventListener('keydown', e=>{
+      if(e.key==='Enter') addNewAlbum();
+    });
+    albumsGrid.appendChild(addAlbumCard);
+
+    state.albums.forEach(album=>{
+      const albumCard = document.createElement('div');
+      albumCard.classList.add('album-card');
+
+      // Photo grid inside
+      const photoGrid = document.createElement('div');
+      photoGrid.className = 'photo-grid-inner';
+      const photos = album.photoIds.map(id=>state.photos.find(p=>p.id===id)).filter(Boolean);
+      for(let i=0; i<4; i++) {
+        const img = document.createElement('img');
+        if(photos[i]) {
+          img.src = photos[i].src;
+          img.alt = 'Album photo ' + photos[i].id;
+        }
+        photoGrid.appendChild(img);
+      }
+      albumCard.appendChild(photoGrid);
+
+      // Title editable
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'album-title';
+      titleDiv.textContent = album.title;
+      titleDiv.title = 'Click pencil icon to edit title';
+      titleDiv.setAttribute('tabindex','0');
+
+      // Pencil icon
+      const pencil = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      pencil.setAttribute('viewBox','0 0 24 24');
+      pencil.setAttribute('width','15');
+      pencil.setAttribute('height','15');
+      pencil.setAttribute('aria-hidden', 'true');
+      pencil.style.fill = '#d72b7e';
+      pencil.style.cursor = 'pointer';
+      pencil.style.marginLeft = '6px';
+      pencil.innerHTML = '<path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 00-1.42 0l-2.34 2.34 3.75 3.75 2.83-2.81a1.003 1.003 0 000-1.42l-2.82-2.86z"/>';
+      titleDiv.appendChild(pencil);
+
+      pencil.addEventListener('click', e=>{
+        e.stopPropagation();
+        titleDiv.contentEditable = true;
+        titleDiv.focus();
+      });
+
+      // Save title on blur or enter
+      titleDiv.addEventListener('blur', () => {
+        titleDiv.contentEditable = false;
+        let newTitle = titleDiv.textContent.trim();
+        if(newTitle.length === 0) newTitle = album.title; // revert if empty
+        album.title = newTitle;
+        titleDiv.textContent = newTitle;
+        titleDiv.appendChild(pencil);
+        addActivity(`Edited album title: ${newTitle}`);
+      });
+      titleDiv.addEventListener('keydown', e => {
+        if(e.key === 'Enter') {
+          e.preventDefault();
+          titleDiv.blur();
+        }
+      });
+
+      albumCard.appendChild(titleDiv);
+      albumsGrid.appendChild(albumCard);
+    });
+  }
+  function addNewAlbum() {
+    const newAlbum = {id: Date.now(), title: 'New Album', photoIds: []};
+    state.albums.push(newAlbum);
+    renderAlbums();
+    addActivity(`Added new album: "New Album"`);
+  }
+  renderAlbums();
+
+  // ===============================
+  // Favorites grid
+  // ===============================
+  const favoritesGrid = document.querySelector('.favorites-grid');
+  function renderFavorites() {
+    favoritesGrid.innerHTML = '';
+    const favorites = state.photos.filter(p=>p.favorite);
+    if(favorites.length===0){
+      const noFav = document.createElement('p');
+      noFav.className = 'no-favorites-msg';
+      noFav.textContent = 'No favorites yet.';
+      favoritesGrid.appendChild(noFav);
+      return;
+    }
+    favorites.forEach(photo => {
+      const div = document.createElement('div');
+      div.className = 'favorite-photo-card';
+      div.dataset.photoId = photo.id;
+      div.setAttribute('tabindex', '0');
+      div.setAttribute('role', 'button');
+      div.setAttribute('aria-label', `Favorite photo ${photo.id}`);
+      const img = document.createElement('img');
+      img.src = photo.src;
+      img.alt = `Favorite photo ${photo.id}`;
+      div.appendChild(img);
+      favoritesGrid.appendChild(div);
+      div.addEventListener('click', () => openPostModal(photo.id));
+      div.addEventListener('keydown', e => {
+        if(e.key === 'Enter') openPostModal(photo.id);
+      });
+    });
+  }
+  renderFavorites();
+
+  // ===============================
+  // Templates grids
+  // ===============================
+  const sharedCommunityGrid = document.getElementById('tab-shared-community');
+  const myTemplatesGrid = document.getElementById('tab-my-templates');
+
+  function renderTemplates() {
+    // Clear grids except upload card
+    sharedCommunityGrid.querySelectorAll('.template-card:not(.upload-card)').forEach(el=>el.remove());
+    myTemplatesGrid.querySelectorAll('.template-card:not(.upload-card)').forEach(el=>el.remove());
+
+    function makeTemplateCard(tpl, isMyTemplate){
+      const div = document.createElement('div');
+      div.className = 'template-card';
+      div.style.backgroundColor = tpl.bgColor || '#B9D86F';
+      div.setAttribute('tabindex', '0');
+      // Construct template frame vertical images stacked
+      const firstImg = document.createElement('img');
+      firstImg.className = 'template-frame';
+      firstImg.alt = 'Template frame';
+      firstImg.src = tpl.images[0];
+      div.appendChild(firstImg);
+
+      // Controls if my template
+      if(isMyTemplate){
+        const controls = document.createElement('div');
+        controls.className = 'template-controls';
+        // Edit button
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'template-control-btn';
+        btnEdit.setAttribute('aria-label', 'Edit template');
+        btnEdit.title = 'Edit template';
+        btnEdit.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+        </svg>`;
+        // Share button
+        const btnShare = document.createElement('button');
+        btnShare.className = 'template-control-btn';
+        btnShare.title = 'Share template to community';
+        btnShare.setAttribute('aria-label', 'Share template to community');
+        btnShare.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" width="14" height="14">
+          <circle cx="18" cy="5" r="3"/>
+          <circle cx="6" cy="12" r="3"/>
+          <circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>`;
+        // Delete button
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'template-control-btn';
+        btnDelete.title = 'Delete template';
+        btnDelete.setAttribute('aria-label', 'Delete template');
+        btnDelete.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" width="14" height="14">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/>
+          <path d="M14 11v6"/>
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+        </svg>`;
+
+        controls.appendChild(btnEdit);
+        controls.appendChild(btnShare);
+        controls.appendChild(btnDelete);
+        div.appendChild(controls);
+
+        btnEdit.addEventListener('click', e => {
+          e.stopPropagation();
+          openEditTemplateModal(tpl.id);
+        });
+        btnShare.addEventListener('click', e => {
+          e.stopPropagation();
+          alert('Template shared to community.');
+          tpl.shared = true;
+          renderTemplates();
+          addActivity(`Template shared: ${tpl.id}`);
+        });
+        btnDelete.addEventListener('click', e => {
+          e.stopPropagation();
+          if(confirm('Are you sure you want to delete this template?')) {
+            removeUserTemplate(tpl.id);
+          }
+        });
+      } else {
+        const useBtn = document.createElement('button');
+        useBtn.className = 'use-template-btn';
+        useBtn.textContent = 'Use this template';
+        div.appendChild(useBtn);
+        useBtn.addEventListener('click', e=>{
+          e.stopPropagation();
+          alert('Using template...');
+        });
+      }
+
+      return div;
+    }
+
+    state.templates.forEach(tpl=>{
+      const card = makeTemplateCard(tpl, false);
+      sharedCommunityGrid.appendChild(card);
+    });
+    state.myTemplates.forEach(tpl=>{
+      const card = makeTemplateCard(tpl, true);
+      myTemplatesGrid.appendChild(card);
+    });
+
+    // Upload cards open upload modal
+    document.querySelectorAll('.upload-card').forEach(el=>{
+      el.addEventListener('click', openUploadTemplateModal);
+      el.addEventListener('keydown', e=>{ if(e.key==='Enter') openUploadTemplateModal(); });
+    });
+  }
+  renderTemplates();
+
+  // Remove user template by ID
+  function removeUserTemplate(id){
+    const idx = state.myTemplates.findIndex(t => t.id === id);
+    if(idx !== -1){
+      const title = state.myTemplates[idx].id;
+      state.myTemplates.splice(idx, 1);
+      addActivity(`Deleted template: ${id}`);
+      renderTemplates();
+    }
+  }
+
+  // ===============================
+  // Activity log
+  // ===============================
+  const activityContainer = document.querySelector('.activity-container');
+  function addActivity(desc) {
+    const now = new Date();
+    const timestamp = now.toLocaleString();
+    state.activities.unshift({desc, timestamp});
+    if(state.activities.length > 50) state.activities.length = 50;
+    renderActivity();
+  }
+
+  function renderActivity() {
+    activityContainer.innerHTML = '';
+    if(state.activities.length===0){
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'activity-post empty';
+      emptyDiv.textContent = 'No activity yet.';
+      activityContainer.appendChild(emptyDiv);
+      return;
+    }
+    state.activities.forEach(act=>{
+      const post = document.createElement('div');
+      post.className = 'activity-post';
+      post.textContent = `${act.desc}\n${act.timestamp}`;
+      activityContainer.appendChild(post);
+    });
+  }
+  renderActivity();
+
+  // ===============================
+  // Post modal logic (photo + comments)
+  // ===============================
+  const postModal = document.getElementById('post-modal');
+  const modalLeft = postModal.querySelector('.modal-left');
+  const modalRight = postModal.querySelector('.modal-right');
+  const modalUsername = document.getElementById('modal-username');
+  const commentsContainer = document.getElementById('comments-container');
+  const noCommentsText = document.getElementById('no-comments-text');
+  const commentForm = document.getElementById('comment-form');
+  const commentInput = document.getElementById('comment-input');
+  const commentPostBtn = document.getElementById('comment-post-btn');
+  const reactionFooter = document.getElementById('reaction-footer');
+  let currentPhotoId = null;
+
+  function openPostModal(photoId) {
+    currentPhotoId = photoId;
+    const photo = state.photos.find(p => p.id === photoId);
+    if(!photo) return;
+
+    // Set modal username
+    modalUsername.textContent = state.user.username;
+
+    // Load thumbnails on left (show all photos for simplicity)
+    modalLeft.innerHTML = '';
+    state.photos.forEach(p=>{
+      const img = document.createElement('img');
+      img.src = p.src;
+      img.alt = `Photo ${p.id}`;
+      img.tabIndex = 0;
+      if(p.id === photoId) img.classList.add('selected');
+      img.addEventListener('click', () => openPostModal(p.id));
+      img.addEventListener('keydown', e => {
+        if(e.key === 'Enter') openPostModal(p.id);
+      });
+      modalLeft.appendChild(img);
+    });
+
+    // Load comments on right
+    renderComments(photo);
+    renderReactions(photo);
+
+    postModal.classList.add('active');
+    commentInput.value = '';
+    commentPostBtn.disabled = true;
+    commentInput.focus();
+  }
+
+  // Close modal handlers
+  document.getElementById('post-modal-close-btn').addEventListener('click', ()=> {
+    postModal.classList.remove('active');
+  });
+  postModal.addEventListener('click', e=>{
+    if(e.target === postModal) postModal.classList.remove('active');
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape' && postModal.classList.contains('active')) postModal.classList.remove('active');
+  });
+
+  // Render comments
+  function renderComments(photo) {
+    commentsContainer.innerHTML = '';
+    if(!photo.comments || photo.comments.length === 0) {
+      commentsContainer.appendChild(noCommentsText);
+      return;
+    }
+    photo.comments.forEach(comment => {
+      commentsContainer.appendChild(createCommentElement(comment));
+    });
+  }
+
+  // Create comment element (with avatar, text, replies & like heart)
+  function createCommentElement(comment){
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.tabIndex = 0;
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.style.backgroundImage = `url('${comment.avatar || 'https://via.placeholder.com/40x40.png?text='}')`;
+    div.appendChild(avatar);
+
+    const content = document.createElement('div');
+    content.className = 'comment-content';
+
+    const author = document.createElement('div');
+    author.className = 'comment-author';
+    author.textContent = comment.username;
+    content.appendChild(author);
+
+    const text = document.createElement('div');
+    text.className = 'comment-text';
+    text.textContent = comment.text;
+    content.appendChild(text);
+
+    const footer = document.createElement('div');
+    footer.className = 'comment-footer';
+
+    const dateSpan = document.createElement('span');
+    dateSpan.textContent = comment.date || 'now';
+    footer.appendChild(dateSpan);
+
+    const replyBtn = document.createElement('button');
+    replyBtn.textContent = 'Reply';
+    replyBtn.setAttribute('aria-label', 'Reply to ' + comment.username);
+    footer.appendChild(replyBtn);
+
+    // Like heart icon
+    const heartSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    heartSvg.classList.add('heart-icon');
+    heartSvg.setAttribute('viewBox', '0 0 24 24');
+    heartSvg.innerHTML = '<path d="M12 21s-6-4.35-6-8.5 2.686-5.5 6-5.5 6 2.12 6 5.5-6 8.5-6 8.5z"/>';
+    heartSvg.title = 'Like comment';
+    footer.appendChild(heartSvg);
+
+    div.appendChild(content);
+    div.appendChild(footer);
+
+    // Reply button puts @username in input and focuses
+    replyBtn.addEventListener('click', () => {
+      commentInput.value = `@${comment.username} `;
+      commentInput.focus();
+    });
+    // Toggle like heart fill on click (no stored state here)
+    heartSvg.addEventListener('click', ()=> {
+      heartSvg.classList.toggle('liked');
+    });
+
+    return div;
+  }
+
+  // Render reactions footer below comments in modal
+  function renderReactions(photo) {
+    reactionFooter.innerHTML = '';
+
+    // Heart like button
+    const heartBtn = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    heartBtn.classList.add('heart-icon');
+    heartBtn.setAttribute('viewBox', '0 0 24 24');
+    heartBtn.title = 'Like photo';
+    heartBtn.innerHTML = '<path d="M12 21s-6-4.35-6-8.5 2.686-5.5 6-5.5 6 2.12 6 5.5-6 8.5-6 8.5z"/>';
+    if(photo.liked) heartBtn.classList.add('liked');
+    reactionFooter.appendChild(heartBtn);
+
+    // Comment icon (used as button to focus input)
+    const commentBtn = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    commentBtn.classList.add('heart-icon');
+    commentBtn.setAttribute('viewBox', '0 0 24 24');
+    commentBtn.style.fill = 'none';
+    commentBtn.style.strokeWidth = 2;
+    commentBtn.title = 'Add comment';
+    commentBtn.innerHTML = '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>';
+    commentBtn.style.marginLeft = '12px';
+    commentBtn.style.cursor = 'pointer';
+    reactionFooter.appendChild(commentBtn);
+
+    // Likes count text
+    const likesText = document.createElement('div');
+    likesText.className = 'likes-text';
+    const count = photo.liked ? Math.floor(Math.random() * 10) + 1 : 0;
+    likesText.textContent = count > 0 ? `${count} people liked this` : 'Be the first to like this';
+    reactionFooter.appendChild(likesText);
+
+    // Date text
+    const dateText = document.createElement('div');
+    dateText.style.color = '#edb9d5';
+    dateText.style.fontSize = '11px';
+    dateText.textContent = photo.date || new Date().toLocaleDateString();
+    reactionFooter.appendChild(dateText);
+
+    // Bookmark (favorite) icon toggle
+    const bookmark = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    bookmark.classList.add('bookmark-icon');
+    bookmark.setAttribute('viewBox','0 0 24 24');
+    bookmark.title = photo.favorite ? 'Remove from favorites' : 'Add to favorites';
+    bookmark.innerHTML = '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>';
+    if(photo.favorite) bookmark.classList.add('active');
+    bookmark.style.marginLeft = 'auto';
+    bookmark.style.cursor = 'pointer';
+    reactionFooter.appendChild(bookmark);
+
+    // Toggle favorite on bookmark click
+    bookmark.addEventListener('click', ()=>{
+      photo.favorite = !photo.favorite;
+      bookmark.classList.toggle('active');
+      bookmark.title = photo.favorite ? 'Remove from favorites' : 'Add to favorites';
+      renderFavorites();
+    });
+
+    // Toggle like photo on heart click
+    heartBtn.addEventListener('click', ()=>{
+      photo.liked = !photo.liked;
+      heartBtn.classList.toggle('liked');
+      renderReactions(photo);
+    });
+
+    // Focus comment textarea on comment icon click
+    commentBtn.addEventListener('click', ()=> commentInput.focus());
+  }
+
+  // Comment input and posting
+  commentInput.addEventListener('input', ()=>{
+    commentPostBtn.disabled = commentInput.value.trim().length === 0;
+  });
+
+  commentForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    if(currentPhotoId === null) return;
+    const photo = state.photos.find(p=>p.id === currentPhotoId);
+    if(photo && commentInput.value.trim()!=='') {
+      if(!Array.isArray(photo.comments)) photo.comments = [];
+      photo.comments.push({
+        username: state.user.username,
+        avatar: state.user.profileImg,
+        text: commentInput.value.trim(),
+        date: new Date().toLocaleDateString()
+      });
+      commentInput.value = '';
+      commentPostBtn.disabled = true;
+      renderComments(photo);
+      addActivity(`New comment on photo ${photo.id}`);
+    }
+  });
+
+  // ----------------------
+  // Template modal
+  // ----------------------
+  const templateModal = document.getElementById('template-modal');
+  const templateCloseBtn = document.getElementById('template-close-btn');
+  const templateLeftThumbs = document.getElementById('template-left-thumbs');
+  const frameSizeSelect = document.getElementById('frame-size-select');
+  const shotsSelect = document.getElementById('shots-select');
+  const effectButtons = templateModal.querySelectorAll('.effect-button');
+  const shareToggleCheckbox = document.getElementById('share-toggle-input');
+  const tagsInput = document.getElementById('template-tags');
+  const publishBtn = document.getElementById('publish-btn');
+  const uploadBgImgBox = document.getElementById('upload-bg-img');
+  const uploadStickerPackBox = document.getElementById('upload-sticker-pack');
+
+  let uploadTemplateData = {
+    frameSize: '',
+    shots: '',
+    effect: 'none',
+    share: false,
+    tags: '',
+    bgImage: null,
+    stickerPack: null
+  };
+
+  function openUploadTemplateModal() {
+    templateModal.classList.add('active');
+    document.getElementById('template-modal-title').textContent = 'Upload Template';
+    frameSizeSelect.value = '';
+    shotsSelect.value = '';
+    effectButtons.forEach(b=>b.classList.remove('selected'));
+    effectButtons[0].classList.add('selected');
+    shareToggleCheckbox.checked = false;
+    tagsInput.value = '';
+    uploadBgImgBox.textContent = 'Upload background image here\nin .jpeg or .png format';
+    uploadBgImgBox.classList.remove('selected');
+    uploadStickerPackBox.textContent = 'Upload sticker pack design here\nin .png format';
+    uploadStickerPackBox.classList.remove('selected');
+    uploadTemplateData = {frameSize:'', shots:'', effect:'none', share:false, tags:'', bgImage:null, stickerPack:null};
+  }
+
+  // Close template modal
+  templateCloseBtn.addEventListener('click', ()=> templateModal.classList.remove('active'));
+  templateModal.addEventListener('click', e=> { if(e.target === templateModal) templateModal.classList.remove('active'); });
+  document.addEventListener('keydown', e=> {
+    if(e.key==='Escape' && templateModal.classList.contains('active')) templateModal.classList.remove('active');
+  });
+
+  // Effect buttons
+  effectButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      effectButtons.forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      uploadTemplateData.effect = btn.getAttribute('data-effect');
+    });
+  });
+  // Select change
+  frameSizeSelect.addEventListener('change', e=> uploadTemplateData.frameSize = e.target.value);
+  shotsSelect.addEventListener('change', e=> uploadTemplateData.shots = e.target.value);
+  shareToggleCheckbox.addEventListener('change', e=> uploadTemplateData.share = e.target.checked);
+  tagsInput.addEventListener('input', e=> uploadTemplateData.tags = e.target.value);
+
+  // Upload image input simulation (url prompt)
+  uploadBgImgBox.addEventListener('click', ()=>{
+    const url = prompt('Enter background image URL (.jpeg or .png required)');
+    if(url && (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png'))) {
+      uploadTemplateData.bgImage = url;
+      uploadBgImgBox.textContent = 'Background image selected';
+      uploadBgImgBox.classList.add('selected');
+    } else if(url) {
+      alert('Invalid format. Use jpeg or png.');
+    }
+  });
+  uploadStickerPackBox.addEventListener('click', ()=>{
+    const url = prompt('Enter sticker pack image URL (.png required)');
+    if(url && url.endsWith('.png')){
+      uploadTemplateData.stickerPack = url;
+      uploadStickerPackBox.textContent = 'Sticker pack selected';
+      uploadStickerPackBox.classList.add('selected');
+    } else if(url) {
+      alert('Invalid format. Use png.');
+    }
+  });
+
+  // Publish / Save changes button
+  publishBtn.addEventListener('click', ()=> {
+    if(!uploadTemplateData.frameSize || !uploadTemplateData.shots) {
+      alert('Choose frame size and number of shots.');
+      return;
+    }
+    const newTpl = {
+      id: `mytpl${Date.now()}`,
+      shared: uploadTemplateData.share,
+      images: [
+        uploadTemplateData.bgImage || `https://via.placeholder.com/140x200?text=${Date.now()%1000}`,
+        uploadTemplateData.stickerPack || `https://via.placeholder.com/140x145?text=${Date.now()%1000}`
+      ],
+      bgColor: '#f9d7e7',
+      tags: uploadTemplateData.tags
+    };
+    state.myTemplates.push(newTpl);
+    addActivity(`Template uploaded${uploadTemplateData.share ? ' & shared' : ''}`);
+    renderTemplates();
+    templateModal.classList.remove('active');
+    // Reset button if changed UI for edit mode
+    publishBtn.textContent = 'Publish';
+    publishBtn.onclick = null;
+  });
+
+  // Open edit template modal
+  function openEditTemplateModal(templateId) {
+    templateModal.classList.add('active');
+    document.getElementById('template-modal-title').textContent = 'Edit Template';
+    const tpl = state.myTemplates.find(t=>t.id===templateId);
+    if(!tpl) return;
+    uploadTemplateData = {
+      frameSize: 'medium',
+      shots: '2',
+      effect: 'none',
+      share: tpl.shared,
+      tags: tpl.tags || '',
+      bgImage: tpl.images[0] || null,
+      stickerPack: tpl.images[1] || null
+    };
+    frameSizeSelect.value = uploadTemplateData.frameSize;
+    shotsSelect.value = uploadTemplateData.shots;
+    effectButtons.forEach(b=>b.classList.remove('selected'));
+    const effBtn = Array.from(effectButtons).find(b=>b.dataset.effect===uploadTemplateData.effect);
+    if(effBtn) effBtn.classList.add('selected');
+    shareToggleCheckbox.checked = uploadTemplateData.share;
+    tagsInput.value = uploadTemplateData.tags;
+    if(uploadTemplateData.bgImage){
+      uploadBgImgBox.textContent = 'Background image selected';
+      uploadBgImgBox.classList.add('selected');
+    } else {
+      uploadBgImgBox.textContent = 'Upload background image here\nin .jpeg or .png format';
+      uploadBgImgBox.classList.remove('selected');
+    }
+    if(uploadTemplateData.stickerPack){
+      uploadStickerPackBox.textContent = 'Sticker pack selected';
+      uploadStickerPackBox.classList.add('selected');
+    } else {
+      uploadStickerPackBox.textContent = 'Upload sticker pack design here\nin .png format';
+      uploadStickerPackBox.classList.remove('selected');
+    }
+    publishBtn.textContent = 'Save Changes';
+    publishBtn.onclick = () => {
+      tpl.shared = shareToggleCheckbox.checked;
+      tpl.tags = tagsInput.value;
+      tpl.images[0] = uploadTemplateData.bgImage;
+      tpl.images[1] = uploadTemplateData.stickerPack;
+      addActivity(`Template edited: ${tpl.id}`);
+      renderTemplates();
+      templateModal.classList.remove('active');
+      // Reset publish btn
+      publishBtn.textContent = 'Publish';
+      publishBtn.onclick = null;
+    };
+  }
+
+  // Booth and profile buttons placeholders
+  document.getElementById('btn-booth').addEventListener('click', ()=>{
+    alert('Booth clicked - open camera or photo upload module');
+  });
+  document.getElementById('btn-profile').addEventListener('click', ()=>{
+    alert('Profile clicked - open profile settings or info');
+  });
+
+  // Initial render
+  switchSection('main');
+</script>
+</body>
+</html>

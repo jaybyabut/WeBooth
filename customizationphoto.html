@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Your Photo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Fredoka+One&family=Poppins&family=Montserrat&family=Roboto&family=Open+Sans&family=Lora&family=Raleway&family=Playfair+Display&family=Nunito&family=Merriweather&family=Quicksand&family=Ubuntu&family=Oswald&family=DM+Sans&family=Cabin&family=Lobster&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(to bottom, #ffdeea 0%, #d4e893 100%);
+            font-family: 'Inter', 'DM Sans', sans-serif, 'Fredoka One', cursive;
+            min-height: 100vh;
+        }
+
+        .font-fredoka {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        .text-brand-pink {
+            color: #c32d6c;
+        }
+
+        .nav-button {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: #fff;    
+            color: #c32d6c;            
+            border: 2px solid #dd3d93; 
+            box-shadow: none;        
+            border-radius: 0.75rem;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out; 
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            background-color: #dd3d93;
+            color: white;
+            border-color: #dd3d93;
+            box-shadow: 0 10px 15px -3px rgba(221, 61, 147, 0.6), 0 4px 6px -4px rgba(221, 61, 147, 0.3);
+        }
+
+        .nav-button:active {
+            transform: scale(0.95);
+            opacity: 0.9;
+        }
+
+         .nav-button img {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.5rem;
+            transition: filter 0.2s ease-in-out;
+            filter: none;
+         }
+
+         .nav-button:hover img {
+           filter: brightness(0) invert(1);
+         }
+
+         .active-nav-button {
+           background-color: #dd3d93;
+           color: white;
+           box-shadow: 0 4px 6px -1px rgba(221, 61, 147, 0.4), 0 2px 4px -2px rgba(221, 61, 147, 0.2);
+           border-color: #dd3d93;
+         }
+
+         .active-nav-button img {
+           filter: brightness(0) invert(1);
+         }
+
+         .active-nav-button:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 10px 15px -3px rgba(221, 61, 147, 0.6), 0 4px 6px -4px rgba(221, 61, 147, 0.3);
+         }
+
+         .active-nav-button:active {
+           transform: scale(0.95);
+           opacity: 0.9;
+         }
+
+        .icon-fallback {
+            width: 1.25rem;
+            height: 1.25rem;
+            background-color: #cbd5e1; 
+            color: #475569; 
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+        }
+
+        .custom-section-container {
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 1.5rem; /* rounded-3xl */
+            padding: 1rem;
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            max-height: 600px;
+            overflow-y: auto; /* Enable scrolling */
+            position: relative; 
+            height: 100%; 
+        }
+
+        .stacked-custom-section-container {
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 1.5rem; /* rounded-3xl */
+            padding: 1rem;
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto; /* Enable scrolling */
+            position: relative; 
+            max-height: 280px; /* Give a max height for scrolling */
+        }
+        
+        .custom-section-container, .stacked-custom-section-container {
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 transparent; /* thumb track */
+        }
+        
+        .custom-section-container::-webkit-scrollbar,
+        .stacked-custom-section-container::-webkit-scrollbar {
+            width: 12px;
+        }
+        .custom-section-container::-webkit-scrollbar-track,
+        .stacked-custom-section-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-section-container::-webkit-scrollbar-thumb,
+        .stacked-custom-section-container::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 20px;
+            border: 3px solid transparent;
+            background-clip: content-box;
+        }
+        
+
+        .custom-section-title {
+            font-size: 1.25rem; 
+            font-weight: 700; 
+            color: #c32d6c; 
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #fbcfe8; 
+        }
+
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem; 
+        }
+        
+        /* FIXED: Restored background grid layout */
+        #background-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.5rem; 
+        }
+
+        .item-placeholder {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 0.75rem; 
+            border: 2px solid white;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af; 
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .item-placeholder:hover {
+            transform: scale(1.05);
+            border-color: #f4b744;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .item-placeholder.sticker-button:hover {
+             border-color: #dd3d93; 
+       }
+
+        /* FIXED: Restored background item aspect ratio */
+        .bg-selection-item {
+            aspect-ratio: 1 / 3; 
+            border: 2px solid white;
+            border-radius: 0.5rem; 
+            object-fit: cover;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .bg-selection-item:hover {
+            transform: scale(1.05);
+            border-color: #f4b744;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .back-button {
+            background: none;
+            border: none;
+            color: #c32d6c;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+            margin-bottom: 0.75rem; 
+        }
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .custom-input, .custom-select {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border-radius: 0.5rem; 
+            border: 2px solid white;
+            background-color: rgba(255, 255, 255, 0.9);
+            outline: none;
+            transition: all 0.2s ease;
+            color: #374151; 
+        }
+        textarea.custom-input {
+            line-height: 1.5;
+        }
+        
+        .custom-input:focus, .custom-select:focus {
+            border-color: #f4b744;
+            box-shadow: 0 0 0 2px rgba(244, 183, 68, 0.3);
+        }
+        
+        .color-picker-wrapper {
+            position: relative;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 0.5rem; 
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            color: #374151; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .color-picker-wrapper:hover {
+            border-color: #f4b744;
+        }
+        
+        .color-picker-input {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 36px; 
+            height: 36px;
+            padding: 0;
+            border: none;
+            border-radius: 50%; 
+            background: conic-gradient(
+                from 90deg,
+                hsl(0, 100%, 50%),
+                hsl(39, 100%, 50%),
+                hsl(60, 100%, 50%),
+                hsl(120, 100%, 50%),
+                hsl(240, 100%, 50%),
+                hsl(262, 100%, 50%),
+                hsl(300, 100%, 50%),
+                hsl(0, 100%, 50%)
+            );
+            cursor: pointer;
+        }
+        .color-picker-input::-webkit-color-swatch-wrapper {
+            padding: 0;
+            border-radius: 50%;
+        }
+        .color-picker-input::-webkit-color-swatch {
+            border: 2px solid #e5e7eb; 
+            border-radius: 50%;
+        }
+        .color-picker-input::-moz-color-swatch {
+            border: 2px solid #e5e7eb; 
+            border-radius: 50%;
+        }
+        
+        /* FIXED: Restored color picker to circular grid item */
+        .color-picker-grid-item {
+            position: relative;
+            cursor: pointer;
+            padding: 0;
+            overflow: hidden; 
+            border-radius: 50%; 
+            aspect-ratio: 1 / 1; 
+            border: 2px solid white; 
+            transition: all 0.2s ease;
+        }
+        .color-picker-grid-item:hover {
+            transform: scale(1.05);
+            border-color: #f4b744;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .color-picker-grid-item .icon {
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(
+                from 90deg,
+                hsl(0, 100%, 50%),
+                hsl(39, 100%, 50%),
+                hsl(60, 100%, 50%),
+                hsl(120, 100%, 50%),
+                hsl(240, 100%, 50%),
+                hsl(262, 100%, 50%),
+                hsl(300, 100%, 50%),
+                hsl(0, 100%, 50%)
+            );
+            transition: transform 0.2s ease;
+            border-radius: 50%; 
+        }
+        .color-picker-grid-item:hover .icon {
+            transform: scale(1.1);
+        }
+        .color-picker-grid-item input[type="color"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0; 
+            cursor: pointer;
+        }
+
+        .photobooth-template-container {
+            position: relative; 
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem; 
+            width: 100%;
+            /* === ANG HININGI NINYONG PAGBABAGO === */
+            max-width: 150px; 
+            margin-bottom: 1.5rem; 
+            background-size: cover;
+            background-position: center;
+            transition: background-color 0.3s ease, background-image 0.3s ease;
+            overflow: hidden; 
+        }
+
+        /* --- NEW CSS FOR 4x6 LAYOUT --- */
+        .photobooth-template-container.layout-4x6 {
+            max-width: 300px; /* Wider container for 4x6 */
+            width: 100%;
+        }
+        
+        .photobooth-template-container.layout-4x6 .photo-strip-image {
+            aspect-ratio: 4 / 3; /* 4x6 photos are wider */
+        }
+
+        .photobooth-template-container.layout-4x6 .bg-selection-item {
+            aspect-ratio: 2 / 3; /* 4x6 backgrounds are wider */
+        }
+        /* --- END OF NEW CSS --- */
+
+
+        .sticker-overlay-layer {
+            position: absolute; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; 
+            z-index: 10; 
+            display: none;
+        }
+        
+        .draggable-text {
+            position: absolute;
+            cursor: move;
+            z-index: 20; 
+            padding: 5px;
+            user-select: none; 
+            border: 1px dashed transparent;
+            white-space: pre-wrap; 
+            line-height: 1.2; 
+            font-size: 16px; 
+            min-width: 20px; 
+        }
+        .draggable-text:hover {
+            border-color: #f4b744; 
+        }
+        .draggable-text.is-editing {
+            border-color: #f4b744;
+            border-style: solid;
+            cursor: text;
+        }
+
+        .resize-handle {
+            width: 15px;
+            height: 15px;
+            background: #f4b744;
+            border: 2px solid white;
+            position: absolute;
+            z-index: 21;
+            opacity: 0; 
+            transition: opacity 0.2s ease;
+        }
+        .draggable-text:hover .resize-handle {
+            opacity: 1; 
+        }
+        
+        .resize-handle-font {
+            right: -5px;
+            bottom: -5px;
+            cursor: se-resize;
+        }
+        
+        .resize-handle-width {
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: ew-resize;
+            height: 25px; 
+            border-radius: 4px;
+        }
+
+        .remove-handle {
+            width: 18px;
+            height: 18px;
+            background: #ef4444; /* Red */
+            border: 2px solid white;
+            position: absolute;
+            z-index: 21;
+            opacity: 0; 
+            transition: opacity 0.2s ease;
+            right: -7px;
+            top: -7px;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .draggable-text:hover .remove-handle {
+            opacity: 1;
+        }
+
+
+        .photo-strip-image {
+            background-color: #e5e7eb; 
+            border-radius: 0.25rem;
+            width: 100%;
+            aspect-ratio: 1 / 1; 
+            margin-bottom: 0.5rem; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280; 
+            font-weight: 500;
+            overflow: hidden; /* Added to contain uploaded images */
+        }
+        .photo-strip-image:last-child {
+            margin-bottom: 0;
+        }
+        .template-footer {
+            text-align: center;
+            padding-top: 0.5rem; 
+            margin-top: 0.5rem; 
+            border-top: 1px dashed #cbd5e1; 
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 0 0 0.25rem 0.25rem;
+            margin: 0.5rem -0.5rem -0.5rem -0.5rem; 
+            padding: 0.5rem;
+        }
+        .template-footer .footer-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .template-footer .footer-brand img {
+            height: 2.5rem; 
+            width: auto; 
+            margin-right: 0.5rem; 
+            transition: all 0.2s ease;
+        }
+        .template-footer .footer-brand .footer-text { 
+            font-size: 1rem;
+            color: #dd3d93; 
+            font-weight: 700; 
+            font-family: 'Fredoka One', cursive; 
+            transition: all 0.2s ease;
+        }
+        
+        .footer-extras {
+            margin-top: 0.5rem; 
+            display: flex;
+            flex-direction: row; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            align-items: center;
+            gap: 0.5rem; 
+        }
+
+        .footer-input {
+            background: transparent;
+            border: none;
+            text-align: center;
+            font-size: 0.875rem; 
+            color: #4b5563; 
+            width: auto; 
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        .footer-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 0 1px #cbd5e1; 
+        }
+
+        .social-icons-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; 
+            position: absolute; 
+            
+            right: -3rem; 
+            bottom: 0; 
+            transform: translateY(0); 
+            
+            @media (min-width: 1024px) { 
+                right: -4rem; 
+                bottom: 0; 
+                transform: translateY(0);
+            }
+        }
+        .social-icon-button {
+            width: 3rem; 
+            height: 3rem;
+            border-radius: 50%;
+            background-color: #feefff; 
+            border: 2px solid #dd3d93; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .social-icon-button:hover {
+            background-color: #dd3d93;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .social-icon-button svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: #c32d6c; 
+            transition: color 0.2s ease;
+        }
+        .social-icon-button:hover svg {
+            color: white; 
+        }
+
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px; 
+            font-size: 1.125rem;
+            font-weight: 700;
+            box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+            color: white;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: background 0.3s ease;
+            text-decoration: none;
+            border: none; 
+        }
+        .action-button:hover {
+            background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);
+        }
+        .action-button:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col">
+
+    <div class="max-w-7xl mx-auto w-full flex-grow flex flex-col justify-center p-4 md:p-8">
+        
+        <header class="flex flex-col md:flex-row items-center md:items-baseline justify-between gap-4 mb-8">
+            <div class="flex items-center">
+                <img src="Icons_svg_1/11.svg" alt="WeBooth Logo"  
+                     class="w-12 h-12 md:w-16 md:h-16 mr-3"
+                     onerror="this.outerHTML = '<div class=\'icon-fallback p-2 text-xl\'>W</div>'">
+                
+                <h1 class="text-2xl md:text-3xl text-brand-pink leading-tight font-fredoka">
+                    Customize Your Photo
+                </h1>
+            </div>
+
+            <div class="flex flex-col items-center md:items-end">
+                <nav class="flex items-center gap-3">
+                    <button class="nav-button active-nav-button">
+                        <img src="Icons_svg_1/2.svg" alt="Booth"
+                             onerror="this.outerHTML = '<div class=\'icon-fallback\'>B</div>'">
+                        Booth
+                    </button>
+                    <button class="nav-button">
+                        <img src="Icons_svg_1/4.svg" alt="Profile"
+                             onerror="this.outerHTML = '<div class=\'icon-fallback\'>P</div>'">
+                        Profile
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-1 flex flex-col gap-8 justify-start"> 
+                
+                <div class="stacked-custom-section-container" id="sticker-section-container">
+                    <h2 class="custom-section-title" id="sticker-section-title">Sticker Packs</h2>
+                    <div id="pack-grid">
+                        <div class="item-grid">
+                            
+                            <button class="item-placeholder pack-button" data-pack-name="No Stickers">
+                                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                </svg>
+                                <span class="sr-only">No Stickers</span>
+                            </button>
+
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/cafe2x6.png" alt="Sticker 1" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/capybara2x6.png" alt="Sticker 2" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/cat2x6.png" alt="Sticker 3" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                           <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/clover2x6.png" alt="Sticker 4" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/comic2x6.png" alt="Sticker 5" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/cat2x6.png" alt="Sticker 6" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/dog2x6.png" alt="Sticker 7" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/doodle2x6.png" alt="Sticker 8" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/fairy2x6.png" alt="Sticker 9" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/kitten2x6.png" alt="Sticker 10" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/flower2x6.png" alt="Sticker 11" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/doodle2x6.png" alt="Sticker 12" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/dog2x6.png" alt="Sticker 13" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/capybara2x6.png" alt="Sticker 14" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/kitten2x6.png" alt="Sticker 15" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/cafe2x6.png" alt="Sticker 16" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/flower2x6.png" alt="Sticker 17" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/fairy2x6.png" alt="Sticker 18" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/bear2x6.png" alt="Sticker 19" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/doodle2x6.png" alt="Sticker 20" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/travel2x6.png" alt="Sticker 21" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/vinyl2x6.png" alt="Sticker 22" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/xoxo2x6.png" alt="Sticker 23" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/bear2x6.png" alt="Sticker 24" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/butterfly2x6.png" alt="Sticker 25" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/flower2x6.png" alt="Sticker 26" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/blue2x6.png" alt="Sticker 27" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/brownie2x6.png" alt="Sticker 28" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/blue2x6.png" alt="Sticker 29" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
+                                <img src="Sticker_pack_(2x6 )_1/butterfly2x6.png" alt="Sticker 30" class="w-full h-full object-cover rounded-lg">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stacked-custom-section-container">
+                    <h2 class="custom-section-title">Text</h2>
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <textarea id="custom-text" placeholder="Type here..." class="custom-input" rows="3"></textarea>
+                        </div>
+                        <div>
+                            <button id="add-text-btn" class="action-button w-full justify-center" style="margin-bottom: 0; padding-top: 0.65rem; padding-bottom: 0.65rem; font-size: 1rem;">
+                                Add Text to Strip
+                            </button>
+                        </div>
+                        <div>
+                            <select id="font-select" class="custom-select">
+                                <option style="font-family: 'Poppins', sans-serif;">Poppins</option>
+                                <option style="font-family: 'Montserrat', sans-serif;">Montserrat</option>
+                                <option style="font-family: 'Roboto', sans-serif;">Roboto</option>
+                                <option style="font-family: 'Open Sans', sans-serif;">Open Sans</option>
+                                <option style="font-family: 'Lora', serif;">Lora</option>
+                                <option style="font-family: 'Raleway', sans-serif;">Raleway</option>
+                                <option style="font-family: 'Playfair Display', serif;">Playfair Display</option>
+                                <option style="font-family: 'Nunito', sans-serif;">Nunito</option>
+                                <option style="font-family: 'Merriweather', serif;">Merriweather</option>
+                                <option style="font-family: 'Quicksand', sans-serif;">Quicksand</option>
+                                <option style="font-family: 'Ubuntu', sans-serif;">Ubuntu</option>
+                                <option style="font-family: 'Oswald', sans-serif;">Oswald</option>
+                                <option style="font-family: 'DM Sans', sans-serif;">DM Sans</option>
+                                <option style="font-family: 'Cabin', sans-serif;">Cabin</option>
+                                <option style="font-family: 'Lobster', cursive;">Lobster</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="color-picker-wrapper">
+                                <span>Text Color</span>
+                                <input type="color" id="text-color" class="color-picker-input" value="#c32d6c">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="lg:col-span-1 flex flex-col gap-8 justify-start"> 
+                <div class="custom-section-container">
+                    <h2 class="custom-section-title">Backgrounds</h2>
+                    <div class="item-grid" id="background-grid"> 
+                        
+                        <label class="color-picker-grid-item">
+                            <div class="icon"></div>
+                            <input type="color" id="bg-color" value="#FFFFFF" class="opacity-0 absolute inset-0 w-full h-full">
+                            <span class="sr-only">Custom Background Color</span>
+                        </label>
+                        
+                        <img src="Bg_svg_1/1.svg.png" alt="Background 1" class="bg-selection-item">
+                        <img src="Bg_svg_1/2.svg.png" alt="Background 2" class="bg-selection-item">
+                        <img src="Bg_svg_1/3.svg.png" alt="Background 3" class="bg-selection-item">
+                        <img src="Bg_svg_1/4.svg.png" alt="Background 4" class="bg-selection-item">
+                        <img src="Bg_svg_1/5.svg.png" alt="Background 5" class="bg-selection-item">
+                        <img src="Bg_svg_1/6.svg.png" alt="Background 6" class="bg-selection-item">
+                        <img src="Bg_svg_1/7.svg.png" alt="Background 7" class="bg-selection-item">
+                        <img src="Bg_svg_1/8.svg.png" alt="Background 8" class="bg-selection-item">
+                        <img src="Bg_svg_1/9.svg.png" alt="Background 9" class="bg-selection-item">
+                        <img src="Bg_svg_1/10.svg.png" alt="Background 10" class="bg-selection-item">
+                        <img src="Bg_svg_1/11.svg.png" alt="Background 11" class="bg-selection-item">
+                        <img src="Bg_svg_1/12.svg.png" alt="Background 12" class="bg-selection-item">
+                        <img src="Bg_svg_1/13.svg.png" alt="Background 13" class="bg-selection-item">
+                        <img src="Bg_svg_1/14.svg.png" alt="Background 14" class="bg-selection-item">
+                        <img src="Bg_svg_1/15.svg.png" alt="Background 15" class="bg-selection-item">
+                        <img src="Bg_svg_1/16.svg.png" alt="Background 16" class="bg-selection-item">
+                        <img src="Bg_svg_1/17.svg.png" alt="Background 17" class="bg-selection-item">
+                        <img src="Bg_svg_1/18.svg.png" alt="Background 18" class="bg-selection-item">
+                        <img src="Bg_svg_1/19.svg.png" alt="Background 19" class="bg-selection-item">
+                        <img src="Bg_svg_1/20.svg.png" alt="Background 20" class="bg-selection-item">
+                        <img src="Bg_svg_1/21.svg.png" alt="Background 21" class="bg-selection-item">
+                        <img src="Bg_svg_1/22.svg.png" alt="Background 22" class="bg-selection-item">
+                        <img src="Bg_svg_1/23.svg.png" alt="Background 23" class="bg-selection-item">
+                        <img src="Bg_svg_1/24.svg.png" alt="Background 24" class="bg-selection-item">
+                        <img src="Bg_svg_1/25.svg.png" alt="Background 25" class="bg-selection-item">
+                        <img src="Bg_svg_1/26.svg.png" alt="Background 26" class="bg-selection-item">
+                        <img src="Bg_svg_1/27.svg.png" alt="Background 27" class="bg-selection-item">
+                        <img src="Bg_svg_1/28.svg.png" alt="Background 28" class="bg-selection-item">
+                        <img src="Bg_svg_1/29.svg.png" alt="Background 29" class="bg-selection-item">
+                        <img src="Bg_svg_1/30.svg.png" alt="Background 30" class="bg-selection-item">
+                    </div>
+                </div>
+            </div>
+
+             <div class="lg:col-span-1 flex flex-col items-center relative">
+        
+                <div class="photobooth-template-container" id="photostrip-preview">
+                    <img id="sticker-overlay" class="sticker-overlay-layer" src="" alt="">
+                    
+                    <div class="template-footer">
+                        <div class="footer-brand">
+                            <img id="footer-brand-logo" src="Icons_svg_1/11.svg" 
+                                 alt="WeBooth Logo" 
+                                 class="logo-footer hidden"
+                                 onerror="this.outerHTML = '<div class=\'w-8 h-8 rounded-full bg-slate-300 text-slate-600 flex items-center justify-center font-bold text-lg hidden\'>W</div>'">
+                            <span id="footer-brand-text" class="footer-text font-fredoka hidden">WeBooth</span>
+                        </div>
+                        
+                        <div class="footer-extras">
+                            <input type="text" id="footer-time-dynamic" class="footer-input hidden" size="8">
+                            <input type="text" id="footer-date-dynamic" class="footer-input hidden" size="8">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-row items-center justify-center gap-4 mb-4"> <label class="flex items-center space-x-1.5 cursor-pointer text-brand-pink font-medium">
+                        <input type="checkbox" id="logo-checkbox" class="w-5 h-5 rounded accent-[#c32d6c] border-gray-300 focus:ring-[#c32d6c]"/>
+                        <span>Logo</span>
+                    </label>
+                    <label class="flex items-center space-x-1.5 cursor-pointer text-brand-pink font-medium">
+                        <input type="checkbox" id="date-checkbox" class="w-5 h-5 rounded accent-[#c32d6c] border-gray-300 focus:ring-[#c32d6c]"/>
+                        <span>Date</span>
+                    </label>
+                    <label class="flex items-center space-x-1.5 cursor-pointer text-brand-pink font-medium">
+                        <input type="checkbox" id="time-checkbox" class="w-5 h-5 rounded accent-[#c32d6c] border-gray-300 focus:ring-[#c32d6c]"/>
+                        <span>Time</span>
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <button class="action-button">
+                        POST
+                    </button>
+                </div>
+
+                <div class="social-icons-vertical">
+                    <button class="social-icon-button" id="save-btn" title="Save">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z"></path></svg>
+                    </button>
+                    <button class="social-icon-button" id="send-btn" title="Send / Share">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    </button>
+                    <button class="social-icon-button" id="download-btn" title="Download">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </button>
+                </div>
+
+               </div>
+
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ==========================================================
+        // --- NEW LOGIC TO APPLY SAVED SETTINGS & BUILD LAYOUT ---
+        // ==========================================================
+        
+        // 1. Get saved settings from LocalStorage (passed from previous pages)
+        const frameSize = localStorage.getItem('frameSize') || localStorage.getItem('selectedFrameSize') || '2x6';
+        
+        let shotCount = localStorage.getItem('numShots') || localStorage.getItem('selectedShotCount');
+        shotCount = parseInt(shotCount, 10) || 3; // Default to 3 if missing
+
+        const captureMode = localStorage.getItem('captureMode') || 'camera';
+        const uploadedImageDataUrl = sessionStorage.getItem('uploadedImage');
+
+        const photoStrip = document.getElementById('photostrip-preview');
+        const templateFooter = photoStrip.querySelector('.template-footer');
+
+        // --- 2. Apply Frame Size ---
+        if (frameSize === '4x6') {
+            // Add the CSS class to make the frame wider
+            photoStrip.classList.add('layout-4x6');
+            
+            // UPDATE ASSETS - STICKER FIX HERE
+            // Uses regex /2x6/g to replace ALL instances of 2x6 with 4x6
+            // This ensures both folder name AND filename are updated
+            document.querySelectorAll('.sticker-button img').forEach(img => {
+                img.src = img.src.replace(/2x6/g, '4x6'); 
+            });
+        }
+
+        // --- 3. Apply Number of Shots (Dynamic Loop) ---
+        
+        // First, clear any existing photos just to be safe
+        photoStrip.querySelectorAll('.photo-strip-image').forEach(photo => photo.remove());
+
+        // Now loop to create the correct number of slots based on 'shotCount'
+        for (let i = 1; i <= shotCount; i++) {
+            const photoDiv = document.createElement('div');
+            photoDiv.classList.add('photo-strip-image');
+
+            // If in 'upload' mode, fill with the image
+            if (captureMode === 'upload' && uploadedImageDataUrl) {
+                const img = document.createElement('img');
+                img.src = uploadedImageDataUrl;
+                img.classList.add('w-full', 'h-full', 'object-cover');
+                photoDiv.appendChild(img);
+            } else {
+                // Otherwise (camera mode), just show "Photo X"
+                photoDiv.textContent = `Photo ${i}`;
+            }
+
+            // Insert the new photo *before* the footer
+            photoStrip.insertBefore(photoDiv, templateFooter);
+        }
+
+        // ==========================================================
+        // --- END OF NEW LOGIC ---
+        // ==========================================================
+
+
+        // Button Functionality 
+        const saveBtn = document.getElementById('save-btn');
+        const sendBtn = document.getElementById('send-btn');
+        const downloadBtn = document.getElementById('download-btn');
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => {
+                alert('Saved! (Functionality to be built)');
+            });
+        }
+
+        if (sendBtn) {
+            sendBtn.addEventListener('click', () => {
+                alert('Ready to send! (Functionality to be built)');
+            });
+        }
+
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                alert('Downloading! (Functionality to be built)');
+            });
+        }
+
+        // Background Functionality 
+        const bgColorPicker = document.getElementById('bg-color');
+        const bgImages = document.querySelectorAll('.bg-selection-item');
+
+        if (photoStrip && bgColorPicker) {
+            bgColorPicker.addEventListener('input', (e) => {
+                photoStrip.style.backgroundImage = 'none';
+                photoStrip.style.backgroundColor = e.target.value;
+            });
+        }
+
+        if (photoStrip && bgImages.length > 0) {
+            bgImages.forEach(img => {
+                img.addEventListener('click', () => {
+                    photoStrip.style.backgroundImage = `url(${img.src})`;
+                    photoStrip.style.backgroundColor = 'transparent'; 
+                });
+            });
+        }
+
+        // Footer Checkbox Functionality 
+        const logoCheckbox = document.getElementById('logo-checkbox');
+        const dateCheckbox = document.getElementById('date-checkbox');
+        const timeCheckbox = document.getElementById('time-checkbox');
+
+        const footerLogo = document.getElementById('footer-brand-logo');
+        const footerDate = document.getElementById('footer-date-dynamic');
+        const footerTime = document.getElementById('footer-time-dynamic');
+        const footerWeBoothText = document.getElementById('footer-brand-text'); 
+
+        // date/time
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const year = String(now.getFullYear()).slice(-2);
+        const formattedDate = `${month}/${day}/${year}`;
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const formattedTime = `${hours}:${minutes} ${ampm}`;
+
+        if (logoCheckbox && footerLogo && footerWeBoothText) {
+            logoCheckbox.addEventListener('change', (e) => {
+                footerLogo.classList.toggle('hidden', !e.target.checked);
+                footerWeBoothText.classList.toggle('hidden', !e.target.checked);
+            });
+        }
+
+        if (dateCheckbox && footerDate) {
+            dateCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    if (footerDate.value === '') {
+                        footerDate.value = formattedDate;
+                    }
+                    footerDate.classList.remove('hidden');
+                } else {
+                    footerDate.classList.add('hidden');
+                }
+            });
+        }
+
+        if (timeCheckbox && footerTime) {
+            timeCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    if (footerTime.value === '') {
+                        footerTime.value = formattedTime;
+                    }
+                    footerTime.classList.remove('hidden');
+                } else {
+                    footerTime.classList.add('hidden');
+                }
+            });
+        }
+        
+        // --- JAVASCRIPT FOR ADD/CLEAR/RESIZE TEXT ---
+        
+        const addTextBtn = document.getElementById('add-text-btn');
+        const customTextInput = document.getElementById('custom-text'); 
+        const fontSelect = document.getElementById('font-select');
+        const textColorPicker = document.getElementById('text-color');
+        const targetTextElements = [footerDate, footerTime];
+        
+        if (fontSelect) {
+            fontSelect.addEventListener('change', (e) => {
+                const newFontFamily = e.target.value;
+                targetTextElements.forEach(el => {
+                    if (el) {
+                        el.style.fontFamily = `'${newFontFamily}', sans-serif`;
+                    }
+                });
+            });
+        }
+
+        if (textColorPicker) {
+            textColorPicker.addEventListener('input', (e) => {
+                const newColor = e.target.value;
+                targetTextElements.forEach(el => {
+                    if (el) {
+                        el.style.color = newColor;
+                    }
+                });
+            });
+        }
+
+        if (addTextBtn && photoStrip) {
+            addTextBtn.addEventListener('click', () => {
+                const text = customTextInput.value; 
+                if (text.trim() === '') {
+                    alert('Please type some text first!');
+                    return;
+                }
+                
+                const color = textColorPicker.value;
+                const font = fontSelect.value;
+                
+                const newTextElement = document.createElement('div');
+                newTextElement.textContent = text;
+                newTextElement.style.color = color;
+                newTextElement.style.fontFamily = `'${font}', sans-serif`;
+                newTextElement.classList.add('draggable-text');
+                newTextElement.style.left = '20px'; 
+                newTextElement.style.top = '20px'; 
+
+                const resizeHandleFont = document.createElement('div');
+                resizeHandleFont.classList.add('resize-handle', 'resize-handle-font');
+                newTextElement.appendChild(resizeHandleFont);
+
+                const resizeHandleWidth = document.createElement('div');
+                resizeHandleWidth.classList.add('resize-handle', 'resize-handle-width');
+                newTextElement.appendChild(resizeHandleWidth);
+
+                const removeHandle = document.createElement('div');
+                removeHandle.classList.add('remove-handle');
+                removeHandle.innerHTML = '&#x2715;'; 
+                newTextElement.appendChild(removeHandle);
+
+                photoStrip.appendChild(newTextElement);
+
+                makeDraggableAndResizable(newTextElement, resizeHandleFont, resizeHandleWidth, removeHandle);
+            });
+        }
+        
+        function makeDraggableAndResizable(element, fontHandle, widthHandle, removeHandle) {
+            let isDragging = false;
+            let isResizingFont = false;
+            let isResizingWidth = false;
+
+            let initialFontSize = 16; 
+            let initialWidth = element.clientWidth;
+            let startMouseX, startMouseY;
+            let offsetX, offsetY;
+            
+            element.style.fontSize = `${initialFontSize}px`;
+
+            element.addEventListener('mousedown', (e) => {
+                if (e.target === element) {
+                    isDragging = true;
+                    offsetX = e.clientX - element.getBoundingClientRect().left;
+                    offsetY = e.clientY - element.getBoundingClientRect().top;
+                    element.style.opacity = '0.7'; 
+                    e.preventDefault();
+                }
+            });
+            
+            fontHandle.addEventListener('mousedown', (e) => {
+                isResizingFont = true;
+                startMouseX = e.clientX;
+                startMouseY = e.clientY;
+                initialFontSize = parseFloat(window.getComputedStyle(element).fontSize);
+                element.style.opacity = '0.7';
+                e.preventDefault();
+                e.stopPropagation(); 
+            });
+
+            widthHandle.addEventListener('mousedown', (e) => {
+                isResizingWidth = true;
+                startMouseX = e.clientX;
+                initialWidth = element.clientWidth;
+                element.style.opacity = '0.7';
+                e.preventDefault();
+                e.stopPropagation(); 
+            });
+
+            removeHandle.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                element.remove();
+            });
+            
+            element.addEventListener('dblclick', (e) => {
+                if (e.target.classList.contains('resize-handle') || e.target.classList.contains('remove-handle')) return;
+                
+                element.contentEditable = true;
+                element.focus();
+                element.classList.add('is-editing');
+            });
+            
+            element.addEventListener('blur', () => {
+                element.contentEditable = false;
+                element.classList.remove('is-editing');
+                if (element.textContent.trim() === '') {
+                    element.remove();
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                const stripRect = photoStrip.getBoundingClientRect();
+
+                if (isDragging) {
+                    let newX = e.clientX - stripRect.left - offsetX;
+                    let newY = e.clientY - stripRect.top - offsetY;
+                    
+                    newX = Math.max(0, Math.min(newX, stripRect.width - element.offsetWidth));
+                    newY = Math.max(0, Math.min(newY, stripRect.height - element.offsetHeight));
+
+                    element.style.left = `${newX}px`;
+                    element.style.top = `${newY}px`;
+                } else if (isResizingFont) {
+                    const dx = e.clientX - startMouseX;
+                    const dy = e.clientY - startMouseY;
+                    const distance = Math.max(dx, dy); 
+                    
+                    const newFontSize = Math.max(8, initialFontSize + (distance * 0.5)); 
+                    element.style.fontSize = `${newFontSize}px`;
+                
+                } else if (isResizingWidth) {
+                    const dx = e.clientX - startMouseX;
+                    const newWidth = Math.max(50, initialWidth + dx); 
+                    
+                    element.style.width = `${newWidth}px`;
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                isResizingFont = false;
+                isResizingWidth = false;
+                element.style.opacity = '1'; 
+            });
+        }
+
+        // Sticker Functionality 
+        const stickerOverlay = document.getElementById('sticker-overlay');
+        const stickerButtons = document.querySelectorAll('.sticker-button');
+        const noStickerButton = document.querySelector('.pack-button[data-pack-name="No Stickers"]');
+
+        stickerButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const stickerSrc = button.querySelector('img').src;
+                if (stickerOverlay) {
+                    stickerOverlay.src = stickerSrc;
+                    stickerOverlay.style.display = 'block';
+                }
+            });
+        });
+        
+        if (noStickerButton && stickerOverlay && photoStrip) {
+            noStickerButton.addEventListener('click', () => {
+                stickerOverlay.style.display = 'none';
+                photoStrip.style.backgroundImage = 'none';
+                photoStrip.style.backgroundColor = '#ffffff'; 
+            });
+        }
+
+    });
+        
+</script>
+</body>
+</html>

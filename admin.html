@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Fredoka+One&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    body {font-family: 'Poppins', sans-serif;background-color: #ffe6f3;margin: 0; color: #d23481;}
+    .container { display: flex; min-height: 100vh; }
+    .sidebar { width: 80px; border-right: 2px solid #d23481; display: flex; flex-direction: column; align-items: center; padding: 1rem 0; gap: 2rem;background-color: #ffe6f3;border-radius: 0 16px 16px 0;}
+    .logo {margin-bottom:1rem;}
+    .logo img { width:36px; height:36px;}
+    .left-buttons { display:flex; flex-direction:column; align-items:center; gap:3rem; width:100%;}
+    .left-buttons button {background:none; border:none; color:#d23481; cursor:pointer; font-weight:600; font-size:0.85rem; display:flex; flex-direction: column; align-items:center; gap:0.3rem;padding: 0.2rem 0;transition: color 0.3s;}
+    .left-buttons button:hover {color: #0e0107;}
+    .left-buttons button.active {color: #ea5a9f;font-weight: 700;}
+    .left-buttons button img { width:24px; height:24px;}
+    .main-content { flex-grow:1; padding:1.5rem 2rem; display:flex; flex-direction:column;}
+    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;}
+    .topbar h1 { font-family:'Fredoka One',cursive; font-size:40px; font-weight:900; color:#d23481; margin:0; letter-spacing:-1px;}
+    .right-buttons { display:flex; align-items:center; gap:1rem; }
+    .right-buttons button { display:flex; align-items:center; gap:0.5rem; font-weight:600; font-size:1rem; border-radius:12px; padding:0.5rem 1rem; cursor:pointer; border:2px solid #d23481; background-color:#fff; color:#d23481; transition:background-color 0.3s,color 0.3s;}
+    .right-buttons button img { width:28px; height:28px;}
+    .right-buttons button:hover, .admin-btn { background-color:#d23481; color:#fff; border:2px solid #d23481; }
+    .subnav { display:flex; border-bottom:2px solid #d23481; margin-bottom:1.5rem; gap:2rem; font-size:0.93rem;}
+    .subnav button { background:none; border:none; cursor:pointer; padding-bottom:0.5rem; color:#d23481; border-bottom:3px solid transparent;}
+    .subnav button.active { border-bottom:3px solid #d23481; font-weight:700;}
+    /* Usage Stats Panel */
+    .stats {display:flex; gap:1.5rem; margin-bottom:2rem;}
+    .stat-card { background:white; border:1.5px solid #f4c1d9; border-radius:12px; padding:1.5rem 2rem; flex:1;}
+    .stat-card h3 { margin-top:0; font-weight:700; font-size:1.2rem; color:#d23481; margin-bottom:0.5rem;}
+    .number { font-size:2.8rem; font-weight:900; margin:0.2rem 0 0.5rem; color:black;}
+    .growth { color:#7fc97f; font-weight:600; font-size:0.9rem;}
+    .growth i { margin-right:0.3rem;}
+    .charts {display:flex; gap:1.5rem;}
+    .chart-card { background:white; flex:1; border-radius:12px; padding:1rem 1.5rem; border:1.5px solid #f4c1d9;}
+    .chart-card h3 { margin-top:0; color:#d23481; font-weight:700;}
+    .chart-placeholder { height:120px; background:transparent; border:none; border-radius:8px; display:flex; justify-content:center; align-items:center; font-weight:600; color:#d23481; margin-top:0.8rem;}
+    /* Template Management Panel */
+    .template {display:flex; gap:1.5rem; margin-bottom:1rem; align-items:center;}
+    .upload-btn { flex:0 0 300px; height:120px; border-radius:16px; border:none; color:#fff; font-size:1.5rem; font-weight:bold; cursor:pointer;background: linear-gradient(90deg, #fa49c5 0%, #ffe86b 100%);display:flex; flex-direction:column; justify-content:center; align-items:center;}
+    .upload-btn:hover {background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);}
+    .template-search {flex:1; display:flex; flex-direction:column; gap:.7rem;}
+    .template-search-row-top {display:flex; gap:1rem; margin-bottom:.3rem;}
+    .template-search-row-top input[type="text"] { flex:1; padding:0.9rem 1rem; font-size:1.05em; border-radius:9px; border:1.7px solid #e10994; outline:none;}
+    .template-search-row-bottom {display:flex; gap:1rem; align-items:center;}
+    .template-search-row-bottom label { font-weight:bold; margin-right:0.3rem; color:#e10994; font-size:1.05em;}
+    .template-search-row-bottom select,
+    .template-search-row-bottom input[type="date"] {padding:0.6rem 1rem; border-radius:8px; border:1.7px solid #fa49c5; font-size:1em; outline:none;}
+    .template-table { width:100%; border-collapse:collapse; background:#fffafb; margin-top:1.3rem; border-radius:12px; overflow:hidden;}
+    .template-table thead tr {background:#fde1f2;}
+    .template-table th, .template-table td {padding:1rem; text-align:left; font-size:1.07em; border-bottom:2px solid #fcc2f2;}
+    .template-table th { color:#e10994; font-weight:bold;}
+    .template-table tbody tr {border-bottom:1px solid #fadcea;}
+    .template-table tbody tr:last-child { border-bottom:none;}
+    .template-table td { color:#d23481; }
+    .template-table td .action-icon {margin-right:.8rem; cursor:pointer; opacity:0.90; vertical-align:middle; width:20px; height:20px; transition:opacity .2s;}
+    .template-table td .action-icon:last-child {margin-right:0;}
+    .template-table td .action-icon:hover { opacity:1;}
+    /* Modal styles with scroll */
+    .modal-overlay {position: fixed;top: 0; left: 0; right: 0; bottom: 0;background: rgba(128, 128, 128, 0.6);display: flex;justify-content: center;align-items: center;z-index: 1000;overflow-y: auto; padding: 1rem;  }
+    .modal {background: #fff;padding: 2rem 2.5rem;border-radius: 12px;width: 520px;max-height: 90vh;overflow-y: auto;font-family: 'Poppins', sans-serif;box-shadow: 0 8px 25px rgba(210, 52, 129, 0.25);box-sizing: border-box;position: relative;}
+    #uploadModal .modal {width: 750px;max-height: none;overflow-y: visible;padding: 1.8rem 2.5rem;}
+    .modal h2 {font-family: 'Fredoka One', cursive;font-size: 28px;font-weight: 900;color: #ea3b91;margin: 0 0 1rem 0;}
+    label {font-weight: 600;font-size: 0.93rem;color: #ea3b91;margin-bottom: 0.3rem;display: block;}
+    input[type="text"],
+    select {width: 100%;padding: 0.55rem 1rem;font-size: 1rem;border: 1.5px solid #f9c6dd;border-radius: 10px;outline: none;margin-bottom: 0.8rem;color: #d23481;}
+    input[type="text"]::placeholder {color: #f9b6d4;font-weight: 500;}
+    .upload-instruction {margin-bottom: 0.5rem;color: #d23481;font-weight: 600;}
+    #editDualUploadContainer .upload-instruction {color: #8BC34A;}
+    .upload-form-row {display: flex;gap: 1rem;margin-bottom: 0.8rem;}
+    .upload-form-row .form-group {flex: 1;}
+    .upload-form-row label {margin-bottom: 0.5rem;}
+    .upload-form-row input, .upload-form-row select {width: 100%;}
+    .dual-upload-group {display: flex;flex-direction: column;gap: 0.8rem;margin-bottom: 0.8rem;}
+    .dual-upload-item {border: 1px solid #f0c6d9;padding: 1rem;border-radius: 12px;display: flex;flex-direction: column;justify-content: center;align-items: center;text-align: center;color: #d23481;font-weight: 600;gap: 0.5rem;min-height: auto;background: transparent;cursor: pointer;transition: background 0.2s;}
+    #editDualUploadContainer .dual-upload-item:hover {background: #faf8fa;}
+    .dual-upload-item input[type="file"] {display: none;}
+    .single-upload-box {border: 1.5px dashed #f9c6dd;padding: 1.2rem;border-radius: 14px;display: flex;flex-direction: column;justify-content: center;align-items: center;text-align: center;margin-bottom: 0.8rem;min-height: 65px;}
+    .single-upload-box input[type="file"] {display: none;}
+    .upload-label {background: linear-gradient(90deg, #ea3b91 0%, #fec74f 100%);border-radius: 14px;padding: 0.5rem 1rem;color: white;font-weight: 700;cursor: pointer;user-select: none;transition: filter 0.3s ease;}
+    .upload-label:hover {background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);}
+    .status-group {margin-bottom: 1rem;}
+    .status-group label {margin-right: 1.5rem;font-weight: 700;cursor: pointer;color: #ea3b91;}
+    .status-group input[type="radio"] {margin-right: 0.3rem;accent-color: #ea3b91;cursor: pointer;}
+    .modal-footer {display: flex;justify-content: flex-end;gap: 1rem;}
+    .btn-cancel {background: #dbdbdb;border: none;padding: 0.6rem 1.5rem;border-radius: 8px;font-weight: 700;cursor: pointer;color: #595959;transition: background-color 0.3s ease;}
+    .btn-cancel:hover {background: #c4c4c4;}
+    .btn-submit {background: linear-gradient(90deg, #ea3b91 0%, #fec74f 100%);border: none;padding: 0.6rem 1.8rem;border-radius: 8px;font-weight: 700;cursor: pointer;color: white;transition: background 0.3s ease;}
+    .btn-submit:hover {background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);}
+    /* Template table */
+    .template-table {width: 100%;border-collapse: collapse;background:#fffafb;border-radius:12px;overflow: hidden;}
+    .template-table thead tr {background:#fde1f2;}
+    .template-table th, .template-table td {padding:1rem;text-align:left;font-size:1.07em;border-bottom: 2px solid #fcc2f2;color: #d23481;}
+    .template-table tbody tr:last-child td {border-bottom: none;}
+    .template-table td {vertical-align: middle;}
+    .template-table th {color:#e10994;font-weight: bold;}
+    /* Action icons styles */
+    td button {background:none;border:none;cursor:pointer;color:#d23481;font-size:1.2rem;margin-right: 8px;padding: 0;line-height: 1;}
+    td button:last-child {margin-right: 0;}
+    td button:hover {color: #ea5a9f;}
+    /* Modal Overlay & container */
+    .modal-overlay {position: fixed;top: 0; left: 0; right: 0; bottom: 0;background: rgba(128,128,128,0.6);display: flex;justify-content: center;align-items: center;z-index: 1000;overflow-y: auto;padding: 1rem;}
+    .modal {background: #fff;border-radius: 12px;max-height: 90vh;overflow-y: auto;padding: 2rem;box-shadow: 0 8px 25px rgba(210,52,129,0.25);font-family: 'Poppins', sans-serif;box-sizing: border-box;position: relative;width: 480px;}
+    /* Modal titles */
+    h2.modal-title {font-family: 'Fredoka One', cursive;font-weight: 900;font-size: 28px;margin: 0 0 1rem 0;color: #8BC34A; }
+    #editModal #editModalTitle {color: #8BC34A;}
+    /* Delete modal  */
+    #deleteModal h2.modal-title {color: #d32f2f;font-size: 24px;display: flex;align-items: center;gap: 0.5rem;}
+    #deleteModal .icon-warning {font-size: 30px;color: #d32f2f;}
+    #deleteModal p {font-size: 1rem;margin: 0.25rem 0 0.5rem 0;color: black;}
+    #deleteModal p.warning-text {color: #d32f2f;font-weight: 600;margin-bottom: 1.5rem;}
+    /* View modal */
+    .view-modal-overlay {position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; justify-content: center; align-items: center; z-index: 1100; padding: 1rem;}
+    .view-modal { background: linear-gradient(180deg,#fffafc 0%, #fff 100%); border-radius: 12px; inline-size: 760px; max-inline-size: calc(100% - 2rem); box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 1.25rem 1.5rem; box-sizing: border-box; position: relative; }
+    .view-modal .title { font-family: 'Fredoka One', cursive; font-size: 34px; color: #ea3b91; margin: 0 0 0.6rem 0; }
+    .view-avatar { position: absolute; top: 18px; right: 22px; display:flex; align-items:center; gap:0.35rem; }
+    .avatar-circle { width:56px; height:56px; border-radius:50%; background: #fff; border: 4px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .avatar-circle img { width:100%; height:100%; object-fit:cover; display:block; }
+    .avatar-dot { width:12px; height:12px; background:#e94b4b; border-radius:50%; transform: translate(-14px,-34px); box-shadow:0 0 0 3px rgba(255,255,255,0.85); }
+    .view-modal .view-grid { display: flex; gap: 1.2rem; }
+    .view-left { flex: 1 1 440px; }
+    .view-right { flex: 0 0 320px; border-left: 1px dashed #f4c1d9; padding-inline-start: 1rem; text-align: left; }
+    .status-label { display:block; color:#d23481; font-weight:700; margin-bottom:0.35rem; }
+    .status-badge { display:inline-block; background:#f9dceb; color:#ea3b91; font-weight:700; padding:0.6rem 1rem; border-radius: 12px; margin-bottom: 1rem; }
+    .view-field { margin-block-end: 0.8rem; }
+    .view-field input { inline-size: 100%; padding: 0.7rem 0.9rem; border-radius: 12px; border: none; background: #fff6f9; color: #333; box-sizing: border-box; font-weight:600; }
+    .view-label { font-weight:700; color:#d23481; margin-block-end:0.35rem; display:block; }
+    .asset-title { font-weight:800; font-size:1.05rem; color:#333; margin-block-end:0.6rem; }
+    .asset-config { margin-block-end: 0.8rem; }
+    .asset-preview img { inline-size: 100%; block-size: auto; border-radius:8px; border:1px solid #e6d7df; display:block; }
+    .view-modal .modal-actions { display:flex; justify-content:flex-end; gap:0.8rem; margin-block-start:1rem; }
+    .btn-close { background:#efefef; border: none; padding:0.6rem 1rem; border-radius:8px; font-weight:700; cursor:pointer; }
+    .btn-close {padding: 0.6rem 1.2rem;font-weight: 700;border-radius: 8px;border: 2px solid #ddd;background-color: #f0f0f0;color: #666;cursor: pointer;transition: background-color 0.3s ease;}
+    .btn-close:hover {background-color: #dcdcdc;}
+    .btn-gotoedit  {background: linear-gradient(90deg, #f645b1  0%, #f4b744 100%);   border:none; padding:0.6rem 1rem; border-radius:8px; color:#fff; font-weight:700; cursor:pointer; }
+    .btn-gotoedit:hover {background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%); }
+    /* Form labels and inputs */
+    label {font-weight: 600;color: #4CAF50;display: block;margin-bottom: 0.2rem;font-size: 0.9rem;}
+    input[type=text], select {width: 100%;padding: 0.5rem 0.8rem;font-size: 1rem;border: 1.5px solid #bdbdbd;border-radius: 8px;margin-bottom: 1rem;color: #333;font-weight: 500;box-sizing: border-box;}
+    input[readonly] {background-color: #f9f9f9;border-color: #ddd;color: #999;font-weight: 600;cursor: not-allowed;}
+    td button img {width: 16px;height: 16px;display: block;pointer-events: none; user-select: none;}
+    td .action-icon {margin-right: 12px;}
+    td .action-icon:last-child {margin-right: 0;}
+    .modal-footer {display: flex;justify-content: flex-end;gap: 1rem;margin-top: 1rem;}
+    button.btn-cancel {padding: 0.6rem 1.2rem;font-weight: 700;border-radius: 8px;border: 2px solid #ddd;background-color: #f0f0f0;color: #666;cursor: pointer;transition: background-color 0.3s ease;}
+    button.btn-cancel:hover {background-color: #dcdcdc;}
+    button.btn-confirm-delete {background: linear-gradient(90deg,#d32f2f 0%,#f57c00 100%);border: none;padding: 0.6rem 1.2rem;font-weight: 700;border-radius: 8px;color: white;cursor: pointer;transition: filter 0.3s ease;}
+    button.btn-confirm-delete:hover { background: linear-gradient(90deg, #f57c00  0%,#d32f2f  100%);}
+    button.btn-save {background: linear-gradient(90deg, #4caf50 0%, #cddc39 100%);border: none;padding: 0.6rem 1.4rem;font-weight: 700;border-radius: 8px;color: white;cursor: pointer;transition: filter 0.3s ease;}
+    button.btn-save:hover { background: linear-gradient(90deg, #cddc39 0%,#4caf50  100%);}
+    /* Edit modal layout */
+    .edit-content {display: flex; gap: 0.6rem; flex-wrap: wrap;}
+    .edit-left {flex: 1 1 200px;}
+    .edit-right {flex: 1 1 220px; border-left: 1px solid #e0e0e0; padding-left: 0.6rem; text-align: center;}
+    .preview-title {font-weight: 700; margin-bottom: 0.4rem; color: #4caf50; font-size: 0.95rem;}
+    .preview-img {width: 100%; height: auto; border-radius: 8px; border: 1px solid #bdbdbd; margin-bottom: 0.6rem; max-height: 140px; object-fit: contain;}
+    /* Compact edit modal specific rules */
+    #editModal .modal { width: 720px; max-height: none; overflow-y: visible; padding: 1rem 1.25rem; }
+    #editModal .modal .modal-footer { margin-top: 1rem; }
+    .file-upload-label {background: linear-gradient(90deg, #4caf50 0%, #cddc39 100%);color: white;padding: 0.5rem 1rem;border-radius: 12px;font-weight: 700;font-size: 0.9rem;cursor: pointer;user-select: none;display: inline-block;transition: filter 0.3s ease;margin-bottom: 0.5rem;}
+    .file-upload-label:hover {background: linear-gradient(90deg, #cddc39 0%,#4caf50  100%);}
+    #editModal .upload-label {background:transparent;pointer-events: none; color: green;}
+    #editModal .dual-upload-item {cursor: pointer;}
+    #editModal .dual-upload-item input[type="file"] {display: none;width: 0;height: 0;}
+    .file-status {color: #999;font-size: 0.85rem;font-weight: 500;margin-top: 0.3rem;pointer-events: none;}
+    .file-upload-label:hover {filter: brightness(1.1);}
+    input[type="file"] {display: none;}
+    .usage-count {margin-bottom: 1rem;font-weight: 600;font-size: 0.9rem;color: #555;}
+    @media (max-width: 650px) {
+    .edit-content {flex-direction: column;}
+    .edit-right {border-left: none;padding-left: 0;}}
+    /* User Management Panel */
+    .user { display: flex; gap:1rem; margin:2rem 0 0.8rem 0; align-items: center; }
+    .user-controls { display: flex; gap:1rem; align-items: center; width: 100%; }
+    .big-search { flex: 1 1 520px; padding: 0.95rem 1rem; font-size:1.05rem; border-radius: 12px; border: 1.5px solid #f0b9d6; background: #fff; color: #333; box-shadow: inset 0 1px 0 rgba(0,0,0,0.02); }
+    .big-search::placeholder { color:#f0afcf; }
+    .user-search-input { flex: none; padding:0.85rem 1rem; font-size:1.02em; border-radius:9px; border:1.7px solid #e10994; outline:none; background:#fff; }
+    .user-select {padding:0.78rem 1rem; border-radius:9px; border:1.7px solid #e10994; background:#fff; font-size:1.02em; outline:none; min-width:160px;}
+    .user-table {width: 100%;border-collapse: collapse;background:#fffafb;border-radius:12px;overflow: hidden;}
+    .user-table thead tr {background:#fde1f2;}
+    .user-table th, .user-table td {padding:1rem;text-align:left;font-size:1.07em;border-bottom: 2px solid #fcc2f2;color: #d23481;}
+    .user-table tbody tr:last-child td {border-bottom: none;}
+    .user-table td {vertical-align: middle;}
+    .user-table th {color:#e10994;font-weight: bold;}
+    .manage-link {color:#fa49c5; font-weight:700; cursor:pointer; text-decoration:none; font-size:1.11em; transition:text-decoration .2s;}
+    .manage-link:hover {text-decoration:underline;}
+    .tab-panel { animation: fadeIn .6s;}
+    .deleteUserBtn{background: linear-gradient(90deg, #d32f2f 0%, #f57c00 100%); border: none; padding: 0.6rem 1.2rem; border-radius: 8px; color: white; font-weight: 700; cursor: pointer; width: 100%;}
+    .deleteUserBtn:hover { background: linear-gradient(90deg, #f57c00 0%, #d32f2f 100%);}
+    .saveChangeBtn{background: linear-gradient(90deg, #4caf50 0%, #cddc39 100%); border: none; padding: 0.6rem 1rem; border-radius: 8px; color: white; font-weight: 700; cursor: pointer; margin-right: 0.5rem;}
+    .saveChangeBtn:hover { background: linear-gradient(90deg, #cddc39 0%, #4caf50 100%);}
+    .closeManageBtn{background: #efefef; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 700; cursor: pointer;}
+    .closeManageBtn:hover {background-color: #dcdcdc;}
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    @media (max-width:900px) {
+      .template-management-actions {flex-direction:column;gap:1rem;}
+      .upload-btn {width:100%;height:95px;}
+      .template-search {width:100%;}
+      .stats, .charts { flex-direction:column;}
+      .user-management-search-row {flex-direction:column;gap:1rem;}
+      .left-buttons span { display:none;}
+      .sidebar { width:60px;}
+      .main-content, .subnav { flex-direction:column; align-items:flex-start; gap:0.5rem;}
+      .template-grid {grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="sidebar" aria-label="Sidebar Navigation">
+      <div class="logo">
+        <img src="Icons/11.svg" alt="Webooth logo" />
+      </div>
+      <div class="left-buttons">
+        <button data-target="templates" aria-label="Templates" >
+          <img src="Icons 2/templates.svg" alt="Templates icon" />
+          <span>Templates</span>
+        </button>
+        <button data-target="favorites" aria-label="Favorites">
+          <img src="Icons 2/favorites.svg" alt="Favorites icon" />
+          <span>Favorites</span>
+        </button>
+        <button data-target="activity" aria-label="Activity">
+          <img src="Icons 2/activity.svg" alt="Activity icon" />
+          <span>Activity</span>
+        </button>
+        <button data-target="logout" aria-label="Logout">
+          <img src="Icons 2/logout.svg" alt="Logout icon" />
+          <span>Logout</span>
+        </button>
+      </div>
+    </nav>
+    <main class="main-content" role="main">
+      <header class="topbar">
+        <h1>Admin Dashboard</h1>
+        <div class="right-buttons">
+          <button onclick="window.location.href='booth.html'">
+            <img src="Icons/2.svg" alt="Booth icon" />
+            Booth
+          </button>
+          <button onclick="window.location.href='profile.html'">
+            <img src="Icons/4.svg" alt="Profile icon" />
+            Profile
+          </button>
+          <button onclick="window.location.href='sbcjas.html'">
+            <img src="Icons/3.svg" alt="Admin icon" />
+            Admin
+          </button>
+        </div>
+      </header>
+      <div class="subnav" role="tablist" aria-label="Main Content Tabs">
+        <button role="tab" aria-selected="true" class="active" onclick="showTab(0)">Usage Stats</button>
+        <button role="tab" aria-selected="false" onclick="showTab(1)">Template Management</button>
+        <button role="tab" aria-selected="false" onclick="showTab(2)">User Management</button>
+        <button role="tab" aria-selected="false" onclick="showTab(3)">Audit Trail</button>
+      </div>
+      <div id="tab-panels">
+        <!-- Usage Stats tab -->
+        <section class="tab-panel" style="display:block;">
+          <section class="stats">
+            <div class="stat-card">
+              <h3>Total Users</h3>
+              <p class="number" id="total-users">0</p>
+              <p class="growth" id="user-growth">
+                <i class="percentage"></i> 0% this week
+              </p>
+            </div>
+            <div class="stat-card">
+              <h3>Photos Captured</h3>
+              <p class="number" id="photos-captured">0</p>
+              <p class="growth" id="photo-growth">
+                <i class="percentage"></i> 0% this week
+              </p>
+            </div>
+          </section>
+          <section class="charts">
+            <div class="chart-card">
+              <h3>User Growth</h3>
+              <div class="chart-placeholder" id="user-growth-chart">[Line Chart Placeholder]</div>
+            </div>
+            <div class="chart-card">
+              <h3>Photo Volume</h3>
+              <div class="chart-placeholder" id="photo-volume-chart">[Bar Chart Placeholder]</div>
+            </div>
+          </section>
+        </section>
+        <!-- Template Management tab -->
+        <section class="tab-panel" style="display:none;">
+          <div class="template">
+            <button class="upload-btn" onclick="openModal()">
+              +<br>Upload New Template/Pack
+            </button>
+            <form class="template-search" onsubmit="event.preventDefault();">
+              <div class="template-search-row-top">
+                <input type="text" id="templateSearch" placeholder="Search Template Name..." />
+              </div>
+              <div class="template-search-row-bottom">
+                <label for="typeFilter">Type</label>
+                <select id="typeFilter">
+                  <option>All</option>
+                  <option>Sticker Pack</option>
+                  <option>Background</option>
+                  <option>Filter</option>
+                </select>
+                <label for="statusFilter">Status</label>
+                <select id="statusFilter">
+                  <option>Active</option>
+                  <option>Needs Review</option>
+                  <option>Draft</option>
+                </select>
+                <label for="dateFilter">Date Added</label>
+                <input type="date" id="dateFilter" value="clear"/>
+              </div>
+            </form>
+          </div>
+          <table class="template-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Usage Count</th>
+                <th>Status</th>
+                <th>Date Added</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="templateTableBody">
+              <tr>
+                <td>Warm Filter</td>
+                <td>Filter</td>
+                <td>159</td>
+                <td>Active</td>
+                <td>2025-11-10</td>
+                <td style="white-space: nowrap;">
+                  <button aria-label="View" title="View" onclick="openViewModal(exampleFilterTemplate)" >
+                    <img src="Icons 3/view.svg" alt="View logo" />
+                  </button>
+                  <button aria-label="Edit" title="Edit" onclick="openEditModal(exampleFilterTemplate)" >
+                    <img src="Icons 2/edit.svg" alt="View logo" />
+                  </button>
+                  <button aria-label="Delete" title="Delete" onclick="openDeleteModal('Warm Filter')" >
+                    <img src="Icons 3/delete.svg" alt="Delete logo" />
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                  <td>Sunset Background</td>
+                  <td>Background</td>
+                  <td>42</td>
+                  <td>Active</td>
+                  <td>2025-11-12</td>
+                  <td style="white-space: nowrap;">
+                    <button aria-label="View" title="View" onclick="openViewModal(exampleBackgroundTemplate)">
+                      <img src="Icons 3/view.svg" alt="View logo" />
+                    </button>
+                    <button aria-label="Edit" title="Edit" onclick="openEditModal(exampleBackgroundTemplate)">
+                      <img src="Icons 2/edit.svg" alt="Edit logo" />
+                    </button>
+                    <button aria-label="Delete" title="Delete" onclick="openDeleteModal('Sunset Background')">
+                      <img src="Icons 3/delete.svg" alt="Delete logo" />
+                    </button>
+                  </td>
+                </tr>
+            </tbody>
+          </table>
+        </section>
+        <!-- User Management tab -->
+        <section class="tab-panel" style="display:none;">
+          <div class="user">
+            <div class="user-controls">
+              <input 
+              type="text" 
+              id="userSearchInput" 
+              class="user-select1" 
+              style="border: 2px solid #e10994;; height: 48px; padding: 10px;" 
+              placeholder="Search Username or Email..." 
+              />
+              <select id="userGroupFilter" class="user-select">
+                <option>All groups</option>
+                <option>User</option>
+                <option>Admin</option>
+              </select>
+              <select id="userStatusFilter" class="user-select">
+                <option>Status</option>
+                <option>Active</option>
+                <option>Inactive</option>
+              </select>
+            </div>
+          </div>
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>kath</td>
+                <td>kath@example.com</td>
+                <td>Admin</td>
+                <td>Active</td>
+                <td><a class="manage-link" href="#">Manage</a></td>
+              </tr>
+              <tr>
+                <td>JaneSmith</td>
+                <td>jane@example.com</td>
+                <td>User</td>
+                <td>Inactive</td>
+                <td><a class="manage-link" href="#">Manage</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+        <!-- Audit Trail tab -->
+        <section class="tab-panel" style="display:none;">
+          <div class="user">
+            <div class="user-controls">
+              <input 
+              type="text" 
+              id="userSearchInput" 
+              class="user-select1" 
+              style="border: 2px solid #d23481;; height: 50px; padding: 10px;" 
+              placeholder="Search Username or Email..." 
+              />
+              <select id="userGroupFilter" class="user-select">
+                <option>User Type</option>
+                <option>System</option>
+                <option>Regular User</option>
+                <option>Admin</option>
+              </select>
+              <select id="userStatusFilter" class="user-select">
+                <option>Action Type</option>
+                <option>Login</option>
+                <option>Deletion</option>
+                <option>Content Upload</option>
+                <option>Configuration Change</option>
+                <option>System Error</option>
+              </select>
+            </div>
+          </div>
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>IP Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2025-11-15 10:23:45</td>
+                <td>admin_user</td>
+                <td>Deleted template "Old Filter"</td>
+                <td>192.168.1.1</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="display:none;">
+    <div class="modal">
+      <h2 id="modalTitle">Upload New Template</h2>
+      <form id="uploadForm" onsubmit="event.preventDefault(); submitForm();">
+        <label for="templateName">Template Name</label>
+        <input type="text" id="templateName" name="templateName" placeholder="e.g., Soft Blur Filter" required />
+
+        <div class="upload-form-row">
+          <div class="form-group">
+            <label for="templateType">Template Type</label>
+            <select id="templateType" name="templateType" required onchange="updateUploadFields()">
+              <option value="Filter">Filter</option>
+              <option value="Background">Background</option>
+              <option value="Sticker Pack">Sticker Pack</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tags">Tags</label>
+            <input type="text" id="tags" name="tags" placeholder="e.g., soft, blur, light" />
+          </div>
+        </div>
+
+        <!-- Dual upload container for all types -->
+        <div id="dualUploadContainer" style="display:none;">
+          <p class="upload-instruction">Dual Size Assets (Requires 2x6 and 4x6 PNGs)</p>
+          <div class="dual-upload-group">
+            <div class="dual-upload-item">
+              <span>1. 2x6 Inch Asset (.PNG)</span>
+              <label class="upload-label" for="upload2x6">Upload 2x6 File</label>
+              <input type="file" id="upload2x6" name="upload2x6" accept=".png" required />
+            </div>
+            <div class="dual-upload-item">
+              <span>2. 4x6 Inch Asset (.PNG)</span>
+              <label class="upload-label" for="upload4x6">Upload 4x6 File</label>
+              <input type="file" id="upload4x6" name="upload4x6" accept=".png" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Single upload container -->
+        <div id="singleUploadContainer">
+          <p class="upload-instruction" id="uploadInstruction">Upload Asset File (Filter Config or Single PNG)</p>
+          <div class="single-upload-box">
+            <label class="upload-label" for="singleUpload">Browse Files</label>
+            <input type="file" id="singleUpload" name="singleUpload" accept=".png,.json" required />
+          </div>
+        </div>
+
+        <!-- Initial Status -->
+        <div class="status-group">
+          <label>Initial Status</label>
+          <label><input type="radio" name="status" value="Draft" checked /> Draft</label>
+          <label><input type="radio" name="status" value="Active" /> Active</label>
+        </div>
+
+        <!-- Buttons -->
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn-submit">Upload & Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal">
+      <h2 class="modal-title" id="deleteModalTitle">
+        <i class="fas fa-exclamation-triangle icon-warning" aria-hidden="true"></i>
+        Confirm Deletion
+      </h2>
+      <p id="deleteMessage">Are you sure you want to permanently delete this template?</p>
+      <p class="warning-text">This action cannot be undone and will be logged in the Audit Trail.</p>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn-confirm-delete" onclick="confirmDelete()">Confirm Deletion</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- View Template Modal -->
+    <div class="view-modal-overlay" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+      <div class="view-modal" role="document">
+        <div class="title" id="viewModalTitle">Template Details</div>
+        <div class="view-grid">
+          <div class="view-left">
+            <label class="status-label">Template Status</label>
+            <div class="status-badge" id="viewStatus">Active</div>
+            <div class="view-field">
+              <label class="view-label">Template Name</label>
+              <input type="text" id="viewTemplateName" readonly />
+            </div>
+            <div class="view-field">
+              <label class="view-label">Tags</label>
+              <input type="text" id="viewTags" readonly />
+            </div>
+            <div style="display:flex; gap:0.8rem;">
+              <div style="flex:1;">
+                <label class="view-label">Type</label>
+                <input type="text" id="viewType" readonly />
+              </div>
+              <div style="width:120px;">
+                <label class="view-label">Usage Count</label>
+                <input type="text" id="viewUsageCount" readonly />
+              </div>
+            </div>
+            <div class="view-field" style="margin-top:0.6rem;">
+              <label class="view-label">Uploader / Date Added</label>
+              <input type="text" id="viewUploader" readonly />
+            </div>
+          </div>
+          <div class="view-right">
+            <div class="asset-title">Asset Files</div>
+
+            <!-- Single config file (for Filter) -->
+            <div class="asset-config" id="viewConfigContainer">
+              <label class="view-label">Configuration File:</label>
+              <input type="text" id="viewConfigFile" readonly />
+            </div>
+
+            <!-- Dual assets (for Background / Sticker Pack) -->
+            <div id="viewDualAssets" style="display:none;">
+              <div style="margin-block-end:0.6rem;font-weight:700;color:#d23481;">Dual Assets:</div>
+              <div class="view-field">
+                <label class="view-label">2x6 Inch File:</label>
+                <input type="text" id="view2x6FileName" readonly />
+              </div>
+              <div class="view-field">
+                <label class="view-label">4x6 Inch File:</label>
+                <input type="text" id="view4x6FileName" readonly />
+              </div>
+              <div style="display:flex; gap:0.6rem; margin-top:0.6rem;">
+                <div style="flex:1; max-inline-size:100px;">
+                  <div class="asset-preview" id="viewAssetPreview2x6"></div>
+                </div>
+                <div style="flex:1; max-inline-size:100px;">
+                  <div class="asset-preview" id="viewAssetPreview4x6"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- fallback single preview area -->
+            <div class="asset-preview" id="viewAssetPreview"></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-close" onclick="closeViewModal()">Close</button>
+          <button class="btn-gotoedit" onclick="openEditModal(exampleFilterTemplate)">Go to Edit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Template Modal -->
+  <div class="modal-overlay" id="editModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal">
+      <h2 class="modal-title" id="editModalTitle">Edit Template</h2>
+      <form id="editForm" onsubmit="event.preventDefault(); saveChanges();">
+        <div class="edit-content">
+          <div class="edit-left">
+            <label for="editTemplateName">Template Name</label>
+            <input type="text" id="editTemplateName" name="templateName" required />
+
+            <label for="editTags">Tags</label>
+            <input type="text" id="editTags" name="tags" />
+
+            <label for="editType">Type</label>
+            <select id="editType" name="type" required>
+              <option value="Filter">Filter</option>
+              <option value="Background">Background</option>
+              <option value="Sticker Pack">Sticker Pack</option>
+            </select>
+
+            <div class="usage-count" id="editUsageCount">Usage Count: 0 times</div>
+
+            <label for="editStatus">Template Status</label>
+            <select id="editStatus" name="templateStatus" required>
+              <option value="Active">Active</option>
+              <option value="Draft">Draft</option>
+              <option value="Needs Review">Needs Review</option>
+            </select>
+          </div>
+          <div class="edit-right">
+            <div class="preview-title">Current Asset Preview</div>
+            <div id="assetPreviewContainer"></div>
+
+            <!-- Upload inputs: shown based on template type -->
+            <div id="editFilterUploadContainer" style="margin-top: 1rem; display:none;">
+              <label for="replaceFilterFile" class="file-upload-label" tabindex="0">Replace Main Asset File</label>
+              <input type="file" id="replaceFilterFile" name="replaceFilterFile" accept=".png,.json" />
+            </div>
+
+            <div id="editDualUploadContainer" style="margin-top: 1rem; display:none;">
+              <p class="upload-instruction">Replace Dual Size Assets</p>
+              <div class="dual-upload-group">
+                <div class="dual-upload-item" onclick="document.getElementById('editReplace2x6File').click();">
+                  <label class="upload-label" for="editReplace2x6File">Upload New 2x6 File</label>
+                  <div class="file-status">No file selected</div>
+                  <input type="file" id="editReplace2x6File" name="editReplace2x6File" accept=".png" />
+                </div>
+                <div class="dual-upload-item" onclick="document.getElementById('editReplace4x6File').click();">
+                  <label class="upload-label" for="editReplace4x6File">Upload New 4x6 File</label>
+                  <div class="file-status">No file selected</div>
+                  <input type="file" id="editReplace4x6File" name="editReplace4x6File" accept=".png" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="margin-top: 1.5rem;">
+          <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn-save">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Manage User Modal -->
+  <div class="modal-overlay" id="manageUserModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="manageUserTitle">
+    <div class="modal" style="width: 700px; max-height: 100vh; overflow-y: auto;">
+      <h2 id="manageUserTitle" style="font-family: 'Fredoka One', cursive; font-size: 28px; color: #ea3b91; margin: 0 0 1.5rem 0;">Manage User</h2>
+      <!-- Tab Navigation -->
+      <div style="display: flex; border-bottom: 2px solid #f4c1d9; margin-bottom: 1.5rem;">
+        <button id="accountDetailsTab" class="tab-button active" onclick="switchTab('accountDetails')" style="flex: 1; padding: 0.5rem; background: none; border: none; border-bottom: 3px solid #ea3b91; color: #ea3b91; font-weight: 700; cursor: pointer;">Account Details</button>
+        <button id="activityContentsTab" class="tab-button" onclick="switchTab('activityContents')" style="flex: 1; padding: 0.5rem; background: none; border: none; border-bottom: 3px solid transparent; color: #d23481; font-weight: 700; cursor: pointer;">Activity & Contents</button>
+      </div>
+      <!-- Tab Content -->
+      <div id="accountDetailsContent" class="tab-content" style="display: block; overflow-y: auto;">
+        <div style="display: flex; gap: 2rem;">
+          <!-- Left Side: Account Details -->
+          <div style="flex: 1;">
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <div>
+                <label style="font-weight: 600; color: #ea3b91; display: block; margin-bottom: 0.3rem;">Username</label>
+                <input type="text" id="manageUsername" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff6f9; color: #333;" />
+              </div>
+              <div>
+                <label style="font-weight: 600; color: #ea3b91; display: block; margin-bottom: 0.3rem;">User Email</label>
+                <input type="text" id="manageEmail" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff6f9; color: #333;" />
+              </div>
+              <div>
+                <label style="font-weight: 600; color: #ea3b91; display: block; margin-bottom: 0.3rem;">Joined</label>
+                <input type="text" id="manageJoined" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff6f9; color: #333;" />
+              </div>
+              <div>
+                <label style="font-weight: 600; color: #ea3b91; display: block; margin-bottom: 0.3rem;">Total Photos</label>
+                <input type="text" id="manageTotalPhotos" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff6f9; color: #333;" />
+              </div>
+            </div>
+          </div>
+          <!-- Right Side: Account Status and Role -->
+          <div style="flex: 1;">
+            <div style="margin-bottom: 2rem;">
+              <label style="font-weight: 600; color: #ea3b91; display: block; margin-bottom: 0.5rem;">Account Status</label>
+              <select id="manageStatus" style="width: 100%; padding: 0.5rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff; color: #333;">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 2rem;">
+              <label style="font-weight: 600; color: #ea3b91; display: block; margin-bottom: 0.5rem;">User Role</label>
+              <select id="manageRole" style="width: 100%; padding: 0.5rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff; color: #333;">
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+            <button id="deleteUserBtn" class="deleteUserBtn">Delete User</button>
+          </div>
+        </div>
+      </div>
+      <div id="activityContentsContent" class="tab-content" style="display: none; overflow-y: auto; overflow-x: hidden;">
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+          <!-- Top: Recent Activity Log (full width) -->
+          <div>
+            <h3 style="font-family: 'Fredoka One', cursive; font-size: 20px; color: #d23481; margin-bottom: 1rem;">Recent Activity Log</h3>
+            <div style="padding: 1rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff6f9; min-height: 200px;">
+              <ul style="margin: 0; padding-left: 1rem; color: #d23481;">
+                <li>Last login: 2023-10-01 at 14:30</li>
+                <li>Uploaded 5 photos on 2023-09-15</li>
+                <li>Changed profile picture on 2023-08-20</li>
+                <li>Joined event "Summer Party" on 2023-07-10</li>
+              </ul>
+            </div>
+          </div>
+          <!-- Bottom: Capture Photos (full width) -->
+          <div>
+            <h3 style="font-family: 'Fredoka One', cursive; font-size: 20px; color: #d23481; margin-bottom: 1rem;">Capture Photos</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <img src="https://placehold.co/150x100?text=Photo+1" alt="Captured Photo 1" style="width: 100%; border-radius: 8px; border: 1px solid #f4c1d9;" />
+              <img src="https://placehold.co/150x100?text=Photo+2" alt="Captured Photo 2" style="width: 100%; border-radius: 8px; border: 1px solid #f4c1d9;" />
+              <img src="https://placehold.co/150x100?text=Photo+3" alt="Captured Photo 3" style="width: 100%; border-radius: 8px; border: 1px solid #f4c1d9;" />
+              <img src="https://placehold.co/150x100?text=Photo+4" alt="Captured Photo 4" style="width: 100%; border-radius: 8px; border: 1px solid #f4c1d9;" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Bottom Right: Close Button -->
+      <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+        <button onclick="saveChangesUser()" class="saveChangeBtn">Save Changes</button>
+        <button onclick="closeManageUserModal()" class="closeManageBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete User Confirmation Modal -->
+  <div class="modal-overlay" id="deleteUserModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="deleteUserModalTitle">
+    <div class="modal">
+      <h2 class="modal-title" id="deleteUserModalTitle">
+        <img src="icons 3/warn.svg" alt="Warning Icon" style="display: block; margin: 0 auto; width: 50px; height: 50px;" />
+      </h2>
+      <p style="font-size: 1rem; margin: 0.25rem 0 0.5rem 0; color: grey; text-align: center;">Are you sure you want to permanently delete this user?</p>
+      <p class="warning-text" style="color: #d32f2f; font-weight: 600; margin-bottom: 1.5rem; text-align: center;">This action cannot be undone and will be logged in the audit trail.</p>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeDeleteUserModal()">Cancel</button>
+        <button class="btn-confirm-delete" onclick="confirmDeleteUser()">Complete Deletion</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    function showTab(idx) {
+      let subnavBtns = document.querySelectorAll('.subnav button');
+      let panels = document.querySelectorAll('.tab-panel');
+      subnavBtns.forEach((btn, i) => {
+        btn.classList.toggle('active', i === idx);
+        btn.setAttribute('aria-selected', (i === idx).toString());
+        panels[i].style.display = i === idx ? 'block' : 'none';
+      });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      showTab(0);
+    });
+
+    // Modal Elements
+    const modal = document.getElementById('uploadModal');
+    const templateTypeSelect = document.getElementById('templateType');
+    const singleUploadContainer = document.getElementById('singleUploadContainer');
+    const dualUploadContainer = document.getElementById('dualUploadContainer');
+    const uploadInstruction = document.getElementById('uploadInstruction');
+    const singleUploadInput = document.getElementById('singleUpload');
+    const upload2x6Input = document.getElementById('upload2x6');
+    const upload4x6Input = document.getElementById('upload4x6');
+
+    function openModal() {
+      modal.style.display = 'flex';
+      resetForm();
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    // Reset form fields on open
+    function resetForm() {
+      document.getElementById('uploadForm').reset();
+      updateUploadFields();
+    }
+
+    // Update visible upload fields based on template type
+    function updateUploadFields() {
+      const selectedType = templateTypeSelect.value;
+
+      if (selectedType === 'Filter') {
+        singleUploadContainer.style.display = 'block';
+        dualUploadContainer.style.display = 'none';
+        uploadInstruction.textContent = "Upload Asset File (Filter Config or Single PNG)";
+        singleUploadInput.required = true;
+        upload2x6Input.required = false;
+        upload4x6Input.required = false;
+      } else if (selectedType === 'Background' || selectedType === 'Sticker Pack') {
+        singleUploadContainer.style.display = 'none';
+        dualUploadContainer.style.display = 'block';
+        uploadInstruction.textContent = "Dual Size Assets (Requires 2x6 and 4x6 PNGs)";
+        singleUploadInput.required = false;
+        upload2x6Input.required = true;
+        upload4x6Input.required = true;
+      }
+    }
+
+    templateTypeSelect.addEventListener('change', updateUploadFields);
+
+    // Form submit handler (placeholder)
+    function submitForm() {
+      alert('Form submitted! Implement your upload logic here.');
+      closeModal();
+    }
+
+    // Template example data for demo
+    const exampleFilterTemplate = {
+      templateName: "Warm Filter",
+      tags: "warm, vintage, effect",
+      type: "Filter",
+      usageCount: 159,
+      status: "Active",
+      uploader: "Admin789 / 11-10-25",
+      configFile: "warm.js",
+      assetUrls: ["https://placehold.co/360x260?text=Warm+Filter+Preview"]
+    };
+
+    const exampleBackgroundTemplate = {
+      templateName: "Sunset Background",
+      tags: "sunset, scenic",
+      type: "Background",
+      usageCount: 42,
+      status: "Active",
+      uploader: "Designer123 / 11-12-25",
+      fileNames: ["sunset_2x6.png", "sunset_4x6.png"],
+      assetUrls: [
+        "https://placehold.co/150x200?text=2x6+Preview",
+        "https://placehold.co/150x200?text=4x6+Preview"
+      ]
+    };
+
+    const exampleStickerPackTemplate = {
+      templateName: "",
+      tags: "",
+      type: "",
+      usageCount: 0,
+      status: "",
+      assetUrls: [
+        "https://placehold.co/150x200?text=2x6+Sticker",
+        "https://placehold.co/150x200?text=4x6+Sticker"
+      ]
+    };
+
+    // Delete Modal Logic
+    let deleteTemplateName = null;
+    function openDeleteModal(templateName) {
+      deleteTemplateName = templateName;
+      document.getElementById('deleteMessage').textContent = `Are you sure you want to permanently delete the template "${templateName}"?`;
+      document.getElementById('deleteModal').style.display = 'flex';
+    }
+    function closeDeleteModal() {
+      deleteTemplateName = null;
+      document.getElementById('deleteModal').style.display = 'none';
+    }
+    function confirmDelete() {
+      alert(`Template "${deleteTemplateName}" deleted! Implement your deleting logic.`);
+      closeDeleteModal();
+    }
+
+    // View modal logic
+    let currentViewTemplate = null;
+
+    function openViewModal(template) {
+      // If no template passed, do nothing
+      if (!template) return;
+
+      currentViewTemplate = template || {};
+      const vm = document.getElementById('viewModal');
+      document.getElementById('viewStatus').textContent = currentViewTemplate.status || 'Unknown';
+      document.getElementById('viewTemplateName').value = currentViewTemplate.templateName || '';
+      document.getElementById('viewTags').value = currentViewTemplate.tags || '';
+      document.getElementById('viewType').value = currentViewTemplate.type || '';
+      document.getElementById('viewUsageCount').value = currentViewTemplate.usageCount !== undefined ? `${currentViewTemplate.usageCount} times` : '';
+      document.getElementById('viewUploader').value = currentViewTemplate.uploader || '';
+
+      // Show/hide containers depending on type
+      const configContainer = document.getElementById('viewConfigContainer');
+      const dualContainer = document.getElementById('viewDualAssets');
+      const singlePreview = document.getElementById('viewAssetPreview');
+
+      // If background or sticker pack, show dual UI
+      if (currentViewTemplate.type === 'Background' || currentViewTemplate.type === 'Sticker Pack') {
+        if (configContainer) configContainer.style.display = 'none';
+        if (dualContainer) dualContainer.style.display = 'block';
+
+        // Fill file name fields (prefer explicit file names, otherwise parse from URLs)
+        const nameFromUrl = (url) => {
+          try { return url.split('/').pop().split('?')[0]; } catch(e){return ''}
+        }
+
+        const fileName2x6 = (currentViewTemplate.fileNames && currentViewTemplate.fileNames[0]) || (currentViewTemplate.assetUrls && currentViewTemplate.assetUrls[0] ? nameFromUrl(currentViewTemplate.assetUrls[0]) : '');
+        const fileName4x6 = (currentViewTemplate.fileNames && currentViewTemplate.fileNames[1]) || (currentViewTemplate.assetUrls && currentViewTemplate.assetUrls[1] ? nameFromUrl(currentViewTemplate.assetUrls[1]) : '');
+
+        const el2 = document.getElementById('view2x6FileName');
+        const el4 = document.getElementById('view4x6FileName');
+        if (el2) el2.value = fileName2x6;
+        if (el4) el4.value = fileName4x6;
+
+        // Populate two preview images
+        const prev2 = document.getElementById('viewAssetPreview2x6');
+        const prev4 = document.getElementById('viewAssetPreview4x6');
+        if (prev2) prev2.innerHTML = '';
+        if (prev4) prev4.innerHTML = '';
+        if (currentViewTemplate.assetUrls && currentViewTemplate.assetUrls.length) {
+          if (currentViewTemplate.assetUrls[0] && prev2) {
+            const img2 = document.createElement('img'); img2.src = currentViewTemplate.assetUrls[0]; img2.alt = '2x6 preview'; img2.style.width='100%'; img2.style.height='auto'; prev2.appendChild(img2);
+          }
+          if (currentViewTemplate.assetUrls[1] && prev4) {
+            const img4 = document.createElement('img'); img4.src = currentViewTemplate.assetUrls[1]; img4.alt = '4x6 preview'; img4.style.width='100%'; img4.style.height='auto'; prev4.appendChild(img4);
+          }
+        }
+      } else {
+        // for other types show single config/preview
+        if (configContainer) configContainer.style.display = 'block';
+        if (dualContainer) dualContainer.style.display = 'none';
+        document.getElementById('viewConfigFile').value = currentViewTemplate.configFile || '';
+        if (singlePreview) {
+          singlePreview.innerHTML = '';
+          if (currentViewTemplate.assetUrls && currentViewTemplate.assetUrls.length) {
+            const img = document.createElement('img'); img.src = currentViewTemplate.assetUrls[0]; img.alt = 'Asset preview'; img.style.width='100%'; img.style.height='auto'; singlePreview.appendChild(img);
+          }
+        }
+      }
+
+      vm.style.display = 'flex';
+    }
+
+    function closeViewModal() {
+      const vm = document.getElementById('viewModal');
+      if (vm) vm.style.display = 'none';
+      currentViewTemplate = null;
+    }
+
+    function goToEditFromView() {
+      // Close view modal and open edit modal populated with the same template
+      if (currentViewTemplate) {
+        closeViewModal();
+        openEditModal(currentViewTemplate);
+      } else {
+        closeViewModal();
+      }
+    }
+
+    // Edit Modal Logic
+    let currentEditTemplate = null;
+    const editTypeSelect = document.getElementById('editType');
+
+    function updateEditModalTypeUI() {
+      const selectedType = editTypeSelect.value;
+
+      const filterUploadContainer = document.getElementById('editFilterUploadContainer');
+      const dualUploadContainer = document.getElementById('editDualUploadContainer');
+      const previewContainer = document.getElementById('assetPreviewContainer');
+
+      // Clear preview container first
+      previewContainer.innerHTML = '';
+
+      if (selectedType === 'Filter') {
+        filterUploadContainer.style.display = 'block';
+        dualUploadContainer.style.display = 'none';
+
+        // Show single preview image from currentEditTemplate if exists
+        if (currentEditTemplate && currentEditTemplate.assetUrls && currentEditTemplate.assetUrls[0]) {
+          const img = document.createElement('img');
+          img.src = currentEditTemplate.assetUrls[0];
+          img.alt = "Current Filter Preview";
+          img.className = 'preview-img';
+          previewContainer.appendChild(img);
+        }
+      } else if (selectedType === 'Background' || selectedType === 'Sticker Pack') {
+        filterUploadContainer.style.display = 'none';
+        dualUploadContainer.style.display = 'block';
+
+        // Show dual preview images from currentEditTemplate if exist
+        if (currentEditTemplate && currentEditTemplate.assetUrls) {
+          currentEditTemplate.assetUrls.forEach(url => {
+            if (url) {
+              const img = document.createElement('img');
+              img.src = url;
+              img.alt = "Current Asset Preview";
+              img.className = 'preview-img';
+              img.style.marginBottom = '0.5rem';
+              previewContainer.appendChild(img);
+            }
+          });
+        }
+      } else {
+        filterUploadContainer.style.display = 'none';
+        dualUploadContainer.style.display = 'none';
+      }
+    }
+
+    function openEditModal(template) {
+      currentEditTemplate = template;
+
+      document.getElementById('editTemplateName').value = template.templateName;
+      document.getElementById('editTags').value = template.tags;
+      editTypeSelect.value = template.type;
+      document.getElementById('editUsageCount').textContent = `Usage Count: ${template.usageCount} times`;
+      document.getElementById('editStatus').value = template.status;
+
+      // Reset file status text for dual upload
+      const fileStatus2x6 = document.querySelector('[for="editReplace2x6File"]').closest('.dual-upload-item').querySelector('.file-status');
+      const fileStatus4x6 = document.querySelector('[for="editReplace4x6File"]').closest('.dual-upload-item').querySelector('.file-status');
+      if (fileStatus2x6) fileStatus2x6.textContent = 'No file selected';
+      if (fileStatus4x6) fileStatus4x6.textContent = 'No file selected';
+
+      updateEditModalTypeUI();
+
+      document.getElementById('editModal').style.display = 'flex';
+    }
+    function closeEditModal() {
+      currentEditTemplate = null;
+      document.getElementById('editModal').style.display = 'none';
+    }
+    function saveChanges() {
+      alert("Save Changes clicked! Implement your save/update logic.");
+      closeEditModal();
+    }
+
+    // Update preview and inputs on changing type in Edit modal
+    editTypeSelect.addEventListener('change', () => {
+      updateEditModalTypeUI();
+    });
+
+    // File selection status for edit modal
+    const editReplace2x6 = document.getElementById('editReplace2x6File');
+    const editReplace4x6 = document.getElementById('editReplace4x6File');
+
+    if (editReplace2x6) {
+      editReplace2x6.addEventListener('change', function() {
+        const statusEl = this.closest('.dual-upload-item').querySelector('.file-status');
+        if (statusEl) {
+          statusEl.textContent = this.files.length > 0 ? `📄 ${this.files[0].name}` : 'No file selected';
+        }
+      });
+    }
+
+    if (editReplace4x6) {
+      editReplace4x6.addEventListener('change', function() {
+        const statusEl = this.closest('.dual-upload-item').querySelector('.file-status');
+        if (statusEl) {
+          statusEl.textContent = this.files.length > 0 ? `📄 ${this.files[0].name}` : 'No file selected';
+        }
+      });
+    }
+
+    // Simple search/filter handlers for User Management and Audit Trail
+    function performUserSearch() {
+      const q = (document.getElementById('userSearchInput')?.value || '').toLowerCase().trim();
+      const group = document.getElementById('userGroupFilter')?.value || 'All groups';
+      const status = document.getElementById('userStatusFilter')?.value || 'Status';
+      const tbody = document.querySelector('.user-table tbody');
+      if (!tbody) return;
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach(r => {
+        const cells = r.querySelectorAll('td');
+        if (!cells || cells.length < 4) return;
+        const username = (cells[0].textContent || '').toLowerCase();
+        const email = (cells[1].textContent || '').toLowerCase();
+        const role = (cells[2].textContent || '').trim();
+        const st = (cells[3].textContent || '').trim();
+        const matchesQuery = q === '' || username.includes(q) || email.includes(q);
+        const matchesGroup = (group === 'All groups') || (role === group);
+        const matchesStatus = (status === 'Status') || (st === status);
+        r.style.display = (matchesQuery && matchesGroup && matchesStatus) ? '' : 'none';
+      });
+    }
+
+    function performAuditSearch() {
+      const q = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
+      const userType = document.getElementById('auditUserTypeFilter')?.value || 'User Type';
+      const actionType = document.getElementById('auditActionFilter')?.value || 'Action Type';
+      const tbody = document.querySelectorAll('.user-table')[1]?.querySelector('tbody') || document.querySelector('.user-table tbody');
+      if (!tbody) return;
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach(r => {
+        const txt = (r.textContent || '').toLowerCase();
+        const matchesQuery = q === '' || txt.includes(q);
+        // userType/actionType filters require domain-specific mapping; use simple string match against row
+        const matchesUserType = (userType === 'User Type') || txt.includes(userType.toLowerCase());
+        const matchesAction = (actionType === 'Action Type') || txt.includes(actionType.toLowerCase());
+        r.style.display = (matchesQuery && matchesUserType && matchesAction) ? '' : 'none';
+      });
+    }
+
+    // Manage User Modal Functions
+    function openManageUserModal(user) {
+      document.getElementById('manageUsername').value = user.username || '';
+      document.getElementById('manageEmail').value = user.email || '';
+      document.getElementById('manageJoined').value = user.joined || '';
+      document.getElementById('manageTotalPhotos').value = user.totalPhotos || '';
+      document.getElementById('manageStatus').value = user.status || 'Active';
+      document.getElementById('manageRole').value = user.role || 'User';
+      document.getElementById('manageUserModal').style.display = 'flex';
+    }
+
+    function closeManageUserModal() {
+      document.getElementById('manageUserModal').style.display = 'none';
+    }
+
+    function deleteUser() {
+      // Open confirmation modal
+      document.getElementById('deleteUserModal').style.display = 'flex';
+    }
+
+    function closeDeleteUserModal() {
+      document.getElementById('deleteUserModal').style.display = 'none';
+    }
+
+    function confirmDeleteUser() {
+      // Placeholder for delete logic
+      alert('User deleted! Implement your delete logic here.');
+      closeDeleteUserModal();
+      closeManageUserModal();
+    }
+
+    // Tab switching for Manage User Modal
+    function switchTab(tabName) {
+      const accountDetailsTab = document.getElementById('accountDetailsTab');
+      const activityContentsTab = document.getElementById('activityContentsTab');
+      const accountDetailsContent = document.getElementById('accountDetailsContent');
+      const activityContentsContent = document.getElementById('activityContentsContent');
+
+      if (tabName === 'accountDetails') {
+        accountDetailsTab.classList.add('active');
+        accountDetailsTab.style.borderBottom = '3px solid #ea3b91';
+        activityContentsTab.classList.remove('active');
+        activityContentsTab.style.borderBottom = '3px solid transparent';
+        accountDetailsContent.style.display = 'block';
+        activityContentsContent.style.display = 'none';
+      } else if (tabName === 'activityContents') {
+        activityContentsTab.classList.add('active');
+        activityContentsTab.style.borderBottom = '3px solid #ea3b91';
+        accountDetailsTab.classList.remove('active');
+        accountDetailsTab.style.borderBottom = '3px solid transparent';
+        activityContentsContent.style.display = 'block';
+        accountDetailsContent.style.display = 'none';
+      }
+    }
+
+    // Save changes for user
+    function saveChangesUser() {
+      // Placeholder for save logic
+      alert('Changes saved! Implement your save logic here.');
+      closeManageUserModal();
+    }
+
+    // Add event listeners for manage links
+    document.addEventListener('DOMContentLoaded', function() {
+      showTab(0);
+
+      // Existing manage link handlers
+      const manageLinks = document.querySelectorAll('.manage-link');
+      manageLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const row = this.closest('tr');
+          const cells = row.querySelectorAll('td');
+          const username = cells[0].textContent.trim();
+          const email = cells[1].textContent.trim();
+          const role = cells[2].textContent.trim();
+          const status = cells[3].textContent.trim();
+          // Placeholder data for joined and total photos
+          const user = {
+            username: username,
+            email: email,
+            role: role,
+            status: status,
+            joined: '2023-01-01', // Placeholder
+            totalPhotos: '10' // Placeholder
+          };
+          openManageUserModal(user);
+        });
+      });
+
+      // Delete user button
+      document.getElementById('deleteUserBtn').addEventListener('click', deleteUser);
+    });
+  </script>
+</body>
+</html>

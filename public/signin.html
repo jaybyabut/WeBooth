@@ -6,7 +6,144 @@
     <title>Sign Up Form</title>
     <link rel="stylesheet" href="styles.css" />
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      // UPDATED IMPORTS for Social Login 🚀
+      import { 
+            getAuth, 
+            createUserWithEmailAndPassword,
+            signInWithPopup, // New for social sign-in
+            GoogleAuthProvider, // New for Google
+            FacebookAuthProvider // New for Facebook
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
+        authDomain: "photobooth-c42a9.firebaseapp.com",
+        projectId: "photobooth-c42a9",
+        storageBucket: "photobooth-c42a9.firebasestorage.app",
+        messagingSenderId: "994496567051",
+        appId: "1:994496567051:web:81d507ace1fbd2db77b40e",
+        measurementId: "G-4FHWWBR2BJ"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      const supabaseUrl = 'https://gnxwhyjuqgopzrfhhbwb.supabase.co';
+      const supabaseKey = 'sb_publishable_C5eAjvB394x_xkS184bxRw_0IBPaj16'; 
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      async function insertUserToSupabase(uid, username, email) {
+        const { data, error } = await supabase
+          .from('users')
+          .insert([
+            { 
+              user_id: uid, 
+              username: username, 
+              email: email, 
+              profile_img_url: null,
+              provider: 'firebase' 
+            }
+          ]);
+
+        if (error) {
+          console.error('Error inserting user:', error);
+          throw error;
+        } else {
+          console.log('User inserted:', data);
+        }
+      }
+
+      // --- 1. Traditional Email/Password Sign Up Handler ---
+      document.getElementById('signupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Use IDs for reliable input fetching
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+          // 1. Firebase Sign Up (createUserWithEmailAndPassword is defined here)
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          
+          console.log('User signed up with Firebase:', user);
+          
+          // 2. Insert User Profile into Supabase
+          await insertUserToSupabase(user.uid, username, email);
+          
+          alert('Sign up successful!');
+          window.location.href = 'login.html';
+        } catch (error) {
+          console.error('Error signing up:', error);
+          alert('Sign up failed: ' + error.message);
+        }
+      });
+
+      // ------------------------------------------------------------------
+      // --- 2. SOCIAL LOGIN LOGIC (NEW CODE ADDED HERE) 🚀 ---
+      // ------------------------------------------------------------------
+
+      /**
+       * Handles the Firebase sign-in process for social providers (Google/Facebook)
+       * and syncs the new user to Supabase.
+       * @param {GoogleAuthProvider | FacebookAuthProvider} provider - The Firebase provider object.
+       */
+      async function socialSignIn(provider) {
+        try {
+          // 1. Firebase Sign In via Popup
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
+
+          console.log(`User signed in with ${provider.providerId}:`, user);
+
+          // 2. Extract user data, ensuring a fallback for username
+          const username = user.displayName || user.email.split('@')[0] || 'social-user';
+          const email = user.email;
+
+          // 3. Insert/Sync User Profile into Supabase
+          try {
+            // Note: If the user already exists in Supabase (e.g., they first signed up 
+            // with email and then tried social login), the insert will fail due to the 
+            // primary key (user_id) constraint. This is usually fine, as long as 
+            // the Firebase login was successful.
+            await insertUserToSupabase(user.uid, username, email);
+          } catch (error) {
+            console.warn('Supabase profile creation skipped (User likely exists or RLS issue):', error.message);
+          }
+
+          alert(`Login successful with ${provider.providerId.split('.')[0]}!`);
+          window.location.href = 'login.html'; 
+
+        } catch (error) {
+          console.error('Error with social login:', error);
+          alert('Social login failed: ' + error.message);
+        }
+      }
+
+      // Event Listener for Google Button
+      document.querySelector('.social-icons .google').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const provider = new GoogleAuthProvider();
+        await socialSignIn(provider);
+      });
+
+      // Event Listener for Facebook Button
+      document.querySelector('.social-icons .facebook').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const provider = new FacebookAuthProvider();
+        await socialSignIn(provider);
+      });
+    </script>
+    
     <style>
+/* CSS styles remain the same as the original file */
         * {
             box-sizing: border-box;
         }
@@ -81,7 +218,8 @@
         }
         .input-text label {
             position: absolute;
-            top: 30%;
+            top: 50%; 
+            transform: translateY(-50%); 
             left: 15px;
             font-size: 0.9rem;
             color: #fff;
@@ -96,6 +234,7 @@
             left: 8px;
             font-size: 12px;
             color: #000316;
+            transform: translateY(0); 
         }
 
         .signup-form button {
@@ -199,21 +338,21 @@
     <div class="container">
         <div class="signup-form">
             <h2>Sign Up</h2>
-            <form>
+            <form id="signupForm">
                 <div class="input-text">
-                    <input type="text" placeholder="" required />
-                    <label>Username</label>
+                    <input type="text" id="username" placeholder="" required />
+                    <label for="username">Username</label>
                 </div>
                 <div class="input-text">
-                    <input type="email" placeholder="" required />
-                    <label>Email</label>
+                    <input type="email" id="email" placeholder="" required />
+                    <label for="email">Email</label>
                 </div>
                 <div class="input-text">
-                    <input type="password" placeholder="" required />
-                    <label>Create Password</label>
+                    <input type="password" id="password" placeholder="" required />
+                    <label for="password">Create Password</label>
                 </div>
-                <button type="submit">Sign Up</button></a>
-               
+                <button type="submit">Sign Up</button>
+                
                 <p class="login-link">
                     Already have an account? <a href="login.html">Login</a>
                 </p>
@@ -232,7 +371,7 @@
             <h1>Your first <br> step to <br> our booth</h1>
             <p>Sign up for an account.</p>
             <div class="logo">
-                <img src="Icons/11.svg" />
+                <img src="Icons/11.svg" alt="WeBooth Logo"/>
                 WeBooth
             </div>
         </div>

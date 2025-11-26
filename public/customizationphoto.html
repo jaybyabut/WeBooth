@@ -23,55 +23,67 @@
         .text-brand-pink {
             color: #c32d6c;
         }
- .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
 
-    .topbar h1 {
-      font-family: 'Fredoka One', cursive;
-      font-size: 40px;
-      font-weight: 900;
-      color: #d23481;
-      margin: 0;
-      letter-spacing: -1px;
-    }
+        /* --- EXISTING CSS STYLES (TRUNCATED FOR BREVITY) --- */
+        .nav-button {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: #fff; 
+            color: #c32d6c; 
+            border: 2px solid #dd3d93; 
+            box-shadow: none; 
+            border-radius: 0.75rem;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out; 
+        }
 
-    .right-buttons {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
+        .nav-button:hover {
+            transform: translateY(-2px);
+            background-color: #dd3d93;
+            color: white;
+            border-color: #dd3d93;
+            box-shadow: 0 10px 15px -3px rgba(221, 61, 147, 0.6), 0 4px 6px -4px rgba(221, 61, 147, 0.3);
+        }
 
-    .right-buttons button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      font-size: 1rem;
-      border-radius: 12px;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      border: 2px solid #d23481;
-      background-color: #fff;
-      color: #d23481;
-      transition: background-color 0.3s, color 0.3s;
-    }
+        .nav-button:active {
+            transform: scale(0.95);
+            opacity: 0.9;
+        }
 
-    .right-buttons button img {
-      width: 28px;
-      height: 28px;
-    }
+        .nav-button img {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.5rem;
+            transition: filter 0.2s ease-in-out;
+            filter: none;
+        }
 
-    .right-buttons button:hover,
-    .admin-btn {
-      background-color: #d23481;
-      color: #fff;
-      border: 2px solid #d23481;
-    }
+        .nav-button:hover img {
+            filter: brightness(0) invert(1);
+        }
 
+        .active-nav-button {
+            background-color: #dd3d93;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(221, 61, 147, 0.4), 0 2px 4px -2px rgba(221, 61, 147, 0.2);
+            border-color: #dd3d93;
+        }
+
+        .active-nav-button img {
+            filter: brightness(0) invert(1);
+        }
+
+        .active-nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(221, 61, 147, 0.6), 0 4px 6px -4px rgba(221, 61, 147, 0.3);
+        }
+
+        .active-nav-button:active {
+            transform: scale(0.95);
+            opacity: 0.9;
+        }
 
         .icon-fallback {
             width: 1.25rem;
@@ -591,6 +603,179 @@
         .filter-noir { filter: grayscale(100%) contrast(1.2) brightness(0.8); }
         /* --- END ADDED CSS --- */
 
+        /* --- ADDED MODAL CSS --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black backdrop */
+            z-index: 50; /* Above all other content */
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2.5rem; /* Increased padding for the pink fade effect */
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content-inner {
+            position: relative;
+            z-index: 10;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 237, 249, 0.7) 0%, rgba(248, 255, 232, 0.7) 100%);
+            opacity: 0.8;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #c32d6c; 
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .modal-label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #c32d6c;
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            filter: drop-shadow(0 1px 1px rgba(195, 45, 108, 0.2));
+        }
+
+        .modal-input, .modal-textarea {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border-radius: 0.5rem; 
+            border: 2px solid #ffdeea;
+            background-color: rgba(255, 255, 255, 0.95);
+            outline: none;
+            transition: all 0.2s ease;
+            color: #374151; 
+        }
+        .modal-input:focus, .modal-textarea:focus {
+            border-color: #dd3d93;
+            box-shadow: 0 0 0 2px rgba(221, 61, 147, 0.3);
+        }
+
+        .custom-toggle {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+            margin-right: 0.75rem;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .slider {
+            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+        }
+
+        .toggle-switch input:focus + .slider {
+            box-shadow: 0 0 1px #f645b1;
+        }
+
+        .toggle-switch input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .modal-button-cancel {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .modal-button-cancel:hover {
+            background-color: #e5e7eb;
+            border-color: #d1d5db;
+        }
+
+        .modal-button-post {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; 
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.1s ease;
+            border: none; 
+        }
+        .modal-button-post:hover {
+            background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);
+        }
+        .modal-button-post:active {
+            transform: scale(0.98);
+        }
+        /* --- END ADDED MODAL CSS --- */
+
     </style>
 </head>
 <body class="text-gray-800 min-h-screen flex flex-col">
@@ -599,9 +784,9 @@
         
         <header class="flex flex-col md:flex-row items-center md:items-baseline justify-between gap-4 mb-8">
             <div class="flex items-center">
-                <img src="Icons/11.svg" alt="WeBooth Logo" 	
-                     class="w-12 h-12 md:w-16 md:h-16 mr-3"
-                     onerror="this.outerHTML = '<div class=\'icon-fallback p-2 text-xl\'>W</div>'">
+                <img src="Icons/11.svg" alt="WeBooth Logo" 
+                    class="w-12 h-12 md:w-16 md:h-16 mr-3"
+                    onerror="this.outerHTML = '<div class=\'icon-fallback p-2 text-xl\'>W</div>'">
                 
                 <h1 class="text-2xl md:text-3xl text-brand-pink leading-tight font-fredoka">
                     Customize Your Photo
@@ -609,19 +794,18 @@
             </div>
 
             <div class="flex flex-col items-center md:items-end">
-                <header class="topbar">
-        <div class="right-buttons">
-          <button onclick="window.location.href='booth.html'">
-            <img src="Icons/2.svg" alt="Booth icon" />
-            Booth
-          </button>
-          <button onclick="window.location.href='finalprof.html'">
-            <img src="Icons/4.svg" alt="Profile icon" />
-            Profile
-          </button>
-        </div>
-      </header>
-
+                <nav class="flex items-center gap-3">
+                    <button class="nav-button active-nav-button">
+                        <img src="Icons/2.svg" alt="Booth"
+                            onerror="this.outerHTML = '<div class=\'icon-fallback\'>B</div>'">
+                        Booth
+                    </button>
+                    <button class="nav-button">
+                        <img src="Icons/4.svg" alt="Profile"
+                            onerror="this.outerHTML = '<div class=\'icon-fallback\'>P</div>'">
+                        Profile
+                    </button>
+                </nav>
             </div>
         </header>
 
@@ -767,9 +951,9 @@
                         </div>
                         
                         <div>
-                   <label class="color-picker-wrapper">
-                         <span>Text Color</span>
-                         <input type="color" id="text-color" class="color-picker-input" value="#c32d6c">
+                    <label class="color-picker-wrapper">
+                            <span>Text Color</span>
+                            <input type="color" id="text-color" class="color-picker-input" value="#c32d6c">
                     </label>
                 </div>
             </div>
@@ -854,9 +1038,9 @@
         <div class="template-footer">
             <div class="footer-brand">
                 <img id="footer-brand-logo" src="Icons_svg_1/11.svg" 
-                     alt="WeBooth Logo" 
-                     class="logo-footer hidden"
-                     onerror="this.outerHTML = '<div class=\'w-8 h-8 rounded-full bg-slate-300 text-slate-600 flex items-center justify-center font-bold text-lg hidden\'>W</div>'">
+                    alt="WeBooth Logo" 
+                    class="logo-footer hidden"
+                    onerror="this.outerHTML = '<div class=\'w-8 h-8 rounded-full bg-slate-300 text-slate-600 flex items-center justify-center font-bold text-lg hidden\'>W</div>'">
                 <span id="footer-brand-text" class="footer-text font-fredoka hidden">WeBooth</span>
             </div>
             
@@ -882,7 +1066,7 @@
     </div>
 
     <div class="flex items-center gap-6">
-        <button class="action-button">
+        <button class="action-button" id="main-post-btn">
             POST
         </button>
     </div>
@@ -903,6 +1087,34 @@
 
 </main>
 </div>
+
+<div id="post-modal-overlay" class="modal-overlay">
+    <div class="modal-content" id="post-modal-content">
+        <div class="modal-content-inner">
+            <h2 class="modal-title">Post Your Photo</h2>
+            
+            <label for="photo-title-input" class="modal-label">Photo Title</label>
+            <input type="text" id="photo-title-input" placeholder="" class="modal-input">
+
+            <label for="photo-description-textarea" class="modal-label">Description</label>
+            <textarea id="photo-description-textarea" placeholder="" class="modal-textarea" rows="3"></textarea>
+
+            <div class="custom-toggle">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="share-to-community-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+                <span class="text-brand-pink font-medium">Share to community</span>
+            </div>
+            
+            <div class="flex justify-end gap-3 mt-8">
+                <button id="modal-cancel-btn" class="modal-button-cancel">Cancel</button>
+                <button id="modal-post-btn" class="modal-button-post">Post</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -945,7 +1157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.sticker-button img').forEach(img => {
             // FIX: Replace both old path formats and update image size suffix
             img.src = img.src.replace('sticker pack (2x6 ) 1', 'sticker pack (2 x 6 in)')
-                             .replace(/2x6/g, '4x6');
+                            .replace(/2x6/g, '4x6');
         });
 
         if (shotCount === 4) {
@@ -1259,15 +1471,74 @@ document.addEventListener('DOMContentLoaded', () => {
     if (noStickerButton && stickerOverlay && photoStrip) {
         noStickerButton.addEventListener('click', () => {
             stickerOverlay.style.display = 'none';
-            // Note: Background color/image controls are handled by the Backgrounds section, 
-            // so we don't reset them here unless we want 'No Stickers' to imply 'No Background'.
-            // photoStrip.style.backgroundImage = 'none';
-            // photoStrip.style.backgroundColor = '#ffffff'; 
         });
     }
 
+
+    // --- JAVASCRIPT FOR POST MODAL ---
+    const mainPostBtn = document.getElementById('main-post-btn');
+    const modalOverlay = document.getElementById('post-modal-overlay');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const modalPostBtn = document.getElementById('modal-post-btn');
+    const photoTitleInput = document.getElementById('photo-title-input');
+    const photoDescriptionTextarea = document.getElementById('photo-description-textarea');
+    const shareToggle = document.getElementById('share-to-community-toggle');
+
+    // Function to show the modal
+    if (mainPostBtn) {
+        mainPostBtn.addEventListener('click', () => {
+            if (modalOverlay) {
+                modalOverlay.style.display = 'flex';
+                // Optional: Reset form values on open
+                photoTitleInput.value = '';
+                photoDescriptionTextarea.value = '';
+                shareToggle.checked = true;
+            }
+        });
+    }
+
+    // Function to hide the modal 
+    const hideModal = () => {
+        if (modalOverlay) {
+            modalOverlay.style.display = 'none';
+        }
+    };
+
+    if (modalCancelBtn) {
+        modalCancelBtn.addEventListener('click', hideModal);
+    }
+
+    if (modalOverlay) {
+        // Hide modal if user clicks outside the content (on the overlay itself)
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                hideModal();
+            }
+        });
+    }
+
+    // Handle the final Post action inside the modal
+    if (modalPostBtn) {
+        modalPostBtn.addEventListener('click', () => {
+            const title = photoTitleInput.value;
+            const description = photoDescriptionTextarea.value;
+            const share = shareToggle.checked;
+            
+            // --- This is where your actual POST/SAVE logic would go ---
+            alert(`
+                Photo Posted!
+                Title: ${title || '(No Title)'}
+                Description: ${description || '(No Description)'}
+                Shared to Community: ${share ? 'Yes' : 'No'}
+            `);
+            
+            // Close the modal
+            hideModal();
+        });
+    }
+    // --- END JAVASCRIPT FOR POST MODAL ---
+
 });
-    
 </script>
 </body>
 </html>

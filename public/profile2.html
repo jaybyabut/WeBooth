@@ -273,8 +273,10 @@
     .edit-profile-modal {
       background: linear-gradient(135deg, #fff6fc, #ffe3f0);
       border-radius: 16px;
-      width: 400px; /* Fixed width */
-      max-width: 90vw; /* Responsive on small screens */
+      width: 400px;
+      /* Fixed width */
+      max-width: 90vw;
+      /* Responsive on small screens */
       padding: 24px 28px 28px 28px;
       position: relative;
       display: flex;
@@ -299,6 +301,7 @@
       user-select: none;
       transition: color 0.3s;
     }
+
     #edit-profile-close:hover {
       color: #a4154f;
     }
@@ -344,6 +347,7 @@
       min-width: 90px;
       text-align: center;
     }
+
     #change-photo-btn:hover {
       background-color: #bf2e68;
       color: #fff;
@@ -486,25 +490,25 @@
       user-select: none;
       display: none;
     }
-    
+
     #section-favorites.active {
       display: block;
     }
-    
+
     #section-favorites h2 {
       font-family: 'Fredoka One', cursive;
       font-size: 30px;
       margin-top: 0;
       color: #c32d6c;
     }
-    
+
     .favorites-grid {
       display: grid;
       gap: 14px;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       padding-top: 30px;
     }
-    
+
     .favorite-photo-card {
       border-radius: 10px;
       border: 5px solid #f9d7a8;
@@ -512,18 +516,18 @@
       user-select: none;
       cursor: pointer;
     }
-    
+
     .favorite-photo-card img {
       width: 100%;
       height: 300px;
       object-fit: cover;
     }
-    
+
     .favorite-photo-card:focus {
       outline: 2px solid #a31a62;
       outline-offset: 2px;
     }
-    
+
     .no-favorites-msg {
       font-style: italic;
       color: #f9acdb;
@@ -537,18 +541,18 @@
       user-select: none;
       display: none;
     }
-    
+
     #section-activity.active {
       display: block;
     }
-    
+
     #section-activity h2 {
       font-family: 'Fredoka One', cursive;
       font-size: 30px;
       margin-top: 0;
       color: #c32d6c;
     }
-    
+
     .activity-container {
       display: flex;
       flex-direction: column;
@@ -556,7 +560,7 @@
       height: 100%;
       overflow-y: auto;
     }
-    
+
     .activity-post {
       background: white;
       border-radius: 14px;
@@ -568,7 +572,7 @@
       white-space: pre-line;
       word-break: break-word;
     }
-    
+
     .activity-post.empty {
       font-style: italic;
       color: #f29dcc;
@@ -875,7 +879,7 @@
     </nav>
     <main class="main-content" role="main">
       <header class="topbar">
-        <h1 class="greeting" aria-live="polite">Hi, <span id="username-display">Username</span>!</h1>
+        <h1 class="greeting" aria-live="polite">Hi, <span id="username-display">Loading...</span>!</h1>
         <div class="right-buttons">
           <button onclick="window.location.href='booth.html'">
             <img src="Icons/2.svg" alt="Booth icon" />
@@ -888,12 +892,11 @@
         </div>
       </header>
 
-      <!-- Profile info -->
       <section class="profile-info" aria-label="User profile info">
         <div class="profile-img" aria-hidden="true" id="profile-img"
           style="background-image: url('https://via.placeholder.com/72x72.png?text=');"></div>
         <div class="profile-bio">
-          <strong id="profile-username">Username</strong>
+          <strong id="profile-username">Loading...</strong>
           <div>
             <span id="profile-bio-text">bio<br>0 photo</span>
           </div>
@@ -904,11 +907,12 @@
         </button>
       </section>
 
-      <!-- Edit Profile Modal -->
       <div class="modal-bg" id="edit-profile-modal" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title"
         tabindex="-1">
-        <div class="modal edit-profile-modal" role="document" aria-labelledby="edit-profile-title" aria-describedby="edit-profile-description">
-          <button class="modal-close-btn" id="edit-profile-close" aria-label="Close edit profile modal">&times;</button>
+        <div class="modal edit-profile-modal" role="document" aria-labelledby="edit-profile-title"
+          aria-describedby="edit-profile-description">
+          <button class="modal-close-btn" id="edit-profile-close"
+            aria-label="Close edit profile modal">&times;</button>
           <div class="edit-profile-content">
             <div class="profile-pic-section" aria-describedby="edit-profile-description">
               <div class="profile-pic-placeholder" aria-hidden="true">
@@ -939,13 +943,11 @@
         <div class="photo-library-grid" aria-live="polite" aria-label="Photo Library Grid"></div>
       </section>
 
-      <!-- Favorites Section -->
       <section id="section-favorites" class="section" role="region" aria-label="Favorites Section">
         <h2>Favorites</h2>
         <div class="favorites-grid" aria-live="polite"></div>
       </section>
 
-      <!-- Activity Section -->
       <section id="section-activity" class="section" role="region" aria-label="Activity Log Section">
         <h2>Activity</h2>
         <div class="activity-container" aria-live="polite"></div>
@@ -953,12 +955,10 @@
     </main>
   </div>
 
-  <!-- Modal for Post + comments -->
   <div class="modal-bg" id="post-modal" role="dialog" aria-modal="true" aria-labelledby="modal-username" tabindex="-1">
     <div class="modal">
       <div class="modal-left" aria-label="Selected photo">
-        <!-- Single photo will be placed here -->
-      </div>
+        </div>
       <div class="modal-right">
         <div class="modal-header">
           <div class="username" id="modal-username"></div>
@@ -975,15 +975,52 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; // Keeping setLogLevel for consistency
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'; // Supabase import
+
+    // --- SUPABASE CONFIGURATION ---
+    const supabaseUrl = 'https://gnxwhyjuqgopzrfhhbwb.supabase.co';
+    const supabaseKey = 'sb_publishable_C5eAjvB394x_xkS184bxRw_0IBPaj16';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+
+    // --- FIREBASE SETUP AND AUTHENTICATION ---
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
+      authDomain: "photobooth-c42a9.firebaseapp.com",
+      projectId: "photobooth-c42a9",
+      storageBucket: "photobooth-c42a9.firebasestorage.app",
+      messagingSenderId: "994496567051",
+      appId: "1:994496567051:web:81d507ace1fbd2db77b40e",
+      measurementId: "G-4FHWWBR2BJ"
+    };
+    
+    // Global variables provided by the environment (kept for compatibility, though overridden above)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    // Initialize Firebase Auth (keeping the auth domain)
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    setLogLevel('error'); 
+
+    let currentUserId = null;
+    let isAuthReady = false;
+
+    // Main application state
     const state = {
       user: {
-        username: 'Username',
-        bio: 'bio',
+        username: 'User', // Default username
+        bio: 'Set your bio here.',
         photoCount: 0,
-        profileImg: 'https://via.placeholder.com/72x72.png?text='
+        profileImg: 'https://via.placeholder.com/72x72.png?text=P'
       },
       photos: [
+        // Mock data remains the same
         {
           id: 1,
           src: 'https://via.placeholder.com/720x480?text=Photo+1',
@@ -1000,10 +1037,122 @@
           date: 'October 30',
           comments: []
         },
-       
+
       ],
       activities: []
     };
+
+    /**
+     * Fetches the user's profile from the Supabase 'users' table or creates a default one.
+     * @param {string} userId - The Firebase Auth UID.
+     * @param {string} email - The user's email.
+     * @param {string | null} displayName - The user's display name from Firebase (e.g., Google login name).
+     */
+    async function fetchOrCreateProfile(userId, email, displayName) {
+      if (!userId) return;
+      console.log(`Fetching profile for user: ${userId} from Supabase 'users' table.`);
+
+      try {
+        // 1. Try to fetch the existing profile from the 'users' table
+        let { data: profileData, error } = await supabase
+          .from('users') 
+          .select('username, bio')
+          .eq('user_id', userId) // Match the Supabase row ID to the Firebase Auth ID
+          .single();
+
+        // Supabase error handling: 'PGRST116' is the code for 'No rows found' (expected for new users)
+        if (error && error.code !== 'PGRST116') { 
+          console.error("Supabase fetch error (not 404):", error);
+        }
+
+        if (profileData) {
+          // Profile exists: update state with fetched data
+          state.user.username = profileData.username || `User_${userId.substring(0, 4)}`;
+          state.user.bio = profileData.bio || 'Set your bio here.';
+          console.log("Profile found in Supabase 'users' table. Username:", state.user.username);
+        } else {
+          // Profile does not exist: create a new record
+          console.log("No profile found in Supabase 'users' table. Creating default.");
+          
+          // CRITICAL FIX: Use displayName (e.g., Google full name) as the primary default username.
+          const defaultUsername = displayName || (email ? email.split('@')[0] : `User_${userId.substring(0, 4)}`);
+          
+          const defaultProfile = {
+            id: userId, // CRITICAL: Supabase PK must match Auth ID
+            username: defaultUsername,
+            bio: 'Welcome to your new profile!',
+            created_at: new Date().toISOString()
+          };
+          
+          const { error: insertError } = await supabase
+            .from('users') // Updated to 'users' table
+            .insert([defaultProfile]);
+
+          if (insertError) {
+            console.error("Supabase insert error on 'users' table:", insertError);
+            state.user.username = defaultUsername; // Fallback to local default if insert fails
+            state.user.bio = defaultProfile.bio;
+          } else {
+            state.user.username = defaultUsername;
+            state.user.bio = defaultProfile.bio;
+          }
+        }
+      } catch (error) {
+        console.error("Unexpected Supabase operation error:", error);
+      }
+      updateUserUI();
+    }
+
+    /**
+     * Saves the current user state (username and bio) to Supabase 'users' table.
+     */
+    async function saveProfileChanges(newUsername, newBio) {
+      if (!currentUserId) {
+        console.error("Cannot save profile: User not authenticated.");
+        return;
+      }
+      const updateData = {
+        username: newUsername,
+        bio: newBio,
+        updated_at: new Date().toISOString() // Use ISO string for Supabase timestamp
+      };
+      try {
+        const { error } = await supabase
+          .from('users') // Updated to 'users' table
+          .update(updateData)
+          .eq('id', currentUserId); // Match the Supabase row ID to the Firebase Auth ID
+
+        if (error) {
+          console.error("Error saving profile changes to Supabase 'users' table:", error);
+        } else {
+          console.log("Profile successfully updated in Supabase 'users' table.");
+          addActivity('Profile information saved.');
+        }
+      } catch (error) {
+        console.error("Unexpected Supabase save error:", error);
+      }
+    }
+
+
+    // Handle authentication state and profile loading
+    onAuthStateChanged(auth, (user) => {
+      isAuthReady = true;
+      if (user) {
+        currentUserId = user.uid;
+        // PASS displayName for better default username creation
+        fetchOrCreateProfile(user.uid, user.email, user.displayName);
+
+        // Optional: Add listeners for user-specific data here (like a real-time photo library listener)
+      } else {
+        // User is signed out.
+        currentUserId = null;
+        console.log("User signed out or failed auth. Redirecting to login.html...");
+        // This is a protected page, so if signed out, redirect to login
+        window.location.href = 'login.html'; 
+      }
+    });
+
+    // --- APPLICATION LOGIC ---
 
     // Update user UI (profile and greeting)
     function updateUserUI() {
@@ -1013,7 +1162,7 @@
         `<br>${state.user.photoCount} photo${state.user.photoCount !== 1 ? "s" : ""}`;
       document.getElementById('profile-img').style.backgroundImage = `url('${state.user.profileImg}')`;
     }
-    updateUserUI();
+    updateUserUI(); // Call once with initial 'Loading...' state
 
     // Render photo library grid
     const photoLibraryGrid = document.querySelector('.photo-library-grid');
@@ -1118,15 +1267,22 @@
     sidebarButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.dataset.target === 'logout') {
-          alert('Logging out...');
+          // Use Firebase signOut
+          signOut(auth).then(() => {
+            console.log("User logged out successfully.");
+            // Redirect to login page after sign out (Assuming 'login.html' exists)
+            window.location.href = 'login.html';
+          }).catch((error) => {
+            console.error("Logout failed:", error);
+          });
           return;
         }
-        
+
         // Hide all sections
         document.querySelectorAll('.section').forEach(section => {
           section.style.display = 'none';
         });
-        
+
         // Show the selected section
         if (btn.dataset.target === 'favorites') {
           document.getElementById('section-favorites').style.display = 'block';
@@ -1138,7 +1294,7 @@
           // Default to photo library
           document.getElementById('tab-photolib').style.display = 'block';
         }
-        
+
         // Update active button
         sidebarButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -1222,44 +1378,48 @@
     profilePhotoInput.addEventListener('change', () => {
       if (profilePhotoInput.files && profilePhotoInput.files[0]) {
         const file = profilePhotoInput.files[0];
-        
+
         // Check if file is an image
         if (!file.type.startsWith('image/')) {
-          alert('Please select a valid image file (JPEG, PNG, GIF, etc.).');
+          console.error('Please select a valid image file (JPEG, PNG, GIF, etc.).');
           return;
         }
-        
+
         // Create a FileReader to read the file
         const reader = new FileReader();
-        
-        reader.onload = function(e) {
+
+        reader.onload = function (e) {
           // Update the profile picture with the selected image
           const newProfilePic = e.target.result;
           editProfilePic.src = newProfilePic;
           profileMainImg.style.backgroundImage = `url('${newProfilePic}')`;
           state.user.profileImg = newProfilePic;
         };
-        
-        reader.onerror = function() {
-          alert('Error reading the selected file. Please try again.');
+
+        reader.onerror = function () {
+          console.error('Error reading the selected file. Please try again.');
         };
-        
+
         // Read the file as a data URL
         reader.readAsDataURL(file);
       }
     });
 
     // Handle edit profile form submission
-    editProfileForm.addEventListener('submit', (e) => {
+    editProfileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const newUsername = editUsernameInput.value.trim();
       const newBio = editBioInput.value.trim();
       if (newUsername.length === 0) {
-        alert('Username cannot be empty.');
+        console.error('Username cannot be empty.');
         editUsernameInput.focus();
         return;
       }
-      // Update state and UI
+      
+      // Save changes to Supabase
+      await saveProfileChanges(newUsername, newBio);
+
+      // Update local state and UI
       state.user.username = newUsername;
       state.user.bio = newBio;
       updateUserUI();
@@ -1277,7 +1437,7 @@
       // Show only the selected photo in the left section
       modalLeft.style.display = 'flex';
       modalLeft.innerHTML = '';
-      
+
       const img = document.createElement('img');
       img.src = photo.src;
       img.alt = `Photo ${photo.id}`;

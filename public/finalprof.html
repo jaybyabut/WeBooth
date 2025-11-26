@@ -272,7 +272,7 @@
     </nav>
     <main class="main-content" role="main">
       <header class="topbar">
-        <h1 class="greeting" aria-live="polite">Hi, <span id="username-display">Username</span>!</h1>
+        <h1 class="greeting" aria-live="polite">Hi, <span id="username-display">Loading...</span>!</h1>
         <div class="right-buttons">
           <button onclick="window.location.href='mainhome.html'">
             <img src="Icons/2.svg" alt="Booth icon" />
@@ -285,12 +285,11 @@
         </div>
       </header>
 
-      <!-- Profile info -->
       <section class="profile-info" aria-label="User profile info">
         <div class="profile-img" aria-hidden="true" id="profile-img"
           style="background-image: url('');"></div>
         <div class="profile-bio">
-          <strong id="profile-username">Username</strong>
+          <strong id="profile-username">Loading...</strong>
           <div>
             <span id="profile-bio-text">bio<br>0 photo</span>
           </div>
@@ -301,7 +300,6 @@
         </button>
       </section>
 
-      <!-- Edit Profile Modal -->
       <div class="modal-bg" id="edit-profile-modal" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title"
         tabindex="-1">
         <div class="modal edit-profile-modal" role="document" aria-labelledby="edit-profile-title" aria-describedby="edit-profile-description">
@@ -328,12 +326,10 @@
         </div>
       </div>
 
-      <!-- Upload Template Modal -->
       <div id="upload-template-modal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="upload-template-title" tabindex="-1">
         <div class="upload-template-modal">
           <button class="upload-close-btn" id="upload-close-btn" aria-label="Close upload modal">&times;</button>
           
-          <!-- Left side - Preview area (single photo only) -->
           <div class="upload-preview-side">
             <div class="preview-title">Preview</div>
             <div class="preview-image" id="template-preview">
@@ -341,11 +337,9 @@
             </div>
           </div>
 
-          <!-- Right side - Form controls -->
           <div class="upload-controls-side">
             <h2 class="modal-title" id="upload-template-title">Upload Template</h2>
 
-            <!-- Layout Section -->
             <div class="layout-section">
               <div class="section-heading">Layout</div>
               <div class="layout-options">
@@ -368,7 +362,6 @@
               </div>
             </div>
 
-            <!-- Upload Background -->
             <div class="upload-section">
               <div class="section-heading">Upload background image here</div>
               <label for="backgroundUpload" class="upload-box" tabindex="0" role="button">
@@ -377,7 +370,6 @@
               </label>
             </div>
 
-            <!-- Effects Section -->
             <div class="effects-section">
               <div class="section-heading">Effects</div>
               <div class="effects-grid">
@@ -390,7 +382,6 @@
               </div>
             </div>
 
-            <!-- Upload Stickers -->
             <div class="upload-section">
               <div class="section-heading">Upload sticker pack design here</div>
               <label for="stickersUpload" class="upload-box" tabindex="0" role="button">
@@ -399,21 +390,17 @@
               </label>
             </div>
 
-            <!-- Divider -->
             <div class="modal-divider"></div>
 
-            <!-- Share Toggle -->
             <div class="share-section">
               <input type="checkbox" id="shareToggle" class="toggle-input" />
               <label for="shareToggle">Share to community</label>
             </div>
 
-            <!-- Tags Input -->
             <div class="tags-section">
               <input type="text" id="tagsInput" class="tags-input" placeholder="Add #tags..." aria-label="Add #tags" />
             </div>
 
-            <!-- Publish Button -->
             <div class="publish-section">
               <button id="publishBtn" disabled>Publish</button>
             </div>
@@ -421,49 +408,39 @@
         </div>
       </div>
 
-      <!-- Photo Library Subnav -->
       <div class="subnav" role="tablist" aria-label="Main Content Tabs" id="photo-library-subnav">
         <button role="tab" aria-selected="true" class="active" id="tab-photolib-btn">Photo Library</button>
       </div>
 
-      <!-- Photo Library Section -->
       <section id="section-photolib" role="tabpanel" aria-labelledby="tab-photolib-btn" class="section active">
         <div class="photo-library-grid" aria-live="polite" aria-label="Photo Library Grid"></div>
       </section>
 
-      <!-- Favorites Section -->
       <section id="section-favorites" class="section" role="region" aria-label="Favorites Section">
         <h2>Favorites</h2>
         <div class="favorites-grid" aria-live="polite"></div>
       </section>
 
-      <!-- Activity Section -->
       <section id="section-activity" class="section" role="region" aria-label="Activity Log Section">
         <h2>Activity</h2>
         <div class="activity-container" aria-live="polite"></div>
       </section>
 
-      <!-- Templates Section -->
       <section id="section-templates" class="section" role="region" aria-label="Templates Section">
         <h2>Feed</h2>
         
-        <!-- Tab navigation -->
         <nav class="tabnav" role="tablist" aria-label="Templates Tabs">
           <button role="tab" aria-selected="true" class="active" id="tab-shared-btn">Shared to Community</button>
           <button role="tab" aria-selected="false" id="tab-mytemplates-btn">My Templates</button>
         </nav>
 
-        <!-- Shared Templates Grid - NOW VERTICAL DESIGN -->
         <section id="tab-shared" role="tabpanel" aria-labelledby="tab-shared-btn" style="display:block;">
           <div class="vertical-templates-container" aria-live="polite" aria-label="Shared templates grid">
-            <!-- Template cards will be generated here by JS -->
-          </div>
+            </div>
         </section>
 
-        <!-- My Templates Grid - VERTICAL DESIGN -->
         <section id="tab-mytemplates" role="tabpanel" aria-labelledby="tab-mytemplates-btn" style="display:none;">
           <div class="vertical-templates-container" aria-live="polite" aria-label="My templates grid">
-            <!-- Upload Your Template Card -->
             <div class="template-upload-card" tabindex="0" role="button" aria-label="Upload your template" 
               id="open-upload-modal-btn"
               onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); openUploadTemplateModal(); }">
@@ -476,12 +453,10 @@
     </main>
   </div>
 
-  <!-- Modal for Post + comments -->
   <div class="modal-bg" id="post-modal" role="dialog" aria-modal="true" aria-labelledby="modal-username" tabindex="-1">
     <div class="modal">
       <div class="modal-left" aria-label="Selected photo">
-        <!-- Single photo will be placed here -->
-      </div>
+        </div>
       <div class="modal-right">
         <div class="modal-header">
           <div class="username" id="modal-username"></div>
@@ -498,8 +473,37 @@
     </div>
   </div>
 
-  <script>
-    // Sample Template Data representing the images and card style
+  <script type="module">
+    // --- SDK IMPORTS ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // --- SUPABASE CONFIGURATION ---
+    const supabaseUrl = 'https://gnxwhyjuqgopzrfhhbwb.supabase.co';
+    const supabaseKey = 'sb_publishable_C5eAjvB394x_xkS184bxRw_0IBPaj16';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // --- FIREBASE SETUP AND AUTHENTICATION ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
+      authDomain: "photobooth-c42a9.firebaseapp.com",
+      projectId: "photobooth-c42a9",
+      storageBucket: "photobooth-c42a9.firebasestorage.app",
+      messagingSenderId: "994496567051",
+      appId: "1:994496567051:web:81d507ace1fbd2db77b40e",
+      measurementId: "G-4FHWWBR2BJ"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    setLogLevel('error'); 
+
+    let currentUserId = null;
+    let isAuthReady = false;
+
+    // --- APPLICATION STATE (From original HTML) ---
     const sharedTemplates = [
       {
         id: 1,
@@ -517,7 +521,7 @@
 
     const state = {
       user: {
-        username: 'Username',
+        username: 'Loading...', // Initial state set to Loading
         bio: 'bio',
         photoCount: 0,
         profileImg: ''
@@ -544,7 +548,112 @@
       myTemplates: []
     };
 
-    // UPLOAD TEMPLATE MODAL FUNCTIONALITY
+    /**
+     * Fetches the user's profile from the Supabase 'users' table or creates a default one.
+     * @param {string} userId - The Firebase Auth UID.
+     * @param {string} email - The user's email.
+     * @param {string | null} displayName - The user's display name from Firebase (e.g., Google login name).
+     */
+    async function fetchOrCreateProfile(userId, email, displayName) {
+      if (!userId) return;
+      console.log(`Fetching profile for user: ${userId} from Supabase 'users' table.`);
+
+      try {
+        // 1. Try to fetch the existing profile from the 'users' table
+        let { data: profileData, error } = await supabase
+          .from('users') 
+          .select('username, bio')
+          .eq('user_id', userId) // Assuming 'id' is the column that stores the Firebase UID (Primary Key)
+          .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is the code for 'No rows found' (expected for new users)
+          console.error("Supabase fetch error (not 404):", error);
+        }
+
+        if (profileData) {
+          // Profile exists: update state with fetched data
+          state.user.username = profileData.username || `User_${userId.substring(0, 4)}`;
+          state.user.bio = profileData.bio || 'Set your bio here.';
+          console.log("Profile found in Supabase 'users' table. Username:", state.user.username);
+        } else {
+          // Profile does not exist: create a new record
+          console.log("No profile found in Supabase 'users' table. Creating default.");
+          
+          // Use displayName (full name) as primary default, then email prefix, then fallback ID
+          const defaultUsername = displayName || (email ? email.split('@')[0] : `User_${userId.substring(0, 4)}`);
+          
+          const defaultProfile = {
+            id: userId, // CRITICAL: Supabase PK must match Auth ID
+            username: defaultUsername,
+            bio: 'Welcome to your new profile!',
+            created_at: new Date().toISOString()
+          };
+          
+          const { error: insertError } = await supabase
+            .from('users') // Updated to 'users' table
+            .insert([defaultProfile]);
+
+          if (insertError) {
+            console.error("Supabase insert error on 'users' table:", insertError);
+            state.user.username = defaultUsername; // Fallback to local default if insert fails
+            state.user.bio = defaultProfile.bio;
+          } else {
+            state.user.username = defaultUsername;
+            state.user.bio = defaultProfile.bio;
+          }
+        }
+      } catch (error) {
+        console.error("Unexpected Supabase operation error:", error);
+      }
+      updateUserUI();
+    }
+
+    /**
+     * Saves the current user state (username and bio) to Supabase 'users' table.
+     */
+    async function saveProfileChanges(newUsername, newBio) {
+      if (!currentUserId) {
+        console.error("Cannot save profile: User not authenticated.");
+        return;
+      }
+      const updateData = {
+        username: newUsername,
+        bio: newBio,
+        updated_at: new Date().toISOString()
+      };
+      try {
+        const { error } = await supabase
+          .from('users')
+          .update(updateData)
+          .eq('id', currentUserId); // Match the Supabase row ID to the Firebase Auth ID
+
+        if (error) {
+          console.error("Error saving profile changes to Supabase 'users' table:", error);
+        } else {
+          console.log("Profile successfully updated in Supabase 'users' table.");
+          addActivity('Profile information saved.');
+        }
+      } catch (error) {
+        console.error("Unexpected Supabase save error:", error);
+      }
+    }
+
+    // Handle authentication state and profile loading
+    onAuthStateChanged(auth, (user) => {
+      isAuthReady = true;
+      if (user) {
+        currentUserId = user.uid;
+        // PASS email and displayName for profile lookup/creation
+        fetchOrCreateProfile(user.uid, user.email, user.displayName);
+      } else {
+        // User is signed out. Redirect to login
+        currentUserId = null;
+        console.log("User signed out. Redirecting to login.html...");
+        window.location.href = 'login.html'; 
+      }
+    });
+
+    // UPLOAD TEMPLATE MODAL FUNCTIONALITY (Original code follows)
     const uploadModal = document.getElementById('upload-template-modal');
     const openUploadModalBtn = document.getElementById('open-upload-modal-btn');
     const uploadCloseBtn = document.getElementById('upload-close-btn');
@@ -926,7 +1035,7 @@
         `<br>${state.user.photoCount} photo${state.user.photoCount !== 1 ? "s" : ""}`;
       document.getElementById('profile-img').style.backgroundImage = `url('${state.user.profileImg}')`;
     }
-    updateUserUI();
+    // updateUserUI(); // Initial call moved to onAuthStateChanged completion
 
     // Render photo library grid
     const photoLibraryGrid = document.querySelector('.photo-library-grid');
@@ -1470,7 +1579,12 @@
     sidebarButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.dataset.target === 'logout') {
-          alert('Logging out...');
+          signOut(auth).then(() => {
+            console.log("User logged out successfully.");
+            window.location.href = 'login.html';
+          }).catch((error) => {
+            console.error("Logout failed:", error);
+          });
           return;
         }
         
@@ -1612,7 +1726,7 @@
     });
 
     // Handle edit profile form submission
-    editProfileForm.addEventListener('submit', (e) => {
+    editProfileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const newUsername = editUsernameInput.value.trim();
       const newBio = editBioInput.value.trim();
@@ -1621,6 +1735,10 @@
         editUsernameInput.focus();
         return;
       }
+      
+      // Save changes to Supabase
+      await saveProfileChanges(newUsername, newBio);
+
       // Update state and UI
       state.user.username = newUsername;
       state.user.bio = newBio;

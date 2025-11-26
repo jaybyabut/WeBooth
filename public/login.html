@@ -4,7 +4,140 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login Form</title>
+  <script type="module" src="auth-check.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Roboto&display=swap" rel="stylesheet" />
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script type="module">
+    // --- FIREBASE AND SUPABASE IMPORTS (Using ES Modules for Firebase SDK) ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { 
+        getAuth, 
+        signInWithEmailAndPassword, 
+        signInWithPopup, 
+        GoogleAuthProvider, 
+        FacebookAuthProvider 
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    // --- CONFIGURATION ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
+      authDomain: "photobooth-c42a9.firebaseapp.com",
+      projectId: "photobooth-c42a9",
+      storageBucket: "photobooth-c42a9.firebasestorage.app",
+      messagingSenderId: "994496567051",
+      appId: "1:994496567051:web:81d507ace1fbd2db77b40e",
+      measurementId: "G-4FHWWBR2BJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const supabaseUrl = 'https://gnxwhyjuqgopzrfhhbwb.supabase.co';
+    const supabaseKey = 'sb_publishable_C5eAjvB394x_xkS184bxRw_0IBPaj16'; 
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+
+    // --- 1. Traditional Email/Password Login Handler ---
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const errorMessageElement = document.getElementById('error-message'); 
+
+    // Helper function to display the error text
+    function displayError(message) {
+        if (message) {
+            // Display the generic error message
+            errorMessageElement.textContent = 'Login details are incorrect. Please try again.';
+            // Make it visible
+            errorMessageElement.style.opacity = '1'; 
+        } else {
+            // Clear the text content
+            errorMessageElement.textContent = ''; 
+            // Make it transparent/hidden
+            errorMessageElement.style.opacity = '0'; 
+        }
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value;
+      const password = passwordInput.value;
+
+      // Clear any previous error before attempting login (fades out)
+      displayError(null); 
+
+      try {
+        // 1. Firebase Login
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        console.log('User logged in with Firebase:', user);
+        
+        // ONLY REDIRECT IF LOGIN IS SUCCESSFUL
+        window.location.href = 'mainhome.html'; 
+
+      } catch (error) {
+        console.error('Error logging in:', error);
+        
+        // Display the user-friendly error message (fades in)
+        displayError(error.message); 
+      }
+    });
+
+
+    // --- 2. SOCIAL LOGIN LOGIC ---
+
+    /**
+     * Handles the Firebase sign-in process for social providers (Google/Facebook).
+     * @param {GoogleAuthProvider | FacebookAuthProvider} provider - The Firebase provider object.
+     */
+    async function socialSignIn(provider) {
+      // Clear any previous error
+      displayError(null); 
+      
+      try {
+        // 1. Firebase Sign In via Popup
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        console.log(`User signed in with ${provider.providerId}:`, user);
+        
+        // ONLY REDIRECT IF LOGIN IS SUCCESSFUL
+        window.location.href = 'mainhome.html'; 
+
+      } catch (error) {
+        // Handle errors and DO NOT REDIRECT
+        console.error('Error with social login:', error);
+        
+        // Display the user-friendly error message
+        if (error.code && error.code !== 'auth/popup-closed-by-user') {
+             displayError(error.message);
+        } else {
+             // Use alert for immediate feedback on popup issues
+             alert('Social login failed: ' + error.message);
+        }
+      }
+    }
+
+    // Event Listener for Google Button
+    document.querySelector('.social-icons .google').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const provider = new GoogleAuthProvider();
+      await socialSignIn(provider);
+    });
+
+    // Event Listener for Facebook Button
+    document.querySelector('.social-icons .facebook').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const provider = new FacebookAuthProvider();
+      await socialSignIn(provider);
+    });
+  </script>
+
   <style>
     * {
     box-sizing: border-box;
@@ -198,16 +331,18 @@
   <div class="container">
     <div class="login-form">
       <h2>Login</h2>
-      <form>
+      <form id="loginForm">
         <div class="input-text">
-          <input type="text" required />
-          <label>Username or Email</label>
+          <input type="email" id="email" required /> 
+          <label>Email</label>
         </div>
         <div class="input-text">
-          <input type="password" required />
+          <input type="password" id="password" required /> 
           <label>Password</label>
         </div>
-        <a href="mainhome.html"><button type="button">login</button></a>
+        <div id="error-message" style="color: red; padding: 5px 10px; border-radius: 5px; font-size: 0.85rem; text-align: center; margin-bottom: 15px; margin-left: 40px; width: 80%; opacity: 0; transition: opacity 0.5s ease;"></div>
+        
+        <button type="submit">Login</button>
       </form>
       <div class="login-links">
         <a href="signin.html">Create an account</a>

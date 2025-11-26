@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Sign Up Form</title>
     <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="auth-check.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -22,7 +23,13 @@
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
       const firebaseConfig = {
-        //api key
+        apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
+        authDomain: "photobooth-c42a9.firebaseapp.com",
+        projectId: "photobooth-c42a9",
+        storageBucket: "photobooth-c42a9.firebasestorage.app",
+        messagingSenderId: "994496567051",
+        appId: "1:994496567051:web:81d507ace1fbd2db77b40e",
+        measurementId: "G-4FHWWBR2BJ"
       };
 
       const app = initializeApp(firebaseConfig);
@@ -41,7 +48,8 @@
               username: username, 
               email: email, 
               profile_img_url: null,
-              provider: 'firebase' 
+              provider: 'firebase',
+              role: 'user'
             }
           ]);
 

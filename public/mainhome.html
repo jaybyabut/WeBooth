@@ -4,292 +4,324 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WeBooth - Ready to Snap</title>
+    <script type="module" src="auth-check.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Fredoka+One&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="styles.css">
+
     <style>
-        body {
-            background: radial-gradient(circle, #d4e893 40%, #feefff 60%);
-            font-family: 'Inter', 'DM Sans', sans-serif, 'Fredoka One', cursive;
-            min-height: 100vh;
-        }
+/*
+/*
+ * This file contains the custom CSS from the original <style> block.
+ * Tailwind CSS utilities (like flex, p-4, md:p-8, etc.) remain in the HTML.
+ */
 
-        .font-fredoka {
-            font-family: 'Fredoka One', cursive;
-        }
+body {
+    background: radial-gradient(circle, #d4e893 40%, #feefff 60%);
+    font-family: 'Inter', 'DM Sans', sans-serif, 'Fredoka One', cursive;
+    min-height: 100vh;
+}
 
-        .text-brand-pink {
-            color: #c32d6c;
-        }
+.font-fredoka {
+    font-family: 'Fredoka One', cursive;
+}
 
-        .nav-button {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background-color: #fff;
-            color: #c32d6c;
-            border: 2px solid #dd3d93;
-            box-shadow: none;
-            border-radius: 0.75rem;
-            padding: 0.5rem 1.25rem;
-            font-weight: 500;
-            transition: all 0.2s ease-in-out;
-            text-decoration: none;
-        }
+.text-brand-pink {
+    color: #c32d6c;
+}
 
-        .nav-button:hover {
-            transform: translateY(-2px);
-            background-color: #dd3d93;
-            color: white;
-            border-color: #dd3d93;
-            box-shadow: 0 10px 15px -3px rgba(221, 61, 147, 0.6), 0 4px 6px -4px rgba(221, 61, 147, 0.3);
-        }
+ .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
 
-        .nav-button:active {
-            transform: scale(0.95);
-            opacity: 0.9;
-        }
+    .topbar h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 40px;
+      font-weight: 900;
+      color: #d23481;
+      margin: 0;
+      letter-spacing: -1px;
+    }
 
-        .nav-button img {
-            width: 1.25rem;
-            height: 1.25rem;
-            margin-right: 0.5rem;
-            transition: filter 0.2s ease-in-out;
-            filter: none;
-        }
+    .right-buttons {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
 
-        .nav-button:hover img {
-            filter: brightness(0) invert(1);
-        }
+    .right-buttons button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border: 2px solid #d23481;
+      background-color: #fff;
+      color: #d23481;
+      transition: background-color 0.3s, color 0.3s;
+    }
 
-        .active-nav-button {
-            background-color: #dd3d93;
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(221, 61, 147, 0.4), 0 2px 4px -2px rgba(221, 61, 147, 0.2);
-            border-color: #dd3d93;
-        }
+    .right-buttons button img {
+      width: 28px;
+      height: 28px;
+    }
 
-        .active-nav-button img {
-            filter: brightness(0) invert(1);
-        }
-
-        .active-nav-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(221, 61, 147, 0.6), 0 4px 6px -4px rgba(221, 61, 147, 0.3);
-        }
-
-        .active-nav-button:active {
-            transform: scale(0.95);
-            opacity: 0.9;
-        }
-
-        .card {
-            background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 10px rgba(221, 61, 147, 0.05);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .control-button {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            background-color: #f4efe6;
-            border: 1px solid #f9d7e2;
-            border-radius: 0.75rem;
-            padding: 0.75rem 1rem;
-            font-weight: 500;
-            text-align: left;
-            transition: all 0.2s ease;
-        }
-
-        .control-button:hover {
-            background-color: #f4efe6;
-            border-color: #f9d7e2;
-        }
-
-        .control-button:active {
-            transform: scale(0.98);
-            background-color: #f3f4f6;
-        }
-
-        .control-button img {
-            width: 1.5rem;
-            height: 1.5rem;
-            margin-right: 0.5rem;
-        }
-
-        .effect-button {
-            background-color: #f4efe6;
-            border: 1px solid #f9d7e2;
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            font-weight: 500;
-            text-align: center;
-            transition: all 0.2s ease;
-        }
-        /* --- NEW: Hover effect for inactive effect buttons --- */
-        .effect-button:hover:not(.active) {
-            background-color: #fee2e2; /* Light red/pinkish background */
-            border-color: #fca5a5; /* Slightly darker border */
-            color: #ef4444; /* Reddish text */
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(252, 165, 165, 0.3), 0 2px 4px -2px rgba(252, 165, 165, 0.2);
-        }
-
-        .effect-button.active {
-            background-color: #ec4899;
-            color: white;
-            border-color: #ec4899;
-        }
-        /* --- Hover effect for the active effect button --- */
-        .effect-button.active:hover {
-            background-color: #db2777; /* Darker pink for hover */
-            border-color: #db2777;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.4), 0 2px 4px -2px rgba(236, 72, 153, 0.2);
-        }
+    .right-buttons button:hover,
+    .admin-btn {
+      background-color: #d23481;
+      color: #fff;
+      border: 2px solid #d23481;
+    }
 
 
-        .effect-button:active:not(.active) {
-            transform: scale(0.95);
-            background-color: #fecaca; /* Even lighter red/pink for active press */
-            border-color: #ef4444;
-            color: #ef4444;
-        }
+/* Card Container Styles (Camera, Layout, Effects) */
+.card {
+    background-color: #f4efe6; 
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(221, 61, 147, 0.15); 
+    backdrop-filter: blur(5px);
+    border: 1px solid #f9d7e2; 
+}
 
-        .effect-button.active:active {
-            transform: scale(0.95);
-            background-color: #a21257; /* Even darker pink for active press */
-            border-color: #a21257;
-        }
+/* New style for the transparent camera preview card */
+.transparent-card {
+    background-color: transparent; /* Makes the card transparent */
+    box-shadow: none; /* Removes the shadow */
+    border: none; /* Removes the border */
+    backdrop-filter: none; /* Removes the blur */
+}
 
-        .icon-fallback {
-            width: 1.25rem;
-            height: 1.25rem;
-            background-color: #cbd5e1;
-            color: #475569;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.75rem;
-            margin-right: 0.5rem;
-        }
+/* Settings Control Buttons (Camera, Layout inputs) */
+.control-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    /* Retaining the original background here for consistency */
+    background-color: #f4efe6; 
+    border: 1px solid #f9d7e2;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    text-align: left;
+    transition: all 0.2s ease;
+    position: relative;
+}
 
-        .control-button .icon-fallback {
-            width: 1.5rem;
-            height: 1.5rem;
-            font-size: 0.875rem;
-        }
+.control-button:hover {
+    background-color: #e8e3dc; /* Slight dark hover */
+    border-color: #f9d7e2;
+}
 
-        /* --- STYLES FOR FILTERS --- */
-        #camera-preview {
-            transition: filter 0.3s ease-in-out, transform 0.4s ease;
-        }
+.control-button:active {
+    transform: scale(0.98);
+    background-color: #e8e3dc;
+}
 
-        /* --- NEW: ADDED STYLE FOR CAMERA FLIP --- */
-        .preview-flipped {
-            transform: scaleX(-1);
-        }
+.control-button img {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.5rem;
+}
 
-        .filter-none { filter: none; }
-        .filter-bw { filter: grayscale(100%); }
-        .filter-warm { filter: sepia(70%); }
-        .filter-cool { filter: contrast(1.1) brightness(1.1) saturate(1.3) hue-rotate(-15deg); }
-        .filter-retro { filter: sepia(100%) brightness(0.9) contrast(1.1); }
-        .filter-noir { filter: grayscale(100%) contrast(1.2) brightness(0.8); }
+/* Effect Selection Buttons */
+.effect-button {
+    background-color: #fff; /* Changed to pure white for better contrast inside the card */
+    border: 1px solid #f9d7e2;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.2s ease;
+}
 
-        .action-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px; /* Ito yung "pill" shape */
-            font-size: 1.125rem;
-            font-weight: 700;
-            box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
-            
-            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
-            color: white;
-            
-            cursor: pointer;
-            margin-bottom: 15px;
-            transition: background 0.3s ease;
-            text-decoration: none;
-            border: none;
-        }
-        .action-button:hover {
-            background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);
-        }
-        .action-button:active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
-    </style>
+/* Effect Button Hover State (Inactive) */
+.effect-button:hover:not(.active) {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+    color: #ef4444;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(252, 165, 165, 0.3), 0 2px 4px -2px rgba(252, 165, 165, 0.2);
+}
+
+/* Effect Button Active State */
+.effect-button.active {
+    background-color: #ec4899;
+    color: white;
+    border-color: #ec4899;
+}
+
+.effect-button.active:hover {
+    background-color: #db2777;
+    border-color: #db2777;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.4), 0 2px 4px -2px rgba(236, 72, 153, 0.2);
+}
+
+.effect-button:active:not(.active) {
+    transform: scale(0.95);
+    background-color: #fecaca;
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.effect-button.active:active {
+    transform: scale(0.95);
+    background-color: #a21257;
+    border-color: #a21257;
+}
+
+/* Fallback styling for missing icons */
+.icon-fallback {
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: #cbd5e1;
+    color: #475569;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+}
+
+.control-button .icon-fallback {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.875rem;
+}
+
+/* Camera Preview and CSS Filters */
+#camera-preview {
+    transition: filter 0.3s ease-in-out, transform 0.4s ease;
+}
+
+.preview-flipped {
+    transform: scaleX(-1);
+}
+
+.filter-none { filter: none; }
+.filter-bw { filter: grayscale(100%); }
+.filter-warm { filter: sepia(70%); }
+.filter-cool { filter: contrast(1.1) brightness(1.1) saturate(1.3) hue-rotate(-15deg); }
+.filter-retro { filter: sepia(100%) brightness(0.9) contrast(1.1); }
+.filter-noir { filter: grayscale(100%) contrast(1.2) brightness(0.8); }
+
+/* Main Action Buttons (Start/Upload) */
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+    background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+    color: white;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: background 0.3s ease;
+    text-decoration: none;
+    border: none;
+}
+
+.action-button:hover {
+    background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);
+}
+
+.action-button:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+/* Consolidated utility class for select arrow icon */
+.select-icon-arrow {
+    position: absolute; /* absolute */
+    right: 1rem; /* right-4 */
+    top: 50%; /* top-1/2 */
+    transform: translateY(-50%); /* transform -translate-y-1/2 */
+    width: 1.25rem; /* w-5 (assuming 1rem = 4 units, 1.25rem = 5 units) */
+    height: 1.25rem; /* h-5 */
+    color: #9ca3af; /* text-gray-400 */
+    pointer-events: none;
+    z-index: 10;
+}
+</style>
+
 </head>
 <body class="text-gray-800 min-h-screen flex flex-col">
 
     <div class="max-w-7xl mx-auto w-full flex-grow flex flex-col justify-center p-4 md:p-8">
+
         <header class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
             <div class="flex items-center">
                 <img src="Icons/11.svg" alt="WeBooth Logo"
                      class="w-12 h-12 md:w-16 md:h-16 mr-3"
                      onerror="this.outerHTML = '<div class=\'icon-fallback p-2 text-xl\'>W</div>'">
-                
+
                 <h1 class="text-2xl md:text-3xl text-brand-pink leading-tight font-fredoka">
                     WeBooth is Ready<br>to Snap
                 </h1>
             </div>
 
-            <nav class="flex items-center gap-3">
-                <button class="nav-button active-nav-button">
-                    <img src="Icons/2.svg" alt="Booth"
-                         onerror="this.outerHTML = '<div class=\'icon-fallback\'>B</div>'">
-                    Booth
-                </button>
-                
-                <button class="nav-button">
-                    <img src="Icons/4.svg" alt="Profile"
-                         onerror="this.outerHTML = '<div class=\'icon-fallback\'>P</div>'">
-                    Profile
-                </button>
-            </nav>
+            <header class="topbar">
+        <div class="right-buttons">
+          <button onclick="window.location.href='booth.html'">
+            <img src="Icons/2.svg" alt="Booth icon" />
+            Booth
+          </button>
+          <button onclick="window.location.href='finalprof.html'">
+            <img src="Icons/4.svg" alt="Profile icon" />
+            Profile
+          </button>
+        </div>
+      </header>
+
         </header>
 
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             <div class="lg:col-span-1 flex flex-col gap-6">
+
                 <section class="card">
                     <h2 class="text-2xl font-bold mb-4">Camera</h2>
                     <div class="grid grid-cols-2 gap-4">
+
                         <button id="switch-camera-btn" class="control-button">
                             <img src="Icons/2.svg" alt="Switch Camera"
                                  class="w-6 h-6 mr-2"
                                  onerror="this.outerHTML = '<div class=\'icon-fallback\'>SC</div>'">
                             <span class="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
-                                Switch Camera
+                                Mirror
                             </span>
                         </button>
-                        
-                        <div class="control-button">
-                            <label for="timer-select" class="cursor-pointer">
+
+                        <div class="control-button relative items-center">
+                            <label for="timer-select" class="cursor-pointer z-10">
                                 <img src="Icons/1.svg" alt="Timer"
-                                     class="w-6 h-6 mr-2"
-                                     onerror="this.outerHTML = '<div class=\'icon-fallback\'>T</div>'">
+                                      class="w-6 h-6 mr-2"
+                                      onerror="this.outerHTML = '<div class=\'icon-fallback\'>T</div>'">
                             </label>
-                            <select id="timer-select" class="flex-1 bg-transparent appearance-none w-full outline-none p-0 m-0 border-0 cursor-pointer">
+
+                            <select id="timer-select" class="appearance-none bg-transparent border-none w-full h-full py-1 outline-none cursor-pointer text-gray-800 z-20 pr-8">
                                 <option value="">Timer</option>
                                 <option value="3">3 Seconds</option>
                                 <option value="10">10 Seconds</option>
                             </select>
-                            <svg class="w-5 h-5 text-gray-400 ml-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+
+                            <svg class="select-icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </div>
                     </div>
@@ -298,38 +330,39 @@
                 <section class="card">
                     <h2 class="text-2xl font-bold mb-4">Layout</h2>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="control-button">
-                            <label for="frame-select" class="cursor-pointer">
+
+                        <div class="control-button relative items-center">
+                            <label for="frame-select" class="cursor-pointer z-10">
                                 <img src="Icons/6.svg" alt="Frame Size"
-                                     class="w-6 h-6 mr-2"
-                                     onerror="this.outerHTML = '<div class=\'icon-fallback\'>FS</div>'">
+                                      class="w-6 h-6 mr-2"
+                                      onerror="this.outerHTML = '<div class=\'icon-fallback\'>FS</div>'">
                             </label>
-                            <select id="frame-select" class="flex-1 bg-transparent appearance-none w-full outline-none p-0 m-0 border-0 cursor-pointer">
+                            <select id="frame-select" class="appearance-none bg-transparent border-none w-full h-full py-1 outline-none cursor-pointer text-gray-800 z-20 pr-8">
                                 <option value="">Frame Size</option>
                                 <option value="2 x 6">2 x 6 inches</option>
                                 <option value="4 x 6">4 x 6 inches</option>
                             </select>
-                            <svg class="w-5 h-5 text-gray-400 ml-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            <svg class="select-icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        
-                        <div class="control-button">
-                            <label for="shots-select" class="cursor-pointer">
+
+                        <div class="control-button relative items-center">
+                            <label for="shots-select" class="cursor-pointer z-10">
                                 <img src="Icons/7.svg" alt="Shots"
-                                     class="w-6 h-6 mr-2"
-                                     onerror="this.outerHTML = '<div class=\'icon-fallback\'>S</div>'">
+                                      class="w-6 h-6 mr-2"
+                                      onerror="this.outerHTML = '<div class=\'icon-fallback\'>S</div>'">
                             </label>
-                            <select id="shots-select" class="flex-1 bg-transparent appearance-none w-full outline-none p-0 m-0 border-0 cursor-pointer">
+                            <select id="shots-select" class="appearance-none bg-transparent border-none w-full h-full py-1 outline-none cursor-pointer text-gray-800 z-20 pr-8">
                                 <option value="">Shots</option>
                                 <option value="1">1 Shot</option>
                                 <option value="2">2 Shots</option>
                                 <option value="3">3 Shots</option>
                                 <option value="4">4 Shots</option>
                             </select>
-                            <svg class="w-5 h-5 text-gray-400 ml-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </Vsvg>
+                            <svg class="select-icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
                         </div>
                     </div>
                 </section>
@@ -347,190 +380,459 @@
                 </section>
             </div>
 
-            <div class="lg:col-span-2 flex flex-col items-center">
-                <div id="camera-preview" class="w-full h-[200px] md:h-[400px] bg-gradient-to-b from-white-200 to-white-200 rounded-2xl flex items-center justify-center border-4 border-white shadow-xl mb-6">
-                    <div class="text-white text-2xl font-bold bg-black/30 p-4 rounded-xl">
-                        Camera Preview
-                    </div>
-                </div>
+<div class="lg:col-span-2">
+    <section class="card transparent-card">
+        <video id="camera-preview" class="w-full h-[500px] md:h-[425px] bg-gradient-to-b from-white-200 to-white-200 rounded-2xl border-4 border-white shadow-xl mb-6" autoplay muted playsinline>
+            Your browser does not support the video tag.
+        </video>
 
-                <div class="flex items-center gap-6">
-                    
-                    <button id="start-btn" class="action-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <circle cx="12" cy="13" r="3" />
-                        </svg>
-                        START
-                    </button>
-                    <button id="upload-btn" type="button" class="action-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        UPLOAD
-                    </button>
-                    <input type="file" id="file-input" accept="image/*" class="hidden">
+        <div class="flex items-center justify-center gap-6">
+    <button id="start-btn" class="action-button">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <circle cx="12" cy="13" r="3" />
+        </svg>
+        START
+    </button>
+    <button id="upload-btn" type="button" class="action-button">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        UPLOAD
+    </button>
+    <input type="file" id="file-input" accept="image/*" class="hidden">
+</div>
+    </section>
+</div>
 
-                </div>
-                 </div>
+             </div>
 
         </main>
     </div>
 
-    <script>
-     document.addEventListener('DOMContentLoaded', () => {
-        
-        // --- Effects Filter Logic (Existing) ---
-        const cameraPreview = document.getElementById('camera-preview');
-        const allFilterClasses = [
-            'filter-none', 'filter-bw', 'filter-warm',
-            'filter-cool', 'filter-retro', 'filter-noir'
-        ];
-        const effectButtons = document.querySelectorAll('.effect-button');
-        
-        effectButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                
-                effectButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
 
-                const newFilter = button.dataset.filter;
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // -------------------------------------------
+    // INITIAL SETUP & RETAKE CHECK
+    // -------------------------------------------
+    const urlParams = new URLSearchParams(window.location.search);
+    const retakeIndex = urlParams.get('retake');
+    let existingImages = [];
 
-                if (cameraPreview) {
-                    cameraPreview.classList.remove(...allFilterClasses);
-                    cameraPreview.classList.add(newFilter);
-                }
-            });
-        });
-
-        
-        // --- SWITCH CAMERA LOGIC (Existing) ---
-        const switchCameraButton = document.getElementById('switch-camera-btn');
-        
-        if (switchCameraButton && cameraPreview) {
-            switchCameraButton.addEventListener('click', () => {
-                cameraPreview.classList.toggle('preview-flipped');
-            });
+    // If retake mode is active, load the existing array of images
+    if (retakeIndex !== null) {
+        try {
+            const imagesJson = sessionStorage.getItem('capturedImagesArray');
+            if (imagesJson) {
+                existingImages = JSON.parse(imagesJson);
+            }
+        } catch (e) {
+            console.error("Failed to load existing captured images for retake:", e);
         }
         
+        // Update UI to reflect retake mode
+        const retakeShotNumber = parseInt(retakeIndex) + 1;
+        const mainTitle = document.querySelector('h1.font-fredoka');
+        if (mainTitle) {
+            mainTitle.innerHTML = `Retaking Shot ${retakeShotNumber}<br>Ready to Snap`;
+        }
+        document.getElementById('upload-btn').disabled = true;
+        document.getElementById('upload-btn').textContent = 'DISABLED';
+        document.getElementById('shots-select').disabled = true;
+        document.getElementById('frame-select').disabled = true;
         
-        // ======================================================
-        // --- NEW SCRIPT FOR SAVING SETTINGS AND REDIRECTING ---
-        // ======================================================
+        // Show only the timer selection, as only one shot will be taken
+        console.log(`RETAKE MODE: Preparing to capture and replace index ${retakeIndex}`);
+    }
 
-        // 1. Get all control elements
-        const startButton = document.getElementById('start-btn');
-        const uploadButton = document.getElementById('upload-btn');
-        const fileInput = document.getElementById('file-input');
-        const frameSelect = document.getElementById('frame-select');
-        const shotsSelect = document.getElementById('shots-select');
-        const timerSelect = document.getElementById('timer-select');
 
-        // 2. Add click listener to the START button
-        if (startButton) {
-            startButton.addEventListener('click', () => {
-                // Get the selected values
-                const frameSize = frameSelect.value;
-                const numShots = shotsSelect.value;
+    // -------------------------------------------
+    // UI Interaction: Apply Visual Effects (UNCHANGED)
+    // -------------------------------------------
+    const cameraPreview = document.getElementById('camera-preview');
+    const allFilterClasses = [
+        'filter-none', 'filter-bw', 'filter-warm',
+        'filter-cool', 'filter-retro', 'filter-noir'
+    ];
+    const effectButtons = document.querySelectorAll('.effect-button');
 
-                // --- Validation Check ---
-                if (frameSize === "" || numShots === "") {
-                    alert('Please select a "Frame Size" and "Shots" before starting.');
-                    return; // Stop the function
+    effectButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            effectButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            const newFilter = button.dataset.filter;
+            if (cameraPreview) {
+                cameraPreview.classList.remove(...allFilterClasses);
+                cameraPreview.classList.add(newFilter);
+            }
+        });
+    });
+
+    // -------------------------------------------
+    // Core Logic: Settings & Navigation (UPDATED)
+    // -------------------------------------------
+    const startButton = document.getElementById('start-btn');
+    const uploadButton = document.getElementById('upload-btn');
+    const fileInput = document.getElementById('file-input');
+    const frameSelect = document.getElementById('frame-select');
+    const shotsSelect = document.getElementById('shots-select');
+    const timerSelect = document.getElementById('timer-select');
+
+    // Function to capture photo from video (FIXED FOR MIRRORING)
+    function capturePhoto() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = cameraPreview.videoWidth;
+        canvas.height = cameraPreview.videoHeight;
+        
+        if (canvas.width === 0 || canvas.height === 0) {
+            throw new Error("Video stream dimensions are zero. Cannot capture.");
+        }
+        
+        // CRITICAL FIX: Check if the preview was flipped (i.e., mirrored for the user)
+        const isMirrored = cameraPreview.classList.contains('preview-flipped');
+        
+        ctx.save(); // Save the current canvas state
+
+        if (isMirrored) {
+            // Apply horizontal flip transformation for the capture
+            // We translate to the right edge and scale by -1
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+        }
+        
+        // Draw the current video frame onto the canvas
+        ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+        
+        ctx.restore(); // Restore the canvas state (clears the flip)
+
+        // Using JPEG with 80% quality to reduce file size and improve stability for multi-shot
+        return canvas.toDataURL('image/jpeg', 0.8); 
+    }
+
+    // Function to show countdown overlay and delay
+    function showCountdown(seconds) {
+        return new Promise(resolve => {
+            if (seconds <= 0) {
+                resolve();
+                return;
+            }
+
+            const overlay = document.createElement('div');
+            overlay.id = 'countdown-overlay';
+            overlay.style.position = 'absolute';
+            overlay.style.top = '50%';
+            overlay.style.left = '50%';
+            overlay.style.transform = 'translate(-50%, -50%)';
+            overlay.style.fontSize = '5rem';
+            overlay.style.fontWeight = 'bold';
+            overlay.style.color = 'white';
+            overlay.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+            overlay.style.zIndex = '10';
+            overlay.style.pointerEvents = 'none';
+            cameraPreview.parentElement.style.position = 'relative'; 
+            cameraPreview.parentElement.appendChild(overlay);
+
+            let count = seconds;
+            overlay.textContent = count;
+
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    overlay.textContent = count;
+                } else {
+                    clearInterval(interval);
+                    overlay.remove();
+                    resolve();
                 }
+            }, 1000);
+        });
+    }
 
-                // Get the rest of the values
-                const timerDuration = timerSelect.value;
+    // --- MAIN CAPTURE SEQUENCE LOGIC (HANDLES BOTH INITIAL AND RETAKE) ---
+    async function startCaptureSequence(frameSize, numShots, timerDuration) {
+        
+        // Determine the number of shots to take based on mode
+        const shotsToTake = (retakeIndex !== null) ? 1 : numShots;
+        
+        const capturedImages = (retakeIndex !== null) ? existingImages : [];
+        let completedSuccessfully = true;
+
+        startButton.disabled = true;
+        uploadButton.disabled = true;
+
+        try {
+            for (let i = 0; i < shotsToTake; i++) {
+                try {
+                    // Retake mode only runs once (i=0) and replaces the selected index
+                    const currentShotNumber = (retakeIndex !== null) ? (parseInt(retakeIndex) + 1) : (i + 1);
+                    const totalShots = (retakeIndex !== null) ? existingImages.length : numShots;
+                    
+                    startButton.textContent = `Shot ${currentShotNumber}/${totalShots} - Counting Down...`;
+                    
+                    await showCountdown(timerDuration); 
+
+                    // Ensure video is ready
+                    if (cameraPreview.readyState < 2) {
+                        await new Promise(resolve => {
+                            const checkReady = () => {
+                                if (cameraPreview.readyState >= 2) {
+                                    resolve();
+                                } else {
+                                    setTimeout(checkReady, 100);
+                                }
+                            };
+                            checkReady();
+                        });
+                    }
+
+                    // Capture the photo
+                    const imageDataUrl = capturePhoto();
+                    
+                    if (retakeIndex !== null) {
+                        // RETAKE MODE: Replace the specific index
+                        const index = parseInt(retakeIndex);
+                        capturedImages[index] = imageDataUrl;
+                    } else {
+                        // INITIAL MODE: Push to the end of the array
+                        capturedImages.push(imageDataUrl);
+                    }
+                    
+                    startButton.textContent = `Shot ${currentShotNumber}/${totalShots} Captured!`;
+                    
+                    // CRITICAL STABILITY FIX: Add a brief pause after capture
+                    await new Promise(r => setTimeout(r, 100)); 
+
+                    // Wait 500ms before starting the next shot countdown (if there is one in initial mode)
+                    if (retakeIndex === null && i < numShots - 1) {
+                         await new Promise(r => setTimeout(r, 500)); 
+                    }
+
+                } catch (shotError) {
+                    console.error(`Error capturing Shot ${i + 1}:`, shotError);
+                    alert(`Failed to capture Shot ${i + 1}. Stopping sequence. Please check camera stream/permissions.`);
+                    completedSuccessfully = false;
+                    break; 
+                }
+            }
+        } catch (sequenceError) {
+            console.error('Error during capture sequence setup:', sequenceError);
+            completedSuccessfully = false;
+        } finally {
+            startButton.disabled = false;
+            uploadButton.disabled = false;
+            startButton.textContent = 'START';
+        }
+
+        if (completedSuccessfully && capturedImages.length > 0) {
+            // Save settings (use the total number of shots, even in retake mode)
+            localStorage.clear();
+            localStorage.setItem('frameSize', frameSize.replace(/ /g, ''));
+            localStorage.setItem('numShots', capturedImages.length); 
+            localStorage.setItem('captureMode', 'camera');
+            const activeButton = document.querySelector('.effect-button.active');
+            const activeFilter = activeButton ? activeButton.dataset.filter : 'filter-none';
+            localStorage.setItem('activeFilter', activeFilter);
+            
+            sessionStorage.clear();
+            sessionStorage.setItem('capturedImagesArray', JSON.stringify(capturedImages));
+            
+            console.log(`Successfully completed capture sequence. Redirecting.`);
+            
+            // Perform the redirect to the review page
+            window.location.href = 'reviewshots.html';
+            
+        } else if (completedSuccessfully && capturedImages.length === 0) {
+             alert('Sequence finished, but no photos were captured. Please check camera permissions and try again.');
+        }
+    }
+
+
+    // Handle 'Start' Button: Start multi-shot/retake capture sequence
+    if (startButton) {
+        startButton.addEventListener('click', () => {
+            const frameSize = frameSelect.value;
+            // In retake mode, numShots is determined by the existing array length, 
+            // but we still need a valid selection for non-retake mode.
+            const numShots = parseInt(shotsSelect.value) || 0; 
+            const timerDuration = parseInt(timerSelect.value) || 0; 
+
+            // Validate required fields only if NOT in retake mode
+            if (retakeIndex === null) {
+                if (frameSize === "" || numShots === 0) {
+                    alert('Please select a "Frame Size" and "Shots" before starting.');
+                    return;
+                }
+            } else {
+                 // Retake mode validation: ensure we have an array to retake into
+                if (existingImages.length === 0) {
+                    alert('Cannot retake: Original shots array is missing.');
+                    return;
+                }
+            }
+
+            // Check if camera is available
+            if (!cameraPreview.srcObject) {
+                alert('Camera not available. Please allow camera access and ensure the camera stream is running.');
+                return;
+            }
+
+            // Start the capture sequence
+            startCaptureSequence(frameSize, numShots, timerDuration);
+        });
+    }
+
+    // Handle 'Upload' Button: Trigger the hidden file input
+    if (uploadButton && fileInput) {
+        uploadButton.addEventListener('click', () => {
+            const frameSize = frameSelect.value;
+            const numShots = shotsSelect.value;
+            
+            if (frameSize === "" || numShots === "") {
+                alert('Please select a "Frame Size" and "Shots" before uploading.');
+                return;
+            }
+
+            // 1. Set 'multiple' attribute based on the number of shots selected
+            const numShotsInt = parseInt(numShots);
+            if (numShotsInt > 1) {
+                fileInput.setAttribute('multiple', 'multiple');
+            } else {
+                fileInput.removeAttribute('multiple');
+            }
+            
+            fileInput.click();
+        });
+    }
+
+    // Handle File Selection: Process uploaded image
+    if (fileInput) {
+        fileInput.addEventListener('change', async (event) => {
+            const files = event.target.files;
+            const numShots = parseInt(shotsSelect.value); 
+            const frameSize = frameSelect.value;
+            
+            if (files.length === 0) {
+                // No files selected, exit
+                return;
+            }
+
+            // Input Validation: Check if number of files matches numShots
+            if (files.length !== numShots) {
+                alert(`You selected ${files.length} files. Please select exactly ${numShots} shots.`);
+                // Reset file input to allow re-selection
+                event.target.value = null; 
+                return;
+            }
+
+            const capturedImages = [];
+            
+            try {
+                // Use Promise.all to handle reading all files asynchronously
+                const filePromises = Array.from(files).map(file => {
+                    if (!file.type.startsWith('image/')) {
+                        throw new Error(`File '${file.name}' is not an image.`);
+                    }
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                });
+                
+                const imageDataUrls = await Promise.all(filePromises);
+                capturedImages.push(...imageDataUrls);
+
+                // Save all settings and images to storage
+                localStorage.clear();
+                localStorage.setItem('frameSize', frameSize.replace(/ /g, ''));
+                localStorage.setItem('numShots', numShots);
+                localStorage.setItem('captureMode', 'upload');
+                
+                // Save the active filter for customizationphoto.html
                 const activeButton = document.querySelector('.effect-button.active');
                 const activeFilter = activeButton ? activeButton.dataset.filter : 'filter-none';
+                localStorage.setItem('activeFilter', activeFilter); 
 
-                // Save all settings to localStorage
-                localStorage.clear(); // Clear any old settings
-                localStorage.setItem('frameSize', frameSize.replace(/ /g, '')); // Saves "2x6" or "4x6"
-                localStorage.setItem('numShots', numShots);
-                localStorage.setItem('timerDuration', timerDuration);
-                localStorage.setItem('activeFilter', activeFilter);
-                localStorage.setItem('captureMode', 'camera'); // Tell next page we're using the camera
+                sessionStorage.clear();
+                sessionStorage.setItem('capturedImagesArray', JSON.stringify(capturedImages)); 
                 
-                console.log('Settings saved for camera:', localStorage);
-
-                // Redirect to review page
+                console.log('Settings saved for upload. Redirecting.');
+                
                 window.location.href = 'reviewshots.html';
-            });
-        }
-        
-        // 3. Add click listener to UPLOAD button (Existing)
-        if (uploadButton && fileInput) {
-            uploadButton.addEventListener('click', () => {
-                fileInput.click(); // I-click ang hidden file input
-            });
-        }
+                
+            } catch (error) {
+                console.error('Error processing uploaded images:', error);
+                alert(`Could not process files: ${error.message}. Please try again.`);
+                event.target.value = null; 
+            }
+        });
+    }
 
-        // 4. Add change listener to file input (UPDATED)
-        if (fileInput) {
-            fileInput.addEventListener('change', (event) => {
-                const file = event.target.files[0]; // Kunin ang file
+// -------------------------------------------
+// Camera Activation and Management (UNCHANGED)
+// -------------------------------------------
+    let currentStream = null;
+    let currentDeviceId = null;
+    let availableCameras = [];
 
-                if (file) {
-                    // Siguraduhin na image file ang pinili
-                    if (!file.type.startsWith('image/')){
-                        alert('Please select an image file.');
-                        event.target.value = null; // I-reset ang input
-                        return;
-                    }
-                    
-                    // --- NEW Validation Check for Upload ---
-                    const frameSize = frameSelect.value;
-                    const numShots = shotsSelect.value;
-                    
-                    if (frameSize === "" || numShots === "") {
-                         alert('Please select a "Frame Size" and "Shots" before uploading.');
-                         event.target.value = null; // I-reset ang input
-                         return; // Stop the function
-                    }
-                    // --- End Validation ---
-                    
-                    const reader = new FileReader();
+    async function startCamera(deviceId = null) {
+        try {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
 
-                    // Kapag natapos basahin ang file
-                    reader.onload = (e) => {
-                        const imageDataUrl = e.target.result; // Ito na ang base64 string ng image
-                        
-                        try {
-                            // --- UPDATED: Save settings AND image ---
-                            
-                            // 1. Save settings to localStorage
-                            localStorage.clear(); // Clear any old settings
-                            localStorage.setItem('frameSize', frameSize.replace(/ /g, '')); // Saves "2x6" or "4x6"
-                            localStorage.setItem('numShots', numShots);
-                            localStorage.setItem('captureMode', 'upload'); // Tell next page we're uploading
-                            
-                            // 2. Save the large image data to sessionStorage
-                            // (sessionStorage is better for large data)
-                            sessionStorage.clear(); // Clear old image
-                            sessionStorage.setItem('uploadedImage', imageDataUrl);
-                            
-                            console.log('Settings saved for upload:', localStorage);
-                            
-                            // 3. I-redirect sa review page
-                            window.location.href = 'reviewshots.html';
-
-                        } catch (error) {
-                            console.error('Error saving to storage:', error);
-                            alert('Could not save image. File might be too large.');
-                        }
-                    };
-
-                    // Basahin ang file bilang Data URL
-                    reader.readAsDataURL(file);
+            const constraints = {
+                video: {
+                    deviceId: deviceId ? { exact: deviceId } : undefined,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
                 }
-            });
-        }
-        
-        // --- END OF NEW SCRIPT ---
+            };
 
-     });
-    </script>
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            cameraPreview.srcObject = currentStream;
+
+            const videoTrack = currentStream.getVideoTracks()[0];
+            currentDeviceId = videoTrack.getSettings().deviceId;
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+        }
+    }
+
+    async function enumerateCameras() {
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            availableCameras = devices.filter(device => device.kind === 'videoinput');
+        } catch (error) {
+            console.error('Error enumerating devices:', error);
+        }
+    }
+
+    async function initCamera() {
+        await enumerateCameras();
+        if (availableCameras.length > 0) {
+            await startCamera(availableCameras[0].deviceId);
+        }
+    }
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        initCamera();
+    } 
+
+    const switchCameraButton = document.getElementById('switch-camera-btn');
+    
+    // Switch Mirror Logic
+    if (switchCameraButton) {
+        switchCameraButton.addEventListener('click', () => {
+            cameraPreview.classList.toggle('preview-flipped');
+        });
+    }
+});
+</script>
 
 </body>
 </html>

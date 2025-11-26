@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Fredoka+One&display=swap"
+    rel="stylesheet" />
+  <style>
+    body {font-family: 'Poppins', sans-serif;background-color: #ffe6f3;margin: 0;color: #d23481;user-select: none;}
+    .container { display: flex;min-height: 100vh; }
+    .sidebar { width: 80px;border-right: 2px solid #d23481;display: flex;flex-direction: column;align-items: center;padding: 1rem 0;gap: 2rem;background-color: #ffe6f3;border-radius: 0 16px 16px 0;}
+    .logo { margin-bottom: 1rem;}
+    .logo img {width: 36px;height: 36px;}
+    .left-buttons {display: flex;flex-direction: column;align-items: center;gap: 3rem;width: 100%;}
+    .left-buttons button {background: none; border: none; color: #d23481; cursor: pointer; font-weight: 600;font-size: 0.85rem;display: flex;flex-direction: column;align-items: center;gap: 0.3rem;padding: 0.2rem 0;transition: color 0.3s;}
+    .left-buttons button:hover {color: #0e0107;}
+    .left-buttons button.active {color: #ea5a9f;font-weight: 700;}
+    .left-buttons button img {width: 24px;height: 24px;}
+    .main-content {flex-grow: 1;padding: 1.5rem 2rem;display: flex;flex-direction: column;}
+    .topbar {display: flex;align-items: center;justify-content: space-between;margin-bottom: 1.5rem;}
+    .topbar h1 {font-family: 'Fredoka One', cursive;font-size: 40px;font-weight: 900;color: #d23481;margin: 0;letter-spacing: -1px;}
+    .right-buttons {display: flex;align-items: center;gap: 1rem;}
+    .right-buttons button {display: flex;align-items: center;gap: 0.5rem;font-weight: 600;font-size: 1rem;border-radius: 12px;padding: 0.5rem 1rem;cursor: pointer;border: 2px solid #d23481;background-color: #fff;color: #d23481;transition: background-color 0.3s, color 0.3s;}
+    .right-buttons button img {width: 28px;height: 28px;}
+    .right-buttons button:hover,
+    .admin-btn {background-color: #d23481;color: #fff;border: 2px solid #d23481;}
+    .subnav {display: flex;border-bottom: 2px solid #d23481;margin-bottom: 1.5rem;gap: 2rem;font-size: 0.93rem;}
+    .subnav button {background: none;border: none;cursor: pointer;padding-bottom: 0.5rem;color: #d23481;border-bottom: 3px solid transparent;}
+    .subnav button.active {border-bottom: 3px solid #d23481;font-weight: 700;}
+    h1.greeting {text-align: center;font-weight: bold;font-size: 80px;color: #c32d6c;margin-left: 60px;margin-top: 60px;margin-bottom: -50px;user-select: none;}
+    .profile-info {display: flex;align-items: center;gap: 1.2rem;padding: 1.2rem;background: transparent;border-radius: 12px;width: auto;margin-left: auto;margin-right: 0;}
+    .profile-img {width: 72px;height: 72px;background-size: cover;background-position: center;border-radius: 50%;border: 2px solid #d3d3d3;color: #d23481;}
+    .profile-bio {display: flex;flex-direction: column;justify-content: center;}
+    .profile-bio strong {font-size: 1.4rem;font-weight: bold;color: #333;}
+    #profile-bio-text {font-size: 1rem;line-height: 1.3;color: #555;}
+    .btn-edit-profile {margin-left: auto;display: flex;align-items: center;gap: 0.5rem;padding: 0.55rem 1rem;background: #f4efe6;color: #222;border: none;border-radius: 8px;cursor: pointer;font-size: 1rem;font-weight: 600;box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);transition: 0.25s ease;}
+    .btn-edit-profile img {width: 22px;height: 22px;}
+    .btn-edit-profile:hover {background: #e61c89;color: #fff;}
+    @media (max-width: 600px) {
+      .profile-info {flex-direction: column;text-align: center;gap: 1rem;margin-left: 0;}
+      .btn-edit-profile {width: 100%;justify-content: center;}}
+    /* Edit Profile Modal Background */
+    #edit-profile-modal {display: none;position: fixed;inset: 0;background: rgba(0, 0, 0, 0.5);backdrop-filter: blur(6px);z-index: 10000;align-items: center;justify-content: center;padding: 16px;user-select: none;}
+    /* Show modal when active */
+    #edit-profile-modal.active {display: flex;}
+    /* Modal box - CORRECTED SIZE */
+    .edit-profile-modal {background: linear-gradient(135deg, #fff6fc, #ffe3f0); border-radius: 16px;width: 400px;max-width: 90vw;padding: 24px 28px 28px 28px;position: relative;display: flex;flex-direction: column;gap: 14px;user-select: none;font-family: 'Poppins', sans-serif;box-shadow: 0 8px 30px rgba(211, 35, 129, 0.3);}
+    /* Close button */
+    #edit-profile-close {position: absolute;top: 8px;right: 12px;background: transparent;border: none;font-size: 26px;font-weight: 700;color: #d23481;cursor: pointer;user-select: none;transition: color 0.3s;}
+    #edit-profile-close:hover {color: #a4154f;}
+    /* Profile pic section centered */
+    .profile-pic-section {display: flex;flex-direction: column;align-items: center;gap: 6px;user-select: none;}
+    .profile-pic-placeholder {width: 90px;height: 90px;border-radius: 50%;overflow: hidden;border: 3px solid #d23481;box-shadow: 0 8px 30px rgba(211, 35, 129, 0.15);}
+    .profile-pic-placeholder img {width: 100%;height: 100%;object-fit: cover;border-radius: 50%;}
+    /* Change button */
+    #change-photo-btn {background-color: #ffd0dc;border: 1px solid #db7093;border-radius: 8px;padding: 6px 14px;color: #bf2e68;font-weight: 600;letter-spacing: 0.6px;cursor: pointer;transition: background-color 0.25s;user-select: none;font-size: 0.9rem;min-width: 90px;text-align: center;}
+    #change-photo-btn:hover {background-color: #bf2e68;color: #fff;}
+    /* Form styling */
+    #edit-profile-form {display: flex;flex-direction: column;gap: 10px;user-select: text;}
+    #edit-profile-form label {font-weight: 600;color: #a4154f;font-size: 0.8rem;margin-left: 4px;user-select: none;}
+    #edit-profile-form input[type="text"],
+    #edit-profile-form textarea {border: 1.8px solid #fbc9d9;border-radius: 10px;padding: 8px 14px;font-size: 1rem;font-family: 'Poppins', sans-serif;color: #d23481;resize: vertical;transition: border-color 0.3s;min-height: 40px;box-sizing: border-box;width: 100%;}
+    #edit-profile-form textarea {min-height: 60px;}
+    #edit-profile-form input[type="text"]:focus,
+    #edit-profile-form textarea:focus {border-color: #d23481;outline: none;}
+    /* Buttons container */
+    .edit-profile-buttons {margin-top: 18px;display: flex;justify-content: flex-end;gap: 10px;}
+    /* Cancel button */
+    #edit-cancel-btn {background: #dbdbdb;border: none;padding: 0.6rem 1.5rem;border-radius: 8px;font-weight: 700;cursor: pointer;color: #595959;transition: background-color 0.3s ease;}
+    #edit-cancel-btn:hover {background-color:  #c4c4c4;;}
+    /* Save button with smooth gradient */
+    #edit-save-btn {border: none;padding: 8px 22px;border-radius: 18px;font-weight: 700;color: white;background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);cursor: pointer;user-select: none;font-size: 0.95rem;transition: background 0.4s;}
+    #edit-save-btn:hover {background: linear-gradient(90deg, #f4b744  0%, #ff3c7d 100%);}
+    /* Photo library grid */
+    .photo-library-grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));gap: 12px 20px;margin-top: 12px;user-select: none;max-width: 100%;}
+    .photo-card {width: 140px;border-radius: 12px;background-color: #fdca8c;box-shadow: none;padding: 8px 6px;cursor: pointer;border: 2px solid transparent;display: flex;flex-direction: column;gap: 8px;transition: border-color 0.3s ease;}
+    .photo-card.even {background: #47a851;border-color: #2e7c18;}
+    .photo-card img {width: 100%;height: 300px;object-fit: cover;border-radius: 10px;user-select: none;display: block;box-shadow: 0 5px 10px rgb(0 0 0 / 0.05);border: 4px solid white;transition: border-color 0.2s ease;}
+    .photo-card:hover,
+    .photo-card:focus-visible {border-color: #d72b7e;outline: none;}
+    /* Favorites Section */
+    #section-favorites {user-select: none;display: none;}
+    #section-favorites.active {display: block;}
+    #section-favorites h2 {font-family: 'Fredoka One', cursive;font-size: 30px;margin-top: 0;color: #c32d6c;}
+    .favorites-grid {display: grid;gap: 14px;grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));padding-top: 30px;}
+    .favorite-photo-card {border-radius: 10px;border: 5px solid #f9d7a8;background: #f9d7a8;user-select: none;cursor: pointer;}
+    .favorite-photo-card img {width: 100%;height: 300px;object-fit: cover;}
+    .favorite-photo-card:focus {outline: 2px solid #a31a62;outline-offset: 2px;}
+    .no-favorites-msg {font-style: italic;color: #f9acdb;user-select: none;text-align: center;padding: 20px;}
+    /* Activity Section */
+    #section-activity {user-select: none;display: none;}
+    #section-activity.active {display: block;}
+    #section-activity h2 {font-family: 'Fredoka One', cursive;font-size: 30px;margin-top: 0;color: #c32d6c;}
+    .activity-container {display: flex;flex-direction: column;gap: 22px;height: 100%;overflow-y: auto;}
+    .activity-post {background: white;border-radius: 14px;border: 1px solid #f3c7d9;padding: 12px 14px;font-size: 14px;line-height: 1.3;color: #d72b7e;white-space: pre-line;word-break: break-word;}
+    .activity-post.empty {font-style: italic;color: #f29dcc; border-color: #fddaeb;}
+    /* Modal styles for single photo view - SAME SIZE AS UPLOAD MODAL */
+    .modal-bg {position: fixed;inset: 0;background: rgba(0, 0, 0, 0.5);backdrop-filter: blur(3px);display: none;
+      align-items: center;justify-content: center;z-index: 9999;padding: 12px;user-select: none;}
+    .modal-bg.active {display: flex;}
+    .modal {background: #fef9fb;border-radius: 14px;width: 760px;max-width: 95vw;max-height: 90vh;display: flex;user-select: none;box-shadow: 0 8px 30px rgba(211, 35, 129, 0.3);overflow: hidden;}
+    .modal-left {width: 180px;background: #f9d7e7;padding: 12px 8px;overflow-y: auto;display: flex;flex-direction: column;align-items: center;justify-content: center;border-top-left-radius: 14px;border-bottom-left-radius: 14px;}
+    .modal-left img {width: 140px;height: 500px;object-fit: cover;border-radius: 10px;border: 4px solid white;box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);user-select: none;}
+    .modal-right {flex-grow: 1;display: flex;flex-direction: column;padding: 20px 24px 12px 24px;box-sizing: border-box;overflow-y: auto;border-top-right-radius: 14px;border-bottom-right-radius: 14px;max-height: 600px;}
+    .modal-header {display: flex;align-items: center;justify-content: space-between;border-bottom: 1px solid #f3c7d9;padding-bottom: 10px;user-select: none;}
+    .modal-header .username {font-weight: 700;color: #d72b7e;font-size: 1.2rem;}
+    .modal-close-btn {background: transparent;border: none;font-size: 26px;line-height: 1;cursor: pointer;color: #d72b7e;font-weight: 700;transition: color 0.3s ease;user-select: none;}
+    .modal-close-btn:hover {color: #a4154f;}
+    .comments {flex-grow: 1;overflow-y: auto;border-top: 1px solid #f3c7d9;border-bottom: 1px solid #f3c7d9;margin: 12px 0;padding: 10px 0;user-select: none;}
+    .no-comments {color: #faaad9;font-size: 14px;text-align: center;margin-top: 40px;user-select: none;}
+    .comment {display: flex;gap: 10px;margin-bottom: 12px;outline-offset: 2px;user-select: none;}
+    .comment:focus-visible {outline: 2px solid #d72b7e;border-radius: 8px;}
+    .comment .avatar {width: 40px;height: 40px;border-radius: 50%;background: url('') center/cover no-repeat;flex-shrink: 0;user-select: none;}
+    .comment-content {flex-grow: 1;}
+    .comment-author {font-weight: 700;font-size: 14px;color: #d72b7e;user-select: none;}
+    .comment-text {font-size: 13px;margin-top: 4px;color: #444;white-space: pre-wrap;word-wrap: break-word;user-select: text;}
+    .comment-footer {display: flex;align-items: center;gap: 15px;font-size: 11px;color: #aaa;margin-top: 6px;user-select: none;}
+    .comment-footer button {border: none;background: none;color: #d72b7e;font-weight: 700;cursor: pointer;padding: 0;font-size: 12px;}
+    .comment-footer button:disabled {cursor: default;color: #f9b4d5;}
+    /* Updated reaction icons to use images */
+    .heart-icon,
+    .comment-icon,
+    .bookmark-icon {cursor: pointer;width: 18px;height: 18px;transition: transform 0.2s ease;user-select: none;flex-shrink: 0;}
+    .heart-icon.liked,
+    .bookmark-icon.active {background-color: #d72b7e;}
+    .reaction-footer {padding-top: 8px;font-weight: 700;color: #d72b7e;font-size: 14px;display: flex;align-items: center;gap: 12px;}
+    .reaction-footer div.likes-text {font-weight: 900;margin-left: auto;color: #a41753;user-select: none;}
+    .comment-form {display: flex; gap: 12px;}
+    .comment-form textarea {flex-grow: 1;border-radius: 10px;border: 1px solid #f3c7d9;background: #fff0f8;padding: 10px 14px;font-size: 14px;resize: vertical;min-height: 48px;outline: none;color: #d72b7e;font-family: inherit;user-select: text;transition: border-color 0.3s ease;}
+    .comment-form textarea:focus {border-color: #d72b7e;}
+    .comment-form textarea::placeholder {color: #f9c5db;}
+    .comment-form button {border: none;background: transparent;font-weight: 700;font-size: 14px;color: #d72b7e;cursor: pointer;opacity: 0.75;user-select: none;transition: opacity 0.3s ease;}
+    .comment-form button:disabled {opacity: 0.3;cursor: default;}
+    .comment-form button:hover:not(:disabled) {opacity: 1;}
+    /* Hidden file input */
+    #profile-photo-input {display: none;}
+    /* Templates Section Styles */
+    #section-templates { user-select: none; display: none;}
+    #section-templates.active {display: block;}
+    #section-templates h2 {font-family: 'Fredoka One', cursive;font-size: 30px;margin-top: 0;color: #c32d6c;}
+    .tabnav {display: flex;gap: 2rem;border-bottom: 2px solid #ea5a9f;margin-bottom: 1.2rem;user-select: none;}
+    .tabnav button {background: none;border: none;cursor: pointer;font-weight: 600;font-size: 1rem;color: #d23481;border-bottom: 3px solid transparent;padding-bottom: 0.4rem;transition: color 0.3s, border-color 0.3s;}
+    .tabnav button:hover {color: #ea5a9f;}
+    .tabnav button.active {border-color: #ea5a9f;font-weight: 700;color: #ea5a9f;}
+    /* VERTICAL TEMPLATE DESIGN FOR BOTH SECTIONS */
+    .vertical-templates-container {display: flex;gap: 40px;user-select: none;flex-wrap: wrap;}
+    .vertical-template-card {position: relative;width: 200px; height: 500px; padding: 16px;border-radius: 16px;background: linear-gradient(to bottom, #5e2e55, #765075);box-shadow: 0 1px 28px 10px rgb(169 42 89 / 0.2);display: flex;flex-direction: column;justify-content: flex-start;user-select: none;overflow: hidden;background-size: cover;background-position: center;transition: all 0.3s ease;}
+    .template-photo-container {width: 100%;height: 380px; position: relative;overflow: hidden;border-radius: 6px;background-color: rgba(255, 255, 255, 0.9);box-shadow: inset 0 0 3px #0070c0;}
+    .template-photo-single {width: 100%;height: 100%;background-size: cover;background-position: center;position: relative;}
+    .template-photo-multiple {display: grid;width: 100%;height: 100%;position: relative;}
+    .template-photo-multiple.two-shots {grid-template-columns: 1fr 1fr;gap: 4px;}
+    .template-photo-multiple.three-shots {grid-template-columns: 1fr 1fr;grid-template-rows: 1fr 1fr;gap: 4px;}
+    .template-photo-multiple.four-shots {grid-template-columns: 1fr 1fr;grid-template-rows: 1fr 1fr;gap: 4px;}
+    .photo-slot {background-size: cover;background-position: center;border-radius: 4px;}
+    /* Sticker overlay */
+    .sticker-overlay {position: absolute;top: 0;left: 0;width: 100%;height: 100%;pointer-events: none;z-index: 2;}
+    .sticker {position: absolute;width: 40px;height: 40px;background-size: contain;background-repeat: no-repeat;background-position: center;cursor: grab;transition: transform 0.2s ease, box-shadow 0.2s ease;z-index: 3;}
+    .sticker.dragging {cursor: grabbing;box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);transform: scale(1.1);z-index: 10;}
+    .sticker:hover {transform: scale(1.05);}
+    /* Template tags */
+    .template-tags {margin-top: 8px;font-size: 0.75rem;padding: 20px;color: #f4cade;text-align: center;max-height: 40px;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;line-clamp: 2;-webkit-box-orient: vertical;z-index: 3;position: relative;}
+   /* Vertical icon buttons stacked top right*/
+    .vertical-template-icons {position: absolute; top: 16px;right: 16px; display: flex;flex-direction: column;gap: 14px;user-select: none;opacity: 0;transition: opacity 0.3s ease;z-index: 5;}
+    .vertical-template-card:hover .vertical-template-icons {opacity: 1;}
+    .vertical-template-icons button {background: none;border: none;cursor: pointer;padding: 0;display: flex;justify-content: center;align-items: center;transition: transform 0.2s;}
+    .vertical-template-icons button:hover {transform: scale(1.1);}
+    .vertical-template-icons img {width: 24px;height: 24px;pointer-events: none;user-select: none;}
+    /* The "Use this template" button bottom left */
+    .vertical-use-template-btn {background-color: #db2d73;border: none;border-radius: 8px;color: white;font-weight: 700;font-size: 1rem;padding: 0.75rem 1.25rem;cursor: pointer;display: flex;align-items: center;gap: 8px;user-select: none;box-shadow: 0 4px 10px rgb(219 45 115 / 0.7);transition: background-color 0.3s ease;user-select: none;opacity: 0;transition: opacity 0.3s ease;z-index: 3;position: relative;}
+    .vertical-template-card:hover .vertical-use-template-btn {opacity: 1;}
+    .vertical-use-template-btn img {width: 20px;height: 20px;filter: invert(100%);user-select: none;pointer-events: none;}
+    .vertical-use-template-btn:hover,
+    .vertical-use-template-btn:focus {background-color: #a31a62;outline: none;}
+    /* Upload your template card */
+    .template-upload-card {width: 200px;height: 500px; border: 2.4px solid #f4cade;border-radius: 16px;display: flex;flex-direction: column;justify-content: center;align-items: center;cursor: pointer;font-weight: 700;font-size: 1.35rem;color: #f4cade;transition: background-color 0.3s ease;user-select: none;}
+    .template-upload-card > .plus-sign {font-size: 5rem;line-height: 1;margin-bottom: 8px;user-select: none;}
+    .template-upload-card:hover,
+    .template-upload-card:focus {background-color: #fce9f1;outline: none;}
+    /* File upload input */
+    #template-upload-input {display: none;}
+    /* Favorite button active state */
+    .favorite-active {filter: invert(23%) sepia(95%) saturate(2106%) hue-rotate(320deg) brightness(90%) contrast(101%);}
+    /* Upload Template Modal Styles  */
+    #upload-template-modal {position: fixed;inset: 0;background: rgba(0, 0, 0, 0.6);backdrop-filter: blur(8px);display: none;align-items: center;justify-content: center;z-index: 11000;user-select: none;}
+    #upload-template-modal.active {display: flex;}
+    .upload-template-modal {background: white;border-radius: 14px;width: 760px;max-width: 95vw;max-height: 90vh;padding: 0;box-sizing: border-box;display: flex;user-select: none;font-family: 'Poppins', sans-serif;color: #333;position: relative;flex-direction: row;overflow: hidden;box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);}
+    .upload-close-btn {position: absolute;top: 12px;right: 16px;background: transparent;border: none;font-size: 26px;font-weight: 700;color: #d72b7e;cursor: pointer;user-select: none;transition: color 0.3s;z-index: 10;}
+    .upload-close-btn:hover {color: #a4154f;}
+    /* Left side - Preview area (single photo only) */
+    .upload-preview-side {width: 180px;background: #f9d7e7;padding: 20px;display: flex;flex-direction: column;align-items: center;justify-content: center;border-top-left-radius: 14px;border-bottom-left-radius: 14px;}
+    .preview-title {font-weight: 700;font-size: 16px;color: #d72b7e;margin-bottom: 16px;}
+    .preview-image {width: 140px;height: 400px;border-radius: 10px;border: 4px solid white;background: #f5f5f5;display: flex;align-items: center;justify-content: center;overflow: hidden;position: relative;}
+    .preview-image img {width: 100%;height: 100%;object-fit: cover;border-radius: 6px;}
+    .preview-placeholder {color: #d72b7e;font-size: 12px;text-align: center;padding: 20px;}
+    /* Updated Upload Controls Side  */
+    .upload-controls-side {flex-grow: 1;display: flex;flex-direction: column;padding: 20px 24px 24px 24px;box-sizing: border-box;overflow-y: auto;border-top-right-radius: 14px;border-bottom-right-radius: 14px;max-height: 600px;gap: 16px;}
+    h2.modal-title {margin: 0 0 10px 0;padding: 0;font-weight: 700;font-size: 24px;color: #d23481;user-select: none;font-family: 'Fredoka One', cursive;}
+    .section-heading {font-weight: 600;font-size: 16px;color: #333;margin-bottom: 8px;user-select: none;}
+    .layout-section {display: flex;flex-direction: column;gap: 12px;margin-bottom: 0;}
+    .layout-options {display: flex;gap: 20px;align-items: center;}
+    .layout-option {display: flex;flex-direction: column;gap: 8px;}
+    .layout-option label {font-size: 14px;color: #666;font-weight: 500;}
+    .layout-option select {border: 1px solid #ddd;border-radius: 6px;padding: 8px 12px;font-size: 14px;color: #333;background: white;font-family: 'Poppins', sans-serif;min-width: 140px;}
+    .layout-option select:focus {outline: none;border-color: #d23481;}
+    .upload-section {display: flex;flex-direction: column;gap: 8px;margin-bottom: 0;}
+    .upload-box {border: 2px dashed #ddd;border-radius: 8px;padding: 20px 16px;text-align: center;cursor: pointer;transition: border-color 0.3s;background: #fafafa;min-height: 60px;display: flex;flex-direction: column;justify-content: center;align-items: center;}
+    .upload-box:hover {border-color: #d23481;background: #fff5f9;}
+    .upload-box .upload-text {font-size: 14px;color: #333;margin-bottom: 4px;font-weight: 500;}
+    .upload-box .upload-format {font-size: 12px;color: #999;font-style: italic;}
+    .effects-section {display: flex;flex-direction: column;gap: 8px;margin-bottom: 0;}
+    .effects-grid {display: grid;grid-template-columns: repeat(3, 1fr);gap: 8px;}
+    .effect-option {padding: 10px 12px;border: 1px solid #ddd;border-radius: 6px;text-align: center;font-size: 13px;color: #666;cursor: pointer;transition: all 0.3s;background: white;font-weight: 500;}
+    .effect-option:hover {border-color: #d23481;color: #d23481;}
+    .effect-option.selected {border-color: #d23481;background: #d23481;color: white;}
+    .modal-divider {height: 1px;background: #eee;margin: 8px 0;}
+    .share-section {display: flex;align-items: center;gap: 12px;font-size: 14px;color: #333;margin-bottom: 0;font-weight: 500;}
+    .tags-section {display: flex;flex-direction: column;gap: 8px;margin-bottom: 0;}
+    .tags-input {border: 1px solid #ddd;border-radius: 6px;padding: 12px;font-size: 14px;color: #333;font-family: 'Poppins', sans-serif;}
+    .tags-input::placeholder {color: #999;}
+    .tags-input:focus {outline: none;border-color: #d23481;}
+    /* Publish button - UPDATED */
+    .publish-section {display: flex;justify-content: flex-end;margin-top: 8px;}
+    #publishBtn {background: #d23481;border: none;border-radius: 20px;padding: 12px 36px;font-weight: 600;color: white;cursor: pointer;font-size: 14px;transition: background-color 0.3s;user-select: none;}
+    #publishBtn:disabled {background: #ccc;cursor: not-allowed;}
+    #publishBtn:not(:disabled):hover {background: #b52c6f;}
+    /* Toggle input styling - UPDATED */
+    .toggle-input {width: 44px;height: 22px;appearance: none;background: #ddd;border-radius: 11px;position: relative;cursor: pointer;transition: background-color 0.3s;}
+    .toggle-input:checked {background: #d23481;}
+    .toggle-input::before {content: '';position: absolute;width: 18px;height: 18px;border-radius: 50%;background: white;top: 2px;left: 2px;transition: transform 0.3s;}
+    .toggle-input:checked::before {transform: translateX(22px);}
+    /* Edit button styling */
+    .vertical-template-icons .edit-icon {width: 24px;height: 24px;filter: invert(23%) sepia(95%) saturate(2106%) hue-rotate(320deg) brightness(90%) contrast(101%);}
+    /* Frame size styles */
+    .frame-2x6 {width: 100%;height: 380px;}
+    .frame-4x6 {width: 100%;height: 450px;}
+    /* Effect filters */
+    .effect-none {filter: none;}
+    .effect-bw {filter: grayscale(100%);}
+    .effect-warm {filter: sepia(0.3) saturate(1.2) hue-rotate(-10deg);}
+    .effect-cool {filter: sepia(0.2) saturate(0.8) hue-rotate(180deg) brightness(1.1);}
+    .effect-retro {filter: sepia(0.5) contrast(1.2) saturate(1.3);}
+    .effect-noir {filter: grayscale(100%) contrast(1.5) brightness(0.8);}
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <nav class="sidebar" aria-label="Sidebar Navigation">
+      <div class="logo">
+        <img src="Icons/11.svg" alt="Webooth logo" />
+      </div>
+      <div class="left-buttons">
+        <button data-target="templates" aria-label="Templates">
+          <img src="Icons 2/templates.svg" alt="Templates icon" />
+          <span>Feed</span>
+        </button>
+        <button data-target="favorites" aria-label="Favorites">
+          <img src="Icons 2/favorites.svg" alt="Favorites icon" />
+          <span>Favorites</span>
+        </button>
+        <button data-target="activity" aria-label="Activity">
+          <img src="Icons 2/activity.svg" alt="Activity icon" />
+          <span>Activity</span>
+        </button>
+        <button data-target="logout" aria-label="Logout">
+          <img src="Icons 2/logout.svg" alt="Logout icon" />
+          <span>Logout</span>
+        </button>
+      </div>
+    </nav>
+    <main class="main-content" role="main">
+      <header class="topbar">
+        <h1 class="greeting" aria-live="polite">Hi, <span id="username-display">Username</span>!</h1>
+        <div class="right-buttons">
+          <button onclick="window.location.href='mainhome.html'">
+            <img src="Icons/2.svg" alt="Booth icon" />
+            Booth
+          </button>
+          <button onclick="window.location.href='finalprof.html'">
+            <img src="Icons/4.svg" alt="Profile icon" />
+            Profile
+          </button>
+        </div>
+      </header>
+
+      <!-- Profile info -->
+      <section class="profile-info" aria-label="User profile info">
+        <div class="profile-img" aria-hidden="true" id="profile-img"
+          style="background-image: url('');"></div>
+        <div class="profile-bio">
+          <strong id="profile-username">Username</strong>
+          <div>
+            <span id="profile-bio-text">bio<br>0 photo</span>
+          </div>
+        </div>
+        <button class="btn-edit-profile" id="btn-edit-profile" aria-label="Edit Profile" type="button">
+          <img src="Icons 2/edit.svg" alt="Edit icon" />
+          Edit Profile
+        </button>
+      </section>
+
+      <!-- Edit Profile Modal -->
+      <div class="modal-bg" id="edit-profile-modal" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title"
+        tabindex="-1">
+        <div class="modal edit-profile-modal" role="document" aria-labelledby="edit-profile-title" aria-describedby="edit-profile-description">
+          <button class="modal-close-btn" id="edit-profile-close" aria-label="Close edit profile modal">&times;</button>
+          <div class="edit-profile-content">
+            <div class="profile-pic-section" aria-describedby="edit-profile-description">
+              <div class="profile-pic-placeholder" aria-hidden="true">
+                <img id="edit-profile-pic" src="" alt="Profile Picture" />
+              </div>
+              <button id="change-photo-btn" type="button" aria-label="Change Profile Photo">Change</button>
+              <input type="file" id="profile-photo-input" accept="image/*" style="display:none" />
+            </div>
+            <form id="edit-profile-form" novalidate>
+              <label for="edit-username">Username</label>
+              <input id="edit-username" name="username" type="text" autocomplete="username" required />
+              <label for="edit-bio">Bio</label>
+              <textarea id="edit-bio" name="bio" rows="3"></textarea>
+              <div class="edit-profile-buttons">
+                <button type="button" id="edit-cancel-btn">Cancel</button>
+                <button type="submit" id="edit-save-btn">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload Template Modal -->
+      <div id="upload-template-modal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="upload-template-title" tabindex="-1">
+        <div class="upload-template-modal">
+          <button class="upload-close-btn" id="upload-close-btn" aria-label="Close upload modal">&times;</button>
+          
+          <!-- Left side - Preview area (single photo only) -->
+          <div class="upload-preview-side">
+            <div class="preview-title">Preview</div>
+            <div class="preview-image" id="template-preview">
+              <div class="preview-placeholder">Template preview will appear here</div>
+            </div>
+          </div>
+
+          <!-- Right side - Form controls -->
+          <div class="upload-controls-side">
+            <h2 class="modal-title" id="upload-template-title">Upload Template</h2>
+
+            <!-- Layout Section -->
+            <div class="layout-section">
+              <div class="section-heading">Layout</div>
+              <div class="layout-options">
+                <div class="layout-option">
+                  <label for="frameSize">Frame Size</label>
+                  <select id="frameSize" name="frameSize" required>
+                    <option value="2x6">2 x 6 inches</option>
+                    <option value="4x6">4 x 6 inches</option>
+                  </select>
+                </div>
+                <div class="layout-option">
+                  <label for="shots">Shots</label>
+                  <select id="shots" name="shots" required>
+                    <option value="1">1 shot</option>
+                    <option value="2">2 shots</option>
+                    <option value="3">3 shots</option>
+                    <option value="4">4 shots</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Background -->
+            <div class="upload-section">
+              <div class="section-heading">Upload background image here</div>
+              <label for="backgroundUpload" class="upload-box" tabindex="0" role="button">
+                <div class="upload-text">in jpeg or png format</div>
+                <input type="file" id="backgroundUpload" class="upload-template-input" accept=".jpeg,.jpg,.png" />
+              </label>
+            </div>
+
+            <!-- Effects Section -->
+            <div class="effects-section">
+              <div class="section-heading">Effects</div>
+              <div class="effects-grid">
+                <button type="button" class="effect-option" data-effect="none">None</button>
+                <button type="button" class="effect-option" data-effect="bw">B&W</button>
+                <button type="button" class="effect-option selected" data-effect="warm">Warm</button>
+                <button type="button" class="effect-option" data-effect="cool">Cool</button>
+                <button type="button" class="effect-option" data-effect="retro">Retro</button>
+                <button type="button" class="effect-option" data-effect="noir">Noir</button>
+              </div>
+            </div>
+
+            <!-- Upload Stickers -->
+            <div class="upload-section">
+              <div class="section-heading">Upload sticker pack design here</div>
+              <label for="stickersUpload" class="upload-box" tabindex="0" role="button">
+                <div class="upload-text">in png format</div>
+                <input type="file" id="stickersUpload" class="upload-template-input" accept=".png" multiple />
+              </label>
+            </div>
+
+            <!-- Divider -->
+            <div class="modal-divider"></div>
+
+            <!-- Share Toggle -->
+            <div class="share-section">
+              <input type="checkbox" id="shareToggle" class="toggle-input" />
+              <label for="shareToggle">Share to community</label>
+            </div>
+
+            <!-- Tags Input -->
+            <div class="tags-section">
+              <input type="text" id="tagsInput" class="tags-input" placeholder="Add #tags..." aria-label="Add #tags" />
+            </div>
+
+            <!-- Publish Button -->
+            <div class="publish-section">
+              <button id="publishBtn" disabled>Publish</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Photo Library Subnav -->
+      <div class="subnav" role="tablist" aria-label="Main Content Tabs" id="photo-library-subnav">
+        <button role="tab" aria-selected="true" class="active" id="tab-photolib-btn">Photo Library</button>
+      </div>
+
+      <!-- Photo Library Section -->
+      <section id="section-photolib" role="tabpanel" aria-labelledby="tab-photolib-btn" class="section active">
+        <div class="photo-library-grid" aria-live="polite" aria-label="Photo Library Grid"></div>
+      </section>
+
+      <!-- Favorites Section -->
+      <section id="section-favorites" class="section" role="region" aria-label="Favorites Section">
+        <h2>Favorites</h2>
+        <div class="favorites-grid" aria-live="polite"></div>
+      </section>
+
+      <!-- Activity Section -->
+      <section id="section-activity" class="section" role="region" aria-label="Activity Log Section">
+        <h2>Activity</h2>
+        <div class="activity-container" aria-live="polite"></div>
+      </section>
+
+      <!-- Templates Section -->
+      <section id="section-templates" class="section" role="region" aria-label="Templates Section">
+        <h2>Feed</h2>
+        
+        <!-- Tab navigation -->
+        <nav class="tabnav" role="tablist" aria-label="Templates Tabs">
+          <button role="tab" aria-selected="true" class="active" id="tab-shared-btn">Shared to Community</button>
+          <button role="tab" aria-selected="false" id="tab-mytemplates-btn">My Templates</button>
+        </nav>
+
+        <!-- Shared Templates Grid - NOW VERTICAL DESIGN -->
+        <section id="tab-shared" role="tabpanel" aria-labelledby="tab-shared-btn" style="display:block;">
+          <div class="vertical-templates-container" aria-live="polite" aria-label="Shared templates grid">
+            <!-- Template cards will be generated here by JS -->
+          </div>
+        </section>
+
+        <!-- My Templates Grid - VERTICAL DESIGN -->
+        <section id="tab-mytemplates" role="tabpanel" aria-labelledby="tab-mytemplates-btn" style="display:none;">
+          <div class="vertical-templates-container" aria-live="polite" aria-label="My templates grid">
+            <!-- Upload Your Template Card -->
+            <div class="template-upload-card" tabindex="0" role="button" aria-label="Upload your template" 
+              id="open-upload-modal-btn"
+              onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); openUploadTemplateModal(); }">
+              <div class="plus-sign">+</div>
+              Upload your template
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal for Post + comments -->
+  <div class="modal-bg" id="post-modal" role="dialog" aria-modal="true" aria-labelledby="modal-username" tabindex="-1">
+    <div class="modal">
+      <div class="modal-left" aria-label="Selected photo">
+        <!-- Single photo will be placed here -->
+      </div>
+      <div class="modal-right">
+        <div class="modal-header">
+          <div class="username" id="modal-username"></div>
+          <button class="modal-close-btn" id="post-modal-close-btn" aria-label="Close modal">&times;</button>
+        </div>
+        <div id="comments-container" class="comments"></div>
+        <div id="no-comments-text" class="no-comments" style="display:none;">No comments yet.</div>
+        <form id="comment-form" class="comment-form">
+          <textarea id="comment-input" placeholder="Add a comment..." rows="2" aria-label="Add a comment"></textarea>
+          <button id="comment-post-btn" type="submit" disabled>Post</button>
+        </form>
+        <div id="reaction-footer" class="reaction-footer"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample Template Data representing the images and card style
+    const sharedTemplates = [
+      {
+        id: 1,
+        photos: [],
+        favorite: false,
+        name: 'Holiday Template',
+        frameSize: '2x6',
+        shots: '1',
+        effect: 'warm',
+        shareToCommunity: true,
+        tags: '#holiday #fun'
+      },
+      
+    ];
+
+    const state = {
+      user: {
+        username: 'Username',
+        bio: 'bio',
+        photoCount: 0,
+        profileImg: ''
+      },
+      photos: [
+        {
+          id: 1,
+          src: '',
+          liked: false,
+          favorite: false,
+          date: 'October 29',
+          comments: []
+        },
+        {
+          id: 2,
+          src: '',
+          liked: false,
+          favorite: false,
+          date: 'October 30',
+          comments: []
+        },
+      ],
+      activities: [],
+      myTemplates: []
+    };
+
+    // UPLOAD TEMPLATE MODAL FUNCTIONALITY
+    const uploadModal = document.getElementById('upload-template-modal');
+    const openUploadModalBtn = document.getElementById('open-upload-modal-btn');
+    const uploadCloseBtn = document.getElementById('upload-close-btn');
+    const publishBtn = document.getElementById('publishBtn');
+    const backgroundUploadInput = document.getElementById('backgroundUpload');
+    const stickersUploadInput = document.getElementById('stickersUpload');
+    const shareToggle = document.getElementById('shareToggle');
+    const tagsInput = document.getElementById('tagsInput');
+    const frameSizeSelect = document.getElementById('frameSize');
+    const shotsSelect = document.getElementById('shots');
+
+    // Preview elements
+    const templatePreview = document.getElementById('template-preview');
+
+    let uploadedBackground = null;
+    let uploadedStickers = [];
+    let currentEffect = 'warm';
+    let draggedSticker = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    // Effects selection handling
+    const effectOptions = document.querySelectorAll('.effect-option');
+    effectOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        effectOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        currentEffect = option.dataset.effect;
+        updatePreview();
+      });
+    });
+
+    // Open upload template modal
+    function openUploadTemplateModal() {
+      uploadModal.classList.add('active');
+      resetUploadModal();
+      trapFocus(uploadModal);
+    }
+
+    // Close upload template modal
+    function closeUploadModal() {
+      uploadModal.classList.remove('active');
+      releaseFocusTrap();
+    }
+
+    function resetUploadModal() {
+      backgroundUploadInput.value = '';
+      stickersUploadInput.value = '';
+      uploadedBackground = null;
+      uploadedStickers = [];
+      shareToggle.checked = false;
+      tagsInput.value = '';
+      frameSizeSelect.value = '2x6';
+      shotsSelect.value = '1';
+      
+      // Reset effects to warm
+      effectOptions.forEach(opt => opt.classList.remove('selected'));
+      const warmBtn = document.querySelector('[data-effect="warm"]');
+      if (warmBtn) warmBtn.classList.add('selected');
+      currentEffect = 'warm';
+      
+      // Reset preview
+      templatePreview.innerHTML = '<div class="preview-placeholder">Template preview will appear here</div>';
+      
+      publishBtn.disabled = true;
+      
+      // Reset modal title and button text
+      document.getElementById('upload-template-title').textContent = 'Upload Template';
+      publishBtn.textContent = 'Publish';
+      delete uploadModal.dataset.editingTemplateId;
+    }
+
+    // Event listeners for upload modal
+    openUploadModalBtn.addEventListener('click', openUploadTemplateModal);
+    uploadCloseBtn.addEventListener('click', closeUploadModal);
+    uploadModal.addEventListener('click', (e) => {
+      if (e.target === uploadModal) closeUploadModal();
+    });
+
+    // Background upload handler
+    backgroundUploadInput.addEventListener('change', () => {
+      if (backgroundUploadInput.files.length === 0) {
+        uploadedBackground = null;
+        updatePreview();
+      } else {
+        uploadedBackground = URL.createObjectURL(backgroundUploadInput.files[0]);
+        updatePreview();
+      }
+      checkPublish();
+    });
+
+    // Stickers upload handler
+    stickersUploadInput.addEventListener('change', () => {
+      if (stickersUploadInput.files.length === 0) {
+        uploadedStickers = [];
+      } else {
+        uploadedStickers.forEach(u => URL.revokeObjectURL(u));
+        uploadedStickers = Array.from(stickersUploadInput.files).map(f => URL.createObjectURL(f));
+      }
+      updatePreview();
+    });
+
+    // Update preview based on current settings
+    function updatePreview() {
+      if (!uploadedBackground) {
+        templatePreview.innerHTML = '<div class="preview-placeholder">Template preview will appear here</div>';
+        return;
+      }
+
+      const frameSize = frameSizeSelect.value;
+      const shots = parseInt(shotsSelect.value);
+      
+      // Create the preview container with background
+      let previewHTML = `
+        <div class="vertical-template-card" style="background-image: url('${uploadedBackground}')">
+          <div class="template-photo-container">
+      `;
+      
+      if (shots === 1) {
+        previewHTML += `
+          <div class="template-photo-single frame-${frameSize} effect-${currentEffect}" 
+               style="background-color: rgba(255, 255, 255, 0.9);">
+          </div>
+        `;
+      } else {
+        previewHTML += `
+          <div class="template-photo-multiple ${shots}-shots frame-${frameSize}">
+            ${Array.from({length: shots}, (_, i) => `
+              <div class="photo-slot effect-${currentEffect}" 
+                   style="background-color: rgba(255, 255, 255, 0.9);">
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      // Add sticker overlay scattered across the entire card
+      previewHTML += createStickerOverlay();
+      
+      // Add tags placeholder
+      previewHTML += `
+          </div>
+          <div class="template-tags">Preview Tags</div>
+          <button class="vertical-use-template-btn" style="opacity: 1;">
+            <img src="Icons/2.svg" alt="Camera icon" /> Use this template
+          </button>
+        </div>
+      `;
+      
+      templatePreview.innerHTML = previewHTML;
+      
+      // Add drag functionality to stickers in preview
+      addStickerDragFunctionality(templatePreview);
+    }
+
+    // Create sticker overlay HTML scattered across entire card
+    function createStickerOverlay() {
+      if (uploadedStickers.length === 0) return '';
+      
+      // Define positions for stickers scattered across the entire card
+      const stickerPositions = [
+        { top: '10%', left: '10%', rotate: '5deg' },
+        { top: '15%', left: '80%', rotate: '-10deg' },
+        { top: '50%', left: '20%', rotate: '15deg' },
+        { top: '60%', left: '70%', rotate: '-5deg' },
+        { top: '80%', left: '30%', rotate: '10deg' },
+        { top: '85%', left: '85%', rotate: '-15deg' }
+      ];
+      
+      return `
+        <div class="sticker-overlay">
+          ${uploadedStickers.map((sticker, index) => {
+            const pos = stickerPositions[index % stickerPositions.length];
+            return `
+              <div class="sticker" style="
+                background-image: url('${sticker}');
+                top: ${pos.top};
+                left: ${pos.left};
+                transform: rotate(${pos.rotate});
+              " data-sticker-index="${index}"></div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    // Add drag functionality to stickers
+    function addStickerDragFunctionality(container) {
+      const stickers = container.querySelectorAll('.sticker');
+      
+      stickers.forEach(sticker => {
+        sticker.addEventListener('mousedown', startStickerDrag);
+        sticker.addEventListener('touchstart', startStickerDrag, { passive: false });
+        
+        // Enable pointer events for stickers
+        sticker.style.pointerEvents = 'auto';
+      });
+    }
+
+    // Start dragging a sticker
+    function startStickerDrag(e) {
+      e.preventDefault();
+      draggedSticker = this;
+      
+      // Calculate offset for smooth dragging
+      const rect = draggedSticker.getBoundingClientRect();
+      if (e.type === 'mousedown') {
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+      } else if (e.type === 'touchstart') {
+        dragOffsetX = e.touches[0].clientX - rect.left;
+        dragOffsetY = e.touches[0].clientY - rect.top;
+      }
+      
+      // Add dragging class for visual feedback
+      draggedSticker.classList.add('dragging');
+      
+      // Add event listeners for dragging
+      document.addEventListener('mousemove', dragSticker);
+      document.addEventListener('touchmove', dragSticker, { passive: false });
+      document.addEventListener('mouseup', stopStickerDrag);
+      document.addEventListener('touchend', stopStickerDrag);
+    }
+
+    // Drag sticker
+    function dragSticker(e) {
+      if (!draggedSticker) return;
+      
+      e.preventDefault();
+      
+      const container = draggedSticker.closest('.vertical-template-card');
+      if (!container) return;
+      
+      const containerRect = container.getBoundingClientRect();
+      let clientX, clientY;
+      
+      if (e.type === 'mousemove') {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      } else if (e.type === 'touchmove') {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      }
+      
+      // Calculate new position within container bounds
+      const newLeft = clientX - containerRect.left - dragOffsetX;
+      const newTop = clientY - containerRect.top - dragOffsetY;
+      
+      // Apply bounds checking to keep sticker within container
+      const maxLeft = containerRect.width - draggedSticker.offsetWidth;
+      const maxTop = containerRect.height - draggedSticker.offsetHeight;
+      
+      const boundedLeft = Math.max(0, Math.min(newLeft, maxLeft));
+      const boundedTop = Math.max(0, Math.min(newTop, maxTop));
+      
+      // Update sticker position
+      draggedSticker.style.left = `${boundedLeft}px`;
+      draggedSticker.style.top = `${boundedTop}px`;
+      draggedSticker.style.transform = 'none'; 
+    }
+
+    // Stop dragging sticker
+    function stopStickerDrag() {
+      if (draggedSticker) {
+        draggedSticker.classList.remove('dragging');
+        draggedSticker = null;
+      }
+      
+      // Remove event listeners
+      document.removeEventListener('mousemove', dragSticker);
+      document.removeEventListener('touchmove', dragSticker);
+      document.removeEventListener('mouseup', stopStickerDrag);
+      document.removeEventListener('touchend', stopStickerDrag);
+    }
+
+    // Frame size and shots change handlers
+    frameSizeSelect.addEventListener('change', updatePreview);
+    shotsSelect.addEventListener('change', updatePreview);
+
+    // Enable publish only if background is uploaded
+    function checkPublish() {
+      publishBtn.disabled = !uploadedBackground;
+    }
+
+    // Publish button click: capture data, add to state, alert confirmation
+    function handlePublishTemplate() {
+      if (!uploadedBackground) {
+        alert("Please upload a background image before publishing.");
+        return;
+      }
+      
+      // Get final sticker positions from preview
+      const previewCard = templatePreview.querySelector('.vertical-template-card');
+      const stickers = previewCard.querySelectorAll('.sticker');
+      const stickerPositions = Array.from(stickers).map(sticker => {
+        return {
+          src: sticker.style.backgroundImage.replace('url("', '').replace('")', ''),
+          top: sticker.style.top,
+          left: sticker.style.left
+        };
+      });
+      
+      const templateData = {
+        photos: [uploadedBackground, ...stickerPositions.map(s => s.src)],
+        stickerPositions: stickerPositions,
+        name: `Uploaded Template ${state.myTemplates.length + 1}`,
+        frameSize: frameSizeSelect.value,
+        shots: shotsSelect.value,
+        effect: currentEffect,
+        shareToCommunity: shareToggle.checked,
+        tags: tagsInput.value.trim(),
+        favorite: false
+      };
+      
+      // Check if we're editing an existing template
+      const editingTemplateId = uploadModal.dataset.editingTemplateId;
+      if (editingTemplateId) {
+        // Update existing template
+        const templateIndex = state.myTemplates.findIndex(t => t.id == editingTemplateId);
+        if (templateIndex !== -1) {
+          state.myTemplates[templateIndex] = {
+            ...state.myTemplates[templateIndex],
+            ...templateData
+          };
+          alert(`Successfully updated template: ${templateData.name}`);
+          delete uploadModal.dataset.editingTemplateId;
+        }
+      } else {
+        // Create new template
+        const newTemplate = {
+          id: Date.now(),
+          ...templateData
+        };
+        
+        // Add to my templates
+        state.myTemplates.push(newTemplate);
+        
+        // If share toggle is on, also add to shared templates
+        if (shareToggle.checked) {
+          const sharedTemplate = {
+            ...newTemplate,
+            id: Date.now() + 1, // Different ID for shared version
+            shared: true
+          };
+          sharedTemplates.push(sharedTemplate);
+        }
+        
+        alert(`Successfully published template: ${newTemplate.name}`);
+      }
+      
+      closeUploadModal();
+      renderMyTemplates();
+      renderSharedTemplates();
+      addActivity(`Template "${templateData.name}" ${editingTemplateId ? 'updated' : 'uploaded'}`);
+    }
+
+    // Update the publish button event listener
+    publishBtn.addEventListener('click', handlePublishTemplate);
+
+    function copyFirstTemplateToMyTemplates() {
+      if (sharedTemplates.length > 0 && state.myTemplates.length === 0) {
+        const firstTemplate = sharedTemplates[0];
+        const templateCopy = {
+          ...firstTemplate,
+          id: Date.now(), // Give it a new unique ID
+          isCopied: true,
+          originalTemplateId: firstTemplate.id
+        };
+        state.myTemplates.push(templateCopy);
+        addActivity(`Template "${firstTemplate.name}" automatically added to My Templates`);
+      }
+    }
+
+    // Update user UI (profile and greeting)
+    function updateUserUI() {
+      document.getElementById('username-display').textContent = state.user.username;
+      document.getElementById('profile-username').textContent = state.user.username;
+      document.getElementById('profile-bio-text').innerHTML = state.user.bio.replace(/\n/g, '<br>') +
+        `<br>${state.user.photoCount} photo${state.user.photoCount !== 1 ? "s" : ""}`;
+      document.getElementById('profile-img').style.backgroundImage = `url('${state.user.profileImg}')`;
+    }
+    updateUserUI();
+
+    // Render photo library grid
+    const photoLibraryGrid = document.querySelector('.photo-library-grid');
+
+    function renderPhotoLibrary() {
+      photoLibraryGrid.innerHTML = '';
+      state.photos.forEach(photo => {
+        const div = document.createElement('div');
+        div.classList.add('photo-card');
+        if (photo.id % 2 === 0) div.classList.add('even');
+        div.dataset.photoId = photo.id;
+        div.tabIndex = 0;
+        div.setAttribute('role', 'button');
+        div.setAttribute('aria-label', `Photo ${photo.id}`);
+
+        const img = document.createElement('img');
+        img.src = photo.src;
+        img.alt = `Photo ${photo.id}`;
+        div.appendChild(img);
+
+        // Open modal on click or enter key press
+        div.addEventListener('click', () => openPostModal(photo.id));
+        div.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === " ") {
+            e.preventDefault();
+            openPostModal(photo.id);
+          }
+        });
+
+        photoLibraryGrid.appendChild(div);
+      });
+    }
+
+    renderPhotoLibrary();
+
+    // Favorites grid
+    const favoritesGrid = document.querySelector('.favorites-grid');
+    function renderFavorites() {
+      favoritesGrid.innerHTML = '';
+      
+      // Combine photo favorites and template favorites
+      const photoFavorites = state.photos.filter(p => p.favorite);
+      const sharedTemplateFavorites = sharedTemplates.filter(t => t.favorite);
+      const myTemplateFavorites = state.myTemplates.filter(t => t.favorite);
+      
+      if (photoFavorites.length === 0 && sharedTemplateFavorites.length === 0 && myTemplateFavorites.length === 0) {
+        const noFav = document.createElement('p');
+        noFav.className = 'no-favorites-msg';
+        noFav.textContent = 'No favorites yet.';
+        favoritesGrid.appendChild(noFav);
+        return;
+      }
+      
+      // Render photo favorites
+      photoFavorites.forEach(photo => {
+        const div = document.createElement('div');
+        div.className = 'favorite-photo-card';
+        div.dataset.photoId = photo.id;
+        div.setAttribute('tabindex', '0');
+        div.setAttribute('role', 'button');
+        div.setAttribute('aria-label', `Favorite photo ${photo.id}`);
+        const img = document.createElement('img');
+        img.src = photo.src;
+        img.alt = `Favorite photo ${photo.id}`;
+        div.appendChild(img);
+        favoritesGrid.appendChild(div);
+        div.addEventListener('click', () => openPostModal(photo.id));
+        div.addEventListener('keydown', e => {
+          if (e.key === 'Enter') openPostModal(photo.id);
+        });
+      });
+      
+      // Render shared template favorites
+      sharedTemplateFavorites.forEach(template => {
+        const card = createSharedTemplateCard(template);
+        favoritesGrid.appendChild(card);
+      });
+      
+      // Render my template favorites
+      myTemplateFavorites.forEach(template => {
+        const card = createMyTemplateCard(template);
+        favoritesGrid.appendChild(card);
+      });
+    }
+
+    // Toggle shared template favorite
+    function toggleSharedTemplateFavorite(templateId) {
+      const template = sharedTemplates.find(t => t.id === templateId);
+      if (template) {
+        template.favorite = !template.favorite;
+        renderSharedTemplates();
+        renderFavorites();
+        addActivity(`Template "${template.name}" ${template.favorite ? 'added to' : 'removed from'} favorites`);
+      }
+    }
+
+    // Toggle my template favorite
+    function toggleMyTemplateFavorite(templateId) {
+      const template = state.myTemplates.find(t => t.id === templateId);
+      if (template) {
+        template.favorite = !template.favorite;
+        renderMyTemplates();
+        renderFavorites();
+        addActivity(`Template "${template.name}" ${template.favorite ? 'added to' : 'removed from'} favorites`);
+      }
+    }
+
+    // Activity log
+    const activityContainer = document.querySelector('.activity-container');
+    function addActivity(desc) {
+      const now = new Date();
+      const timestamp = now.toLocaleString();
+      state.activities.unshift({ desc, timestamp });
+      if (state.activities.length > 50) state.activities.length = 50;
+      renderActivity();
+    }
+
+    function renderActivity() {
+      activityContainer.innerHTML = '';
+      if (state.activities.length === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'activity-post empty';
+        emptyDiv.textContent = 'No activity yet.';
+        activityContainer.appendChild(emptyDiv);
+        return;
+      }
+      state.activities.forEach(act => {
+        const post = document.createElement('div');
+        post.className = 'activity-post';
+        post.textContent = `${act.desc}\n${act.timestamp}`;
+        activityContainer.appendChild(post);
+      });
+    }
+    renderActivity();
+
+    // Templates functionality
+    const sharedGrid = document.querySelector('#tab-shared .vertical-templates-container');
+    const myTemplatesGrid = document.querySelector('#tab-mytemplates .vertical-templates-container');
+
+    // Function to create My Template card 
+    function createMyTemplateCard(template) {
+      const article = document.createElement('article');
+      article.className = 'vertical-template-card';
+      
+      // Set background image if available
+      if (template.photos && template.photos.length > 0) {
+        article.style.backgroundImage = `url('${template.photos[0]}')`;
+      }
+      
+      article.setAttribute('aria-label', `My template: ${template.name}`);
+
+      // Template photo container
+      const photoContainer = document.createElement('div');
+      photoContainer.className = 'template-photo-container';
+      
+      // Create photo layout based on shots
+      const shots = parseInt(template.shots || 1);
+      const frameSize = template.frameSize || '2x6';
+      const effect = template.effect || 'none';
+      
+      if (shots === 1) {
+        const photoDiv = document.createElement('div');
+        photoDiv.className = `template-photo-single frame-${frameSize} effect-${effect}`;
+        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        
+        photoContainer.appendChild(photoDiv);
+      } else {
+        const multipleContainer = document.createElement('div');
+        multipleContainer.className = `template-photo-multiple ${shots}-shots frame-${frameSize}`;
+        
+        for (let i = 0; i < shots; i++) {
+          const photoSlot = document.createElement('div');
+          photoSlot.className = `photo-slot effect-${effect}`;
+          photoSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+          multipleContainer.appendChild(photoSlot);
+        }
+        
+        photoContainer.appendChild(multipleContainer);
+      }
+
+      // Add stickers scattered across the entire card
+      if (template.photos && template.photos.length > 1) {
+        const stickerOverlay = document.createElement('div');
+        stickerOverlay.className = 'sticker-overlay';
+        
+        // Use saved positions if available, otherwise use default positions
+        const defaultPositions = [
+          { top: '10%', left: '10%', rotate: '5deg' },
+          { top: '15%', left: '80%', rotate: '-10deg' },
+          { top: '50%', left: '20%', rotate: '15deg' },
+          { top: '60%', left: '70%', rotate: '-5deg' },
+          { top: '80%', left: '30%', rotate: '10deg' },
+          { top: '85%', left: '85%', rotate: '-15deg' }
+        ];
+        
+        template.photos.slice(1).forEach((sticker, index) => {
+          const savedPosition = template.stickerPositions && template.stickerPositions[index];
+          const pos = savedPosition ? 
+            { top: savedPosition.top, left: savedPosition.left, rotate: '0deg' } : 
+            defaultPositions[index % defaultPositions.length];
+          
+          const stickerDiv = document.createElement('div');
+          stickerDiv.className = 'sticker';
+          stickerDiv.style.backgroundImage = `url('${sticker}')`;
+          stickerDiv.style.top = pos.top;
+          stickerDiv.style.left = pos.left;
+          stickerDiv.style.transform = `rotate(${pos.rotate})`;
+          stickerDiv.setAttribute('data-sticker-index', index);
+          stickerOverlay.appendChild(stickerDiv);
+        });
+        
+        article.appendChild(stickerOverlay);
+        
+        // Add drag functionality to stickers
+        setTimeout(() => {
+          addStickerDragFunctionality(article);
+        }, 0);
+      }
+
+      // Template tags
+      const tagsDiv = document.createElement('div');
+      tagsDiv.className = 'template-tags';
+      tagsDiv.textContent = template.tags || '';
+
+      // Use button
+      const useBtn = document.createElement('button');
+      useBtn.className = 'vertical-use-template-btn';
+      useBtn.setAttribute('aria-label', 'Use this template');
+      useBtn.type = 'button';
+      useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
+      useBtn.addEventListener('click', () => {
+        alert(`Using template: ${template.name}`);
+      });
+
+      // Icon buttons - FAVORITE, EDIT, AND DELETE
+      const iconsDiv = document.createElement('div');
+      iconsDiv.className = 'vertical-template-icons';
+      iconsDiv.setAttribute('role', 'group');
+      iconsDiv.setAttribute('aria-label', 'Template controls');
+
+      // Favorite button
+      const favoriteBtn = document.createElement('button');
+      favoriteBtn.type = 'button';
+      favoriteBtn.setAttribute('aria-label', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.setAttribute('title', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.innerHTML = '<img src="Icons 2/save1.svg" alt="Favorite icon" />';
+      
+      // Add active class if template is favorited
+      if (template.favorite) {
+        favoriteBtn.querySelector('img').classList.add('favorite-active');
+      }
+      
+      favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMyTemplateFavorite(template.id);
+      });
+
+      // EDIT BUTTON 
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.setAttribute('aria-label', 'Edit template');
+      editBtn.setAttribute('title', 'Edit template');
+      editBtn.innerHTML = '<img src="Icons 2/btnedit1.svg" alt="Edit icon" />';
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditTemplateModal(template);
+      });
+
+      // Delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.setAttribute('aria-label', 'Delete template');
+      deleteBtn.setAttribute('title', 'Delete template');
+      deleteBtn.innerHTML = '<img src="Icons 2/btndel1.svg" alt="Delete icon" />';
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this template?')) {
+          state.myTemplates = state.myTemplates.filter(t => t.id !== template.id);
+          renderMyTemplates();
+          renderFavorites();
+          addActivity(`Template "${template.name}" deleted from My Templates`);
+        }
+      });
+
+      // Add buttons to icons container
+      iconsDiv.appendChild(favoriteBtn);
+      iconsDiv.appendChild(editBtn); 
+      iconsDiv.appendChild(deleteBtn);
+
+      // Assemble the card
+      article.appendChild(photoContainer);
+      article.appendChild(tagsDiv);
+      article.appendChild(useBtn);
+      article.appendChild(iconsDiv);
+
+      return article;
+    }
+
+    // Function to create Shared Template card 
+    function createSharedTemplateCard(template) {
+      const article = document.createElement('article');
+      article.className = 'vertical-template-card';
+      
+      // Set background image if available
+      if (template.photos && template.photos.length > 0) {
+        article.style.backgroundImage = `url('${template.photos[0]}')`;
+      }
+      
+      article.setAttribute('aria-label', `Shared template: ${template.name}`);
+
+      // Template photo container
+      const photoContainer = document.createElement('div');
+      photoContainer.className = 'template-photo-container';
+      
+      // Create photo layout based on shots
+      const shots = parseInt(template.shots || 1);
+      const frameSize = template.frameSize || '2x6';
+      const effect = template.effect || 'none';
+      
+      if (shots === 1) {
+        const photoDiv = document.createElement('div');
+        photoDiv.className = `template-photo-single frame-${frameSize} effect-${effect}`;
+        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        
+        photoContainer.appendChild(photoDiv);
+      } else {
+        const multipleContainer = document.createElement('div');
+        multipleContainer.className = `template-photo-multiple ${shots}-shots frame-${frameSize}`;
+        
+        for (let i = 0; i < shots; i++) {
+          const photoSlot = document.createElement('div');
+          photoSlot.className = `photo-slot effect-${effect}`;
+          photoSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+          multipleContainer.appendChild(photoSlot);
+        }
+        
+        photoContainer.appendChild(multipleContainer);
+      }
+
+      // Add stickers scattered across the entire card
+      if (template.photos && template.photos.length > 1) {
+        const stickerOverlay = document.createElement('div');
+        stickerOverlay.className = 'sticker-overlay';
+        
+        // Use saved positions if available, otherwise use default positions
+        const defaultPositions = [
+          { top: '10%', left: '10%', rotate: '5deg' },
+          { top: '15%', left: '80%', rotate: '-10deg' },
+          { top: '50%', left: '20%', rotate: '15deg' },
+          { top: '60%', left: '70%', rotate: '-5deg' },
+          { top: '80%', left: '30%', rotate: '10deg' },
+          { top: '85%', left: '85%', rotate: '-15deg' }
+        ];
+        
+        template.photos.slice(1).forEach((sticker, index) => {
+          const savedPosition = template.stickerPositions && template.stickerPositions[index];
+          const pos = savedPosition ? 
+            { top: savedPosition.top, left: savedPosition.left, rotate: '0deg' } : 
+            defaultPositions[index % defaultPositions.length];
+          
+          const stickerDiv = document.createElement('div');
+          stickerDiv.className = 'sticker';
+          stickerDiv.style.backgroundImage = `url('${sticker}')`;
+          stickerDiv.style.top = pos.top;
+          stickerDiv.style.left = pos.left;
+          stickerDiv.style.transform = `rotate(${pos.rotate})`;
+          stickerDiv.setAttribute('data-sticker-index', index);
+          stickerOverlay.appendChild(stickerDiv);
+        });
+        
+        article.appendChild(stickerOverlay);
+        
+        // Add drag functionality to stickers
+        setTimeout(() => {
+          addStickerDragFunctionality(article);
+        }, 0);
+      }
+
+      // Template tags
+      const tagsDiv = document.createElement('div');
+      tagsDiv.className = 'template-tags';
+      tagsDiv.textContent = template.tags || '';
+
+      // Use button
+      const useBtn = document.createElement('button');
+      useBtn.className = 'vertical-use-template-btn';
+      useBtn.setAttribute('aria-label', 'Use this template');
+      useBtn.type = 'button';
+      useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
+      useBtn.addEventListener('click', () => {
+        alert(`Using template: ${template.name}`);
+      });
+
+      // Icon buttons - ONLY FAVORITE (no copy/share)
+      const iconsDiv = document.createElement('div');
+      iconsDiv.className = 'vertical-template-icons';
+      iconsDiv.setAttribute('role', 'group');
+      iconsDiv.setAttribute('aria-label', 'Template controls');
+
+      // Favorite button
+      const favoriteBtn = document.createElement('button');
+      favoriteBtn.type = 'button';
+      favoriteBtn.setAttribute('aria-label', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.setAttribute('title', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.innerHTML = '<img src="Icons 2/save1.svg" alt="Favorite icon" />';
+      
+      // Add active class if template is favorited
+      if (template.favorite) {
+        favoriteBtn.querySelector('img').classList.add('favorite-active');
+      }
+      
+      favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSharedTemplateFavorite(template.id);
+      });
+
+      // Add only favorite button to icons container
+      iconsDiv.appendChild(favoriteBtn);
+
+      // Assemble the card
+      article.appendChild(photoContainer);
+      article.appendChild(tagsDiv);
+      article.appendChild(useBtn);
+      article.appendChild(iconsDiv);
+
+      return article;
+    }
+
+    // EDIT TEMPLATE MODAL FUNCTIONALITY
+    function openEditTemplateModal(template) {
+      // Populate the upload modal with template data
+      frameSizeSelect.value = template.frameSize || '2x6';
+      shotsSelect.value = template.shots || '1';
+      tagsInput.value = template.tags || '';
+      shareToggle.checked = template.shareToCommunity || false;
+      
+      // Set the selected effect
+      effectOptions.forEach(opt => opt.classList.remove('selected'));
+      const effectBtn = document.querySelector(`[data-effect="${template.effect || 'warm'}"]`);
+      if (effectBtn) effectBtn.classList.add('selected');
+      currentEffect = template.effect || 'warm';
+      
+      // Set uploaded files
+      uploadedBackground = template.photos && template.photos.length > 0 ? template.photos[0] : null;
+      uploadedStickers = template.photos && template.photos.length > 1 ? template.photos.slice(1) : [];
+      
+      updatePreview();
+      
+      // Update the modal title to indicate editing
+      const modalTitle = document.getElementById('upload-template-title');
+      modalTitle.textContent = 'Edit Template';
+      
+      // Update the publish button text
+      publishBtn.textContent = 'Update';
+      
+      // Store the template being edited
+      uploadModal.dataset.editingTemplateId = template.id;
+      
+      // Open the modal
+      uploadModal.classList.add('active');
+      trapFocus(uploadModal);
+    }
+
+    // Render shared templates grid 
+    function renderSharedTemplates() {
+      const sharedContainer = document.querySelector('#tab-shared .vertical-templates-container');
+      sharedContainer.innerHTML = '';
+      
+      if (sharedTemplates.length === 0) {
+        sharedContainer.innerHTML = `
+          <div class="empty-state">
+            <img src="Icons 2/templates.svg" alt="No templates">
+            <h3>No Shared Templates Yet</h3>
+            <p>When community members share templates, they'll appear here.</p>
+            <button onclick="alert('Creating your first template!')">Create Your First Template</button>
+          </div>
+        `;
+      } else {
+        sharedTemplates.forEach(tpl => {
+          const card = createSharedTemplateCard(tpl);
+          sharedContainer.appendChild(card);
+        });
+      }
+    }
+
+    // Function to render My Templates section
+    function renderMyTemplates() {
+      const myTemplatesContainer = document.querySelector('#tab-mytemplates .vertical-templates-container');
+      
+      // Always include the upload card first
+      myTemplatesContainer.innerHTML = `
+        <div class="template-upload-card" tabindex="0" role="button" aria-label="Upload your template" 
+          id="open-upload-modal-btn"
+          onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); openUploadTemplateModal(); }">
+          <div class="plus-sign">+</div>
+          Upload your template
+        </div>
+      `;
+
+      // Add existing templates if any
+      if (state.myTemplates && state.myTemplates.length > 0) {
+        state.myTemplates.forEach(template => {
+          const templateCard = createMyTemplateCard(template);
+          myTemplatesContainer.appendChild(templateCard);
+        });
+      }
+      
+      // Re-attach event listener to the upload button
+      document.getElementById('open-upload-modal-btn').addEventListener('click', openUploadTemplateModal);
+    }
+
+    // Tab switching for templates
+    const tabSharedBtn = document.getElementById('tab-shared-btn');
+    const tabMyTemplatesBtn = document.getElementById('tab-mytemplates-btn');
+    const tabShared = document.getElementById('tab-shared');
+    const tabMyTemplates = document.getElementById('tab-mytemplates');
+
+    tabSharedBtn.addEventListener('click', () => {
+      tabShared.style.display = 'block';
+      tabMyTemplates.style.display = 'none';
+      tabSharedBtn.classList.add('active');
+      tabSharedBtn.setAttribute('aria-selected', 'true');
+      tabMyTemplatesBtn.classList.remove('active');
+      tabMyTemplatesBtn.setAttribute('aria-selected', 'false');
+      renderSharedTemplates();
+    });
+
+    tabMyTemplatesBtn.addEventListener('click', () => {
+      tabShared.style.display = 'none';
+      tabMyTemplates.style.display = 'block';
+      tabMyTemplatesBtn.classList.add('active');
+      tabMyTemplatesBtn.setAttribute('aria-selected', 'true');
+      tabSharedBtn.classList.remove('active');
+      tabSharedBtn.setAttribute('aria-selected', 'false');
+      renderMyTemplates();
+    });
+
+    // Sidebar navigation
+    const sidebarButtons = document.querySelectorAll('.left-buttons button');
+    const photoLibrarySubnav = document.getElementById('photo-library-subnav');
+    
+    sidebarButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.target === 'logout') {
+          alert('Logging out...');
+          return;
+        }
+        
+        // Hide ALL sections
+        document.querySelectorAll('.section').forEach(section => {
+          section.style.display = 'none';
+        });
+        
+        // Hide photo library subnav by default
+        photoLibrarySubnav.style.display = 'none';
+        
+        // Show the selected section and conditionally show subnav
+        if (btn.dataset.target === 'favorites') {
+          document.getElementById('section-favorites').style.display = 'block';
+          renderFavorites();
+        } else if (btn.dataset.target === 'activity') {
+          document.getElementById('section-activity').style.display = 'block';
+          renderActivity();
+        } else if (btn.dataset.target === 'templates') {
+          document.getElementById('section-templates').style.display = 'block';
+          renderSharedTemplates();
+        } else {
+          // Default to photo library
+          document.getElementById('section-photolib').style.display = 'block';
+          photoLibrarySubnav.style.display = 'flex';
+        }
+        
+        // Update active button
+        sidebarButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Modal elements
+    const postModal = document.getElementById('post-modal');
+    const modalLeft = postModal.querySelector('.modal-left');
+    const modalUsername = document.getElementById('modal-username');
+    const commentsContainer = document.getElementById('comments-container');
+    const noCommentsText = document.getElementById('no-comments-text');
+    const commentForm = document.getElementById('comment-form');
+    const commentInput = document.getElementById('comment-input');
+    const commentPostBtn = document.getElementById('comment-post-btn');
+    const reactionFooter = document.getElementById('reaction-footer');
+    const modalCloseBtn = document.getElementById('post-modal-close-btn');
+
+    let currentPhotoId = null;
+
+    // Modal and form elements for edit profile
+    const editProfileModal = document.getElementById('edit-profile-modal');
+    const editProfileBtn = document.getElementById('btn-edit-profile');
+    const editCloseBtn = document.getElementById('edit-profile-close');
+    const editCancelBtn = document.getElementById('edit-cancel-btn');
+    const editProfileForm = document.getElementById('edit-profile-form');
+    const editUsernameInput = document.getElementById('edit-username');
+    const editBioInput = document.getElementById('edit-bio');
+    const editProfilePic = document.getElementById('edit-profile-pic');
+    const changePhotoBtn = document.getElementById('change-photo-btn');
+    const profilePhotoInput = document.getElementById('profile-photo-input');
+    const profileMainImg = document.getElementById('profile-img');
+
+    // Function to open edit profile modal and fill current state values
+    function openEditProfileModal() {
+      editUsernameInput.value = state.user.username;
+      editBioInput.value = state.user.bio;
+      editProfilePic.src = state.user.profileImg || '';
+      editProfileModal.classList.add('active');
+      editUsernameInput.focus();
+      trapFocus(editProfileModal);
+    }
+
+    // Close modal function for edit profile
+    function closeEditProfileModal() {
+      editProfileModal.classList.remove('active');
+      releaseFocusTrap();
+    }
+
+    // Open modal on Edit Profile button click
+    editProfileBtn.addEventListener('click', openEditProfileModal);
+
+    // Close modal on close button or cancel button click
+    editCloseBtn.addEventListener('click', closeEditProfileModal);
+    editCancelBtn.addEventListener('click', closeEditProfileModal);
+
+    // Close modal on clicking outside modal content
+    editProfileModal.addEventListener('click', (e) => {
+      if (e.target === editProfileModal) closeEditProfileModal();
+    });
+
+    // Close modal on ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (editProfileModal.classList.contains('active')) {
+          closeEditProfileModal();
+        }
+        if (postModal.classList.contains('active')) {
+          postModal.classList.remove('active');
+          releaseFocusTrap();
+        }
+        if (uploadModal.classList.contains('active')) {
+          closeUploadModal();
+        }
+      }
+    });
+
+    // Handle Change Photo button - opens actual file explorer
+    changePhotoBtn.addEventListener('click', () => {
+      profilePhotoInput.click();
+    });
+
+    // Handle file selection from file explorer
+    profilePhotoInput.addEventListener('change', () => {
+      if (profilePhotoInput.files && profilePhotoInput.files[0]) {
+        const file = profilePhotoInput.files[0];
+        
+        // Check if file is an image
+        if (!file.type.startsWith('image/')) {
+          alert('Please select a valid image file (JPEG, PNG, GIF, etc.).');
+          return;
+        }
+        
+        // Create a FileReader to read the file
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          // Update the profile picture with the selected image
+          const newProfilePic = e.target.result;
+          editProfilePic.src = newProfilePic;
+          profileMainImg.style.backgroundImage = `url('${newProfilePic}')`;
+          state.user.profileImg = newProfilePic;
+        };
+        
+        reader.onerror = function() {
+          alert('Error reading the selected file. Please try again.');
+        };
+        
+        // Read the file as a data URL
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Handle edit profile form submission
+    editProfileForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newUsername = editUsernameInput.value.trim();
+      const newBio = editBioInput.value.trim();
+      if (newUsername.length === 0) {
+        alert('Username cannot be empty.');
+        editUsernameInput.focus();
+        return;
+      }
+      // Update state and UI
+      state.user.username = newUsername;
+      state.user.bio = newBio;
+      updateUserUI();
+      closeEditProfileModal();
+    });
+
+    // Open modal with only the selected photo in the left section
+    function openPostModal(photoId) {
+      currentPhotoId = photoId;
+      const photo = state.photos.find(p => p.id === photoId);
+      if (!photo) return;
+
+      modalUsername.textContent = state.user.username;
+
+      // Show only the selected photo in the left section
+      modalLeft.style.display = 'flex';
+      modalLeft.innerHTML = '';
+      
+      const img = document.createElement('img');
+      img.src = photo.src;
+      img.alt = `Photo ${photo.id}`;
+      modalLeft.appendChild(img);
+
+      // Render comments & reactions for current photo
+      renderComments(photo);
+      renderReactions(photo);
+
+      noCommentsText.style.display = photo.comments.length === 0 ? 'block' : 'none';
+
+      postModal.classList.add('active');
+      commentInput.value = '';
+      commentPostBtn.disabled = true;
+      commentInput.focus();
+
+      trapFocus(postModal);
+    }
+
+    // Close modal handlers
+    modalCloseBtn.addEventListener('click', () => {
+      postModal.classList.remove('active');
+      releaseFocusTrap();
+    });
+
+    postModal.addEventListener('click', e => {
+      if (e.target === postModal) {
+        postModal.classList.remove('active');
+        releaseFocusTrap();
+      }
+    });
+
+    // Render comments for current photo
+    function renderComments(photo) {
+      commentsContainer.innerHTML = '';
+      if (!photo.comments || photo.comments.length === 0) {
+        noCommentsText.style.display = 'block';
+        return;
+      }
+      noCommentsText.style.display = 'none';
+      photo.comments.forEach(comment => {
+        commentsContainer.appendChild(createCommentElement(comment));
+      });
+    }
+
+    // Create individual comment element
+    function createCommentElement(comment) {
+      const div = document.createElement('div');
+      div.className = 'comment';
+      div.tabIndex = 0;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.style.backgroundImage = `url('${comment.avatar || ''}')`;
+      div.appendChild(avatar);
+
+      const content = document.createElement('div');
+      content.className = 'comment-content';
+
+      const author = document.createElement('div');
+      author.className = 'comment-author';
+      author.textContent = comment.username;
+      content.appendChild(author);
+
+      const text = document.createElement('div');
+      text.className = 'comment-text';
+      text.textContent = comment.text;
+      content.appendChild(text);
+
+      const footer = document.createElement('div');
+      footer.className = 'comment-footer';
+
+      const dateSpan = document.createElement('span');
+      dateSpan.textContent = comment.date || 'now';
+      footer.appendChild(dateSpan);
+
+      const replyBtn = document.createElement('button');
+      replyBtn.textContent = 'Reply';
+      replyBtn.setAttribute('aria-label', 'Reply to ' + comment.username);
+      footer.appendChild(replyBtn);
+
+      // Like heart icon as image
+      const heartImg = document.createElement('img');
+      heartImg.classList.add('heart-icon');
+      heartImg.src = 'Icons 2/heart.svg';
+      heartImg.alt = 'Like comment';
+      heartImg.title = 'Like comment';
+      footer.appendChild(heartImg);
+
+      div.appendChild(content);
+      div.appendChild(footer);
+
+      replyBtn.addEventListener('click', () => {
+        commentInput.value = `@${comment.username} `;
+        commentInput.focus();
+      });
+      heartImg.addEventListener('click', () => {
+        heartImg.classList.toggle('liked');
+      });
+
+      return div;
+    }
+
+    // Render reactions (like, favorite, comment button, likes count)
+    function renderReactions(photo) {
+      reactionFooter.innerHTML = '';
+
+      // Heart like button as image
+      const heartBtn = document.createElement('img');
+      heartBtn.classList.add('heart-icon');
+      heartBtn.src = 'Icons 2/heart.svg';
+      heartBtn.alt = 'Like photo';
+      heartBtn.title = 'Like photo';
+      if (photo.liked) heartBtn.classList.add('liked');
+      reactionFooter.appendChild(heartBtn);
+
+      // Comment icon as image
+      const commentBtn = document.createElement('img');
+      commentBtn.classList.add('comment-icon');
+      commentBtn.src = 'Icons 2/comment.svg';
+      commentBtn.alt = 'Add comment';
+      commentBtn.title = 'Add comment';
+      commentBtn.style.marginLeft = '12px';
+      commentBtn.style.cursor = 'pointer';
+      reactionFooter.appendChild(commentBtn);
+
+      // Likes count or placeholder text
+      const likesText = document.createElement('div');
+      likesText.className = 'likes-text';
+      const count = photo.liked ? Math.floor(Math.random() * 10) + 1 : 0;
+      likesText.textContent = count > 0 ? `${count} people liked this` : 'Be the first to like this';
+      reactionFooter.appendChild(likesText);
+
+      // Date text
+      const dateText = document.createElement('div');
+      dateText.style.color = '#edb9d5';
+      dateText.style.fontSize = '11px';
+      dateText.textContent = photo.date || new Date().toLocaleDateString();
+      reactionFooter.appendChild(dateText);
+
+      // Bookmark (favorite) icon as image
+      const bookmark = document.createElement('img');
+      bookmark.classList.add('bookmark-icon');
+      bookmark.src = 'Icons 2/save.svg';
+      bookmark.alt = photo.favorite ? 'Remove from favorites' : 'Add to favorites';
+      bookmark.title = photo.favorite ? 'Remove from favorites' : 'Add to favorites';
+      if (photo.favorite) bookmark.classList.add('active');
+      bookmark.style.marginLeft = 'auto';
+      bookmark.style.cursor = 'pointer';
+      reactionFooter.appendChild(bookmark);
+
+      // Toggle favorite on bookmark click
+      bookmark.addEventListener('click', () => {
+        photo.favorite = !photo.favorite;
+        bookmark.classList.toggle('active');
+        bookmark.alt = photo.favorite ? 'Remove from favorites' : 'Add to favorites';
+        bookmark.title = photo.favorite ? 'Remove from favorites' : 'Add to favorites';
+        renderFavorites();
+        addActivity(`Photo ${photo.id} ${photo.favorite ? 'added to' : 'removed from'} favorites`);
+      });
+
+      // Toggle like photo on heart click and update reaction area
+      heartBtn.addEventListener('click', () => {
+        photo.liked = !photo.liked;
+        heartBtn.classList.toggle('liked');
+        renderReactions(photo);
+        addActivity(`Photo ${photo.id} ${photo.liked ? 'liked' : 'unliked'}`);
+      });
+
+      // Focus comment textarea on comment icon click
+      commentBtn.addEventListener('click', () => commentInput.focus());
+    }
+
+    // Comment input enable/disable Post button
+    commentInput.addEventListener('input', () => {
+      commentPostBtn.disabled = commentInput.value.trim().length === 0;
+    });
+
+    // Handle comment submit
+    commentForm.addEventListener('submit', e => {
+      e.preventDefault();
+      if (currentPhotoId === null) return;
+      const photo = state.photos.find(p => p.id === currentPhotoId);
+      if (photo && commentInput.value.trim() !== '') {
+        if (!Array.isArray(photo.comments)) photo.comments = [];
+        photo.comments.push({
+          username: state.user.username,
+          avatar: state.user.profileImg,
+          text: commentInput.value.trim(),
+          date: new Date().toLocaleDateString()
+        });
+        commentInput.value = '';
+        commentPostBtn.disabled = true;
+        renderComments(photo);
+        noCommentsText.style.display = 'none';
+        addActivity(`New comment on photo ${photo.id}`);
+      }
+    });
+
+    // Accessibility: Trap focus inside modal when open
+    let lastFocusedElement = null;
+
+    function trapFocus(element) {
+      lastFocusedElement = document.activeElement;
+      const focusableElements = element.querySelectorAll(
+        'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]'
+      );
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements[focusableElements.length - 1];
+
+      function handleKeyDown(e) {
+        if (e.key === 'Tab') {
+          if (e.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+              e.preventDefault();
+              lastFocusable.focus();
+            }
+          } else {
+            if (document.activeElement === lastFocusable) {
+              e.preventDefault();
+              firstFocusable.focus();
+            }
+          }
+        }
+      }
+
+      element.addEventListener('keydown', handleKeyDown);
+      element._focusTrapHandler = handleKeyDown;
+
+      firstFocusable.focus();
+    }
+
+    function releaseFocusTrap() {
+      if (lastFocusedElement) lastFocusedElement.focus();
+      // Remove event listener for postModal
+      if (postModal._focusTrapHandler) {
+        postModal.removeEventListener('keydown', postModal._focusTrapHandler);
+        postModal._focusTrapHandler = null;
+      }
+      // Remove event listener for editProfileModal
+      if (editProfileModal._focusTrapHandler) {
+        editProfileModal.removeEventListener('keydown', editProfileModal._focusTrapHandler);
+        editProfileModal._focusTrapHandler = null;
+      }
+      // Remove event listener for uploadModal
+      if (uploadModal._focusTrapHandler) {
+        uploadModal.removeEventListener('keydown', uploadModal._focusTrapHandler);
+        uploadModal._focusTrapHandler = null;
+      }
+    }
+
+    // Add some sample activities
+    addActivity('Profile picture updated');
+    addActivity('Photo 1 added to favorites');
+    addActivity('New comment on photo 2');
+
+    // Initialize the page 
+    copyFirstTemplateToMyTemplates();
+    renderSharedTemplates();
+    renderMyTemplates();
+    renderPhotoLibrary();
+    renderFavorites();
+    renderActivity();
+  </script>
+</body>
+
+</html>

@@ -47,8 +47,8 @@
     .template-search-row-top input[type="text"] { flex:1; padding:0.9rem 1rem; font-size:1.05em; border-radius:9px; border:1.7px solid #e10994; outline:none;}
     .template-search-row-bottom {display:flex; gap:1rem; align-items:center;}
     .template-search-row-bottom label { font-weight:bold; margin-right:0.3rem; color:#e10994; font-size:1.05em;}
-    .template-search-row-bottom select,
-    .template-search-row-bottom input[type="date"] {padding:0.6rem 1rem; border-radius:8px; border:1.7px solid #fa49c5; font-size:1em; outline:none;}
+    .template-search-row-bottom select {padding:0.6rem 1rem; border-radius:8px; border:1.7px solid #fa49c5; font-size:1em; outline:none;}
+    .template-search-row-bottom input[type="date"] {padding:0.3rem 0.5rem; border-radius:8px; border:1.7px solid #fa49c5; font-size:1em; outline:none;}
     .template-table { width:100%; border-collapse:collapse; background:#fffafb; margin-top:1.3rem; border-radius:12px; overflow:hidden;}
     .template-table thead tr {background:#fde1f2;}
     .template-table th, .template-table td {padding:1rem; text-align:left; font-size:1.07em; border-bottom:2px solid #fcc2f2;}
@@ -59,6 +59,7 @@
     .template-table td .action-icon {margin-right:.8rem; cursor:pointer; opacity:0.90; vertical-align:middle; width:20px; height:20px; transition:opacity .2s;}
     .template-table td .action-icon:last-child {margin-right:0;}
     .template-table td .action-icon:hover { opacity:1;}
+    
     /* Modal styles with scroll */
     .modal-overlay {position: fixed;top: 0; left: 0; right: 0; bottom: 0;background: rgba(128, 128, 128, 0.6);display: flex;justify-content: center;align-items: center;z-index: 1000;overflow-y: auto; padding: 1rem;  }
     .modal {background: #fff;padding: 2rem 2.5rem;border-radius: 12px;width: 520px;max-height: 90vh;overflow-y: auto;font-family: 'Poppins', sans-serif;box-shadow: 0 8px 25px rgba(210, 52, 129, 0.25);box-sizing: border-box;position: relative;}
@@ -194,6 +195,73 @@
     .saveChangeBtn:hover { background: linear-gradient(90deg, #cddc39 0%, #4caf50 100%);}
     .closeManageBtn{background: #efefef; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 700; cursor: pointer;}
     .closeManageBtn:hover {background-color: #dcdcdc;}
+    /* UPDATED FAVORITES SECTION */
+    #section-favorites {user-select: none;display: none;}
+    #section-favorites.active { display: block;}
+    #section-favorites h2 {font-family: 'Fredoka One', cursive;font-size: 30px;margin-top: 0;color: #c32d6c;}
+    .favorites-vertical-container {display: flex;gap: 40px;user-select: none;flex-wrap: wrap;padding-top: 30px;}
+    .no-favorites-msg {font-style: italic;color: #f9acdb;user-select: none;text-align: center;padding: 20px;width: 100%;grid-column: 1 / -1;}
+    .vertical-template-card.dragging {opacity: 0.5;transform: scale(0.95);box-shadow: 0 8px 25px rgba(210, 52, 129, 0.5);}
+    .favorites-vertical-container.drop-zone {border: 2px dashed #ea5a9f;border-radius: 16px;min-height: 200px;display: flex;align-items: center;justify-content: center;background-color: rgba(234, 90, 159, 0.05);transition: all 0.3s ease;}
+    .favorites-vertical-container.drop-zone.active {background-color: rgba(234, 90, 159, 0.1);border-color: #d23481;}
+    .drop-message {color: #d23481;font-weight: 600;font-size: 1.2rem;text-align: center;padding: 20px;}
+    /* Activity Section */
+    #section-activity { user-select: none; display: none; }
+    #section-activity.active { display: block; }
+    #section-activity h2 { font-family: 'Fredoka One', cursive; font-size: 30px; margin-top: 0; color: #c32d6c; }
+    .activity-container { display: flex; flex-direction: column; gap: 22px; height: 100%; overflow-y: auto; }
+    .activity-post { background: white; border-radius: 14px; border: 1px solid #f3c7d9; padding: 12px 14px; font-size: 14px; line-height: 1.3; color: #d72b7e; white-space: pre-line; word-break: break-word; }
+    .activity-post.empty { font-style: italic; color: #f29dcc; border-color: #fddaeb; }
+    /* FEED SECTION STYLES */
+    #section-feed {user-select: none;display: none;}
+    #section-feed.active {display: block;}
+    #section-feed h2 {font-family: 'Fredoka One', cursive;font-size: 30px;margin-top: 0;color: #c32d6c;}
+    .tabnav {display: flex;gap: 2rem;border-bottom: 2px solid #ea5a9f;margin-bottom: 1.2rem;user-select: none;}
+    .tabnav button {background: none;border: none;cursor: pointer;font-weight: 600;font-size: 1rem;color: #d23481;border-bottom: 3px solid transparent;padding-bottom: 0.4rem;transition: color 0.3s, border-color 0.3s;}
+    .tabnav button:hover {color: #ea5a9f;}
+    .tabnav button.active {border-color: #ea5a9f;font-weight: 700;color: #ea5a9f;}
+    .vertical-templates-container {display: flex;gap: 40px;user-select: none;flex-wrap: wrap;}
+    .vertical-template-card {position: relative;width: 200px;height: 500px; padding: 16px;border-radius: 16px;background: linear-gradient(to bottom, #5e2e55, #765075);box-shadow: 0 1px 28px 10px rgb(169 42 89 / 0.2);display: flex;flex-direction: column;justify-content: flex-start;user-select: none;overflow: hidden;background-size: cover;background-position: center;transition: all 0.3s ease;}
+    .template-photo-container {width: 100%;height: 380px; /* Increased height for bigger photos */position: relative;overflow: hidden;border-radius: 6px;background-color: rgba(255, 255, 255, 0.9);box-shadow: inset 0 0 3px #0070c0;}
+    .template-photo-single {width: 100%;height: 100%;background-size: cover;background-position: center;position: relative;}
+    .template-photo-multiple {display: grid;width: 100%;height: 100%;position: relative;}
+    .template-photo-multiple.two-shots {grid-template-columns: 1fr 1fr;gap: 4px;}
+    .template-photo-multiple.three-shots {grid-template-columns: 1fr 1fr;grid-template-rows: 1fr 1fr;gap: 4px;}
+    .template-photo-multiple.four-shots {grid-template-columns: 1fr 1fr;grid-template-rows: 1fr 1fr;gap: 4px;}
+    .photo-slot {background-size: cover;background-position: center;border-radius: 4px;}
+    .sticker-overlay {position: absolute;top: 0;left: 0;width: 100%;height: 100%;pointer-events: none;z-index: 2;}
+    .sticker {position: absolute;width: 40px;height: 40px;background-size: contain;background-repeat: no-repeat;background-position: center;cursor: grab;transition: transform 0.2s ease, box-shadow 0.2s ease;z-index: 3;}
+    .sticker.dragging {cursor: grabbing;box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);transform: scale(1.1);z-index: 10;}
+    .sticker:hover {transform: scale(1.05);}
+    .template-tags {margin-top: 8px;font-size: 0.75rem;padding: 20px;color: #f4cade;text-align: center;max-height: 40px;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;line-clamp: 2;}
+    .vertical-template-icons {position: absolute;top: 16px;right: 16px;display: flex;flex-direction: column;gap: 14px;user-select: none;opacity: 0;transition: opacity 0.3s ease;z-index: 5;}
+    .vertical-template-card:hover .vertical-template-icons {opacity: 1;}
+    .vertical-template-icons button {background: none;border: none;cursor: pointer;padding: 0;display: flex;justify-content: center;align-items: center;transition: transform 0.2s;}
+    .vertical-template-icons button:hover {transform: scale(1.1);}
+    .vertical-template-icons img {width: 24px;height: 24px;pointer-events: none;user-select: none;}
+    .vertical-use-template-btn {background-color: #db2d73;border: none;border-radius: 8px;color: white;font-weight: 700;font-size: 1rem;padding: 0.75rem 1.25rem;cursor: pointer;display: flex;align-items: center;gap: 8px;user-select: none;box-shadow: 0 4px 10px rgb(219 45 115 / 0.7);transition: background-color 0.3s ease;user-select: none;opacity: 0;transition: opacity 0.3s ease;z-index: 3;position: relative;}
+    .vertical-template-card:hover .vertical-use-template-btn {opacity: 1;}
+    .vertical-use-template-btn img {width: 20px;height: 20px;filter: invert(100%);user-select: none;pointer-events: none;}
+    .vertical-use-template-btn:hover,
+    .vertical-use-template-btn:focus {background-color: #a31a62;outline: none;}
+    /* Upload your template card */
+    .template-upload-card {width: 200px; height: 500px; border: 2.4px solid #f4cade;border-radius: 16px;display: flex;flex-direction: column;justify-content: center;align-items: center;cursor: pointer;font-weight: 700;font-size: 1.35rem;color: #f4cade;transition: background-color 0.3s ease;user-select: none;}
+    .template-upload-card > .plus-sign {font-size: 5rem;line-height: 1;margin-bottom: 8px;user-select: none;}
+    .template-upload-card:hover,
+    .template-upload-card:focus {background-color: #fce9f1;outline: none;}
+    /* File upload input */
+    #template-upload-input {display: none;}
+    /* Favorite button active state */
+    .favorite-active {filter: invert(23%) sepia(95%) saturate(2106%) hue-rotate(320deg) brightness(90%) contrast(101%);}
+    .frame-2x6 {width: 100%;height: 380px;}
+    .frame-4x6 {width: 100%;height: 450px;}
+    /* Effect filters */
+    .effect-none {filter: none;}
+    .effect-bw {filter: grayscale(100%);}
+    .effect-warm {filter: sepia(0.3) saturate(1.2) hue-rotate(-10deg);}
+    .effect-cool {filter: sepia(0.2) saturate(0.8) hue-rotate(180deg) brightness(1.1);}
+    .effect-retro {filter: sepia(0.5) contrast(1.2) saturate(1.3);}
+    .effect-noir {filter: grayscale(100%) contrast(1.5) brightness(0.8);}
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(15px);}
       to { opacity: 1; transform: translateY(0);}
@@ -218,9 +286,9 @@
         <img src="Icons/11.svg" alt="Webooth logo" />
       </div>
       <div class="left-buttons">
-        <button data-target="templates" aria-label="Templates" >
-          <img src="Icons 2/templates.svg" alt="Templates icon" />
-          <span>Templates</span>
+        <button data-target="feed" aria-label="Feed" class="active">
+          <img src="Icons 2/templates.svg" alt="Feed icon" />
+          <span>Feed</span>
         </button>
         <button data-target="favorites" aria-label="Favorites">
           <img src="Icons 2/favorites.svg" alt="Favorites icon" />
@@ -314,7 +382,7 @@
                   <option>Needs Review</option>
                   <option>Draft</option>
                 </select>
-                <label for="dateFilter">Date Added</label>
+                <label for="dateFilter">Date</label>
                 <input type="date" id="dateFilter" value="clear"/>
               </div>
             </form>
@@ -468,9 +536,47 @@
           </table>
         </section>
       </div>
+      <!-- FEED SECTION -->
+      <section id="section-feed" class="section" role="region" aria-label="Feed Section" style="display:none;">
+        <h2>Feed</h2>
+        <!-- Tab navigation -->
+        <nav class="tabnav" role="tablist" aria-label="Templates Tabs">
+          <button role="tab" aria-selected="true" class="active" id="tab-shared-btn">Shared to Community</button>
+          <button role="tab" aria-selected="false" id="tab-mytemplates-btn">My Templates</button>
+        </nav>
+        <!-- Shared Templates Grid - NOW VERTICAL DESIGN -->
+        <section id="tab-shared" role="tabpanel" aria-labelledby="tab-shared-btn" style="display:block;">
+          <div class="vertical-templates-container" aria-live="polite" aria-label="Shared templates grid">
+            <!-- Template cards will be generated here by JS -->
+          </div>
+        </section>
+        <!-- My Templates Grid - VERTICAL DESIGN -->
+        <section id="tab-mytemplates" role="tabpanel" aria-labelledby="tab-mytemplates-btn" style="display:none;">
+          <div class="vertical-templates-container" aria-live="polite" aria-label="My templates grid">
+            <!-- Upload Your Template Card -->
+            <div class="template-upload-card" tabindex="0" role="button" aria-label="Upload your template" 
+              id="open-upload-modal-btn"
+              onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); alert('Upload template modal would open here'); }">
+              <div class="plus-sign">+</div>
+              Upload your template
+            </div>
+          </div>
+        </section>
+      </section>
+      <!-- UPDATED Favorites Section -->
+      <section id="section-favorites" class="section" role="region" aria-label="Favorites Section" style="display:none;">
+        <h2>Favorites</h2>
+        <div class="favorites-vertical-container" id="favoritesContainer" aria-live="polite">
+          <!-- Favorites will be generated here by JavaScript -->
+        </div>
+      </section>
+      <!-- Activity Section -->
+      <section id="section-activity" class="section" role="region" aria-label="Activity Log Section" style="display:none;">
+        <h2>Activity</h2>
+        <div class="activity-container" aria-live="polite"></div>
+      </section>
     </main>
   </div>
-
   <!-- Upload Modal -->
   <div class="modal-overlay" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="display:none;">
     <div class="modal">
@@ -493,7 +599,6 @@
             <input type="text" id="tags" name="tags" placeholder="e.g., soft, blur, light" />
           </div>
         </div>
-
         <!-- Dual upload container for all types -->
         <div id="dualUploadContainer" style="display:none;">
           <p class="upload-instruction">Dual Size Assets (Requires 2x6 and 4x6 PNGs)</p>
@@ -510,7 +615,6 @@
             </div>
           </div>
         </div>
-
         <!-- Single upload container -->
         <div id="singleUploadContainer">
           <p class="upload-instruction" id="uploadInstruction">Upload Asset File (Filter Config or Single PNG)</p>
@@ -519,14 +623,12 @@
             <input type="file" id="singleUpload" name="singleUpload" accept=".png,.json" required />
           </div>
         </div>
-
         <!-- Initial Status -->
         <div class="status-group">
           <label>Initial Status</label>
           <label><input type="radio" name="status" value="Draft" checked /> Draft</label>
           <label><input type="radio" name="status" value="Active" /> Active</label>
         </div>
-
         <!-- Buttons -->
         <div class="modal-footer">
           <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
@@ -550,7 +652,6 @@
       </div>
     </div>
   </div>
-
     <!-- View Template Modal -->
     <div class="view-modal-overlay" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
       <div class="view-modal" role="document">
@@ -584,13 +685,11 @@
           </div>
           <div class="view-right">
             <div class="asset-title">Asset Files</div>
-
             <!-- Single config file (for Filter) -->
             <div class="asset-config" id="viewConfigContainer">
               <label class="view-label">Configuration File:</label>
               <input type="text" id="viewConfigFile" readonly />
             </div>
-
             <!-- Dual assets (for Background / Sticker Pack) -->
             <div id="viewDualAssets" style="display:none;">
               <div style="margin-block-end:0.6rem;font-weight:700;color:#d23481;">Dual Assets:</div>
@@ -611,7 +710,6 @@
                 </div>
               </div>
             </div>
-
             <!-- fallback single preview area -->
             <div class="asset-preview" id="viewAssetPreview"></div>
           </div>
@@ -622,7 +720,6 @@
         </div>
       </div>
     </div>
-
     <!-- Edit Template Modal -->
   <div class="modal-overlay" id="editModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
     <div class="modal">
@@ -632,10 +729,8 @@
           <div class="edit-left">
             <label for="editTemplateName">Template Name</label>
             <input type="text" id="editTemplateName" name="templateName" required />
-
             <label for="editTags">Tags</label>
             <input type="text" id="editTags" name="tags" />
-
             <label for="editType">Type</label>
             <select id="editType" name="type" required>
               <option value="Filter">Filter</option>
@@ -655,13 +750,11 @@
           <div class="edit-right">
             <div class="preview-title">Current Asset Preview</div>
             <div id="assetPreviewContainer"></div>
-
             <!-- Upload inputs: shown based on template type -->
             <div id="editFilterUploadContainer" style="margin-top: 1rem; display:none;">
               <label for="replaceFilterFile" class="file-upload-label" tabindex="0">Replace Main Asset File</label>
               <input type="file" id="replaceFilterFile" name="replaceFilterFile" accept=".png,.json" />
             </div>
-
             <div id="editDualUploadContainer" style="margin-top: 1rem; display:none;">
               <p class="upload-instruction">Replace Dual Size Assets</p>
               <div class="dual-upload-group">
@@ -686,7 +779,6 @@
       </form>
     </div>
   </div>
-
   <!-- Manage User Modal -->
   <div class="modal-overlay" id="manageUserModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="manageUserTitle">
     <div class="modal" style="width: 700px; max-height: 100vh; overflow-y: auto;">
@@ -773,7 +865,6 @@
       </div>
     </div>
   </div>
-
   <!-- Delete User Confirmation Modal -->
   <div class="modal-overlay" id="deleteUserModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="deleteUserModalTitle">
     <div class="modal">
@@ -790,373 +881,914 @@
   </div>
 
   <script>
-    // Tab switching
+    const sharedTemplates = [
+      {
+        id: 1,
+        photos: [],
+        favorite: false,
+        name: 'Holiday Template',
+        frameSize: '2x6',
+        shots: '1',
+        effect: 'warm',
+        shareToCommunity: true,
+        tags: '#holiday #fun'
+      },
+     
+    ];
+
+    const state = {
+      user: {
+        username: 'Username',
+        bio: 'bio',
+        photoCount: 0,
+        profileImg: ''
+      },
+      photos: [
+        {
+          id: 1,
+          src: '',
+          liked: false,
+          favorite: false,
+          date: 'October 29',
+          comments: []
+        },
+       
+      ],
+      activities: [],
+      myTemplates: []
+    };
+    function copyFirstTemplateToMyTemplates() {
+      if (sharedTemplates.length > 0 && state.myTemplates.length === 0) {
+        const firstTemplate = sharedTemplates[0];
+        const templateCopy = {
+          ...firstTemplate,
+          id: Date.now(), // Give it a new unique ID
+          isCopied: true,
+          originalTemplateId: firstTemplate.id
+        };
+        state.myTemplates.push(templateCopy);
+        addActivity(`Template "${firstTemplate.name}" automatically added to My Templates`);
+      }
+    }
+    // Function to create Shared Template card - VERTICAL DESIGN
+    function createSharedTemplateCard(template) {
+      const article = document.createElement('article');
+      article.className = 'vertical-template-card';
+      article.draggable = true;
+      article.dataset.templateId = template.id;
+      article.dataset.templateType = 'shared';
+      // Set background image if available
+      if (template.photos && template.photos.length > 0) {
+        article.style.backgroundImage = `url('${template.photos[0]}')`;
+      }
+      article.setAttribute('aria-label', `Shared template: ${template.name}`);
+      // Template photo container
+      const photoContainer = document.createElement('div');
+      photoContainer.className = 'template-photo-container';
+      // Create photo layout based on shots
+      const shots = parseInt(template.shots || 1);
+      const frameSize = template.frameSize || '2x6';
+      const effect = template.effect || 'none';
+      
+      if (shots === 1) {
+        const photoDiv = document.createElement('div');
+        photoDiv.className = `template-photo-single frame-${frameSize} effect-${effect}`;
+        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        
+        photoContainer.appendChild(photoDiv);
+      } else {
+        const multipleContainer = document.createElement('div');
+        multipleContainer.className = `template-photo-multiple ${shots}-shots frame-${frameSize}`;
+        
+        for (let i = 0; i < shots; i++) {
+          const photoSlot = document.createElement('div');
+          photoSlot.className = `photo-slot effect-${effect}`;
+          photoSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+          multipleContainer.appendChild(photoSlot);
+        }
+        photoContainer.appendChild(multipleContainer);
+      }
+      // Add stickers
+      if (template.photos && template.photos.length > 1) {
+        const stickerOverlay = document.createElement('div');
+        stickerOverlay.className = 'sticker-overlay';
+        // Use saved positions if available, otherwise use default positions
+        const defaultPositions = [
+          { top: '10%', left: '10%', rotate: '5deg' },
+          { top: '15%', left: '80%', rotate: '-10deg' },
+          { top: '50%', left: '20%', rotate: '15deg' },
+          { top: '60%', left: '70%', rotate: '-5deg' },
+          { top: '80%', left: '30%', rotate: '10deg' },
+          { top: '85%', left: '85%', rotate: '-15deg' }
+        ];
+        
+        template.photos.slice(1).forEach((sticker, index) => {
+          const savedPosition = template.stickerPositions && template.stickerPositions[index];
+          const pos = savedPosition ? 
+            { top: savedPosition.top, left: savedPosition.left, rotate: '0deg' } : 
+            defaultPositions[index % defaultPositions.length];
+          
+          const stickerDiv = document.createElement('div');
+          stickerDiv.className = 'sticker';
+          stickerDiv.style.backgroundImage = `url('${sticker}')`;
+          stickerDiv.style.top = pos.top;
+          stickerDiv.style.left = pos.left;
+          stickerDiv.style.transform = `rotate(${pos.rotate})`;
+          stickerDiv.setAttribute('data-sticker-index', index);
+          stickerOverlay.appendChild(stickerDiv);
+        });
+        
+        article.appendChild(stickerOverlay);
+      }
+
+      // Template tags
+      const tagsDiv = document.createElement('div');
+      tagsDiv.className = 'template-tags';
+      tagsDiv.textContent = template.tags || '';
+
+      // Use button
+      const useBtn = document.createElement('button');
+      useBtn.className = 'vertical-use-template-btn';
+      useBtn.setAttribute('aria-label', 'Use this template');
+      useBtn.type = 'button';
+      useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
+      useBtn.addEventListener('click', () => {
+        alert(`Using template: ${template.name}`);
+      });
+      const iconsDiv = document.createElement('div');
+      iconsDiv.className = 'vertical-template-icons';
+      iconsDiv.setAttribute('role', 'group');
+      iconsDiv.setAttribute('aria-label', 'Template controls');
+
+      // Favorite button
+      const favoriteBtn = document.createElement('button');
+      favoriteBtn.type = 'button';
+      favoriteBtn.setAttribute('aria-label', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.setAttribute('title', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.innerHTML = '<img src="Icons 2/save1.svg" alt="Favorite icon" />';
+            if (template.favorite) {
+        favoriteBtn.querySelector('img').classList.add('favorite-active');
+      }
+      
+      favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSharedTemplateFavorite(template.id);
+      });
+
+      // Add only favorite button to icons container
+      iconsDiv.appendChild(favoriteBtn);
+
+      // Add drag events to the shared template card
+      article.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', template.id);
+        e.dataTransfer.setData('template-type', 'shared');
+        article.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'copy';
+      });
+      
+      article.addEventListener('dragend', () => {
+        article.classList.remove('dragging');
+      });
+
+      // Assemble the card
+      article.appendChild(photoContainer);
+      article.appendChild(tagsDiv);
+      article.appendChild(useBtn);
+      article.appendChild(iconsDiv);
+
+      return article;
+    }
+
+    // Function to create My Template card - VERTICAL DESIGN
+    function createMyTemplateCard(template) {
+      const article = document.createElement('article');
+      article.className = 'vertical-template-card';
+      article.draggable = true;
+      article.dataset.templateId = template.id;
+      article.dataset.templateType = 'my';
+      
+      // Set background image if available
+      if (template.photos && template.photos.length > 0) {
+        article.style.backgroundImage = `url('${template.photos[0]}')`;
+      }
+      
+      article.setAttribute('aria-label', `My template: ${template.name}`);
+
+      // Template photo container
+      const photoContainer = document.createElement('div');
+      photoContainer.className = 'template-photo-container';
+      
+      // Create photo layout based on shots
+      const shots = parseInt(template.shots || 1);
+      const frameSize = template.frameSize || '2x6';
+      const effect = template.effect || 'none';
+      
+      if (shots === 1) {
+        const photoDiv = document.createElement('div');
+        photoDiv.className = `template-photo-single frame-${frameSize} effect-${effect}`;
+        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        
+        photoContainer.appendChild(photoDiv);
+      } else {
+        const multipleContainer = document.createElement('div');
+        multipleContainer.className = `template-photo-multiple ${shots}-shots frame-${frameSize}`;
+        
+        for (let i = 0; i < shots; i++) {
+          const photoSlot = document.createElement('div');
+          photoSlot.className = `photo-slot effect-${effect}`;
+          photoSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+          multipleContainer.appendChild(photoSlot);
+        }
+        
+        photoContainer.appendChild(multipleContainer);
+      }
+
+      // Add stickers scattered across the entire card
+      if (template.photos && template.photos.length > 1) {
+        const stickerOverlay = document.createElement('div');
+        stickerOverlay.className = 'sticker-overlay';
+        
+        // Use saved positions if available, otherwise use default positions
+        const defaultPositions = [
+          { top: '10%', left: '10%', rotate: '5deg' },
+          { top: '15%', left: '80%', rotate: '-10deg' },
+          { top: '50%', left: '20%', rotate: '15deg' },
+          { top: '60%', left: '70%', rotate: '-5deg' },
+          { top: '80%', left: '30%', rotate: '10deg' },
+          { top: '85%', left: '85%', rotate: '-15deg' }
+        ];
+        
+        template.photos.slice(1).forEach((sticker, index) => {
+          const savedPosition = template.stickerPositions && template.stickerPositions[index];
+          const pos = savedPosition ? 
+            { top: savedPosition.top, left: savedPosition.left, rotate: '0deg' } : 
+            defaultPositions[index % defaultPositions.length];
+          
+          const stickerDiv = document.createElement('div');
+          stickerDiv.className = 'sticker';
+          stickerDiv.style.backgroundImage = `url('${sticker}')`;
+          stickerDiv.style.top = pos.top;
+          stickerDiv.style.left = pos.left;
+          stickerDiv.style.transform = `rotate(${pos.rotate})`;
+          stickerDiv.setAttribute('data-sticker-index', index);
+          stickerOverlay.appendChild(stickerDiv);
+        });
+        
+        article.appendChild(stickerOverlay);
+      }
+
+      // Template tags
+      const tagsDiv = document.createElement('div');
+      tagsDiv.className = 'template-tags';
+      tagsDiv.textContent = template.tags || '';
+
+      // Use button
+      const useBtn = document.createElement('button');
+      useBtn.className = 'vertical-use-template-btn';
+      useBtn.setAttribute('aria-label', 'Use this template');
+      useBtn.type = 'button';
+      useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
+      useBtn.addEventListener('click', () => {
+        alert(`Using template: ${template.name}`);
+      });
+
+      // Icon buttons - FAVORITE, EDIT, AND DELETE
+      const iconsDiv = document.createElement('div');
+      iconsDiv.className = 'vertical-template-icons';
+      iconsDiv.setAttribute('role', 'group');
+      iconsDiv.setAttribute('aria-label', 'Template controls');
+
+      // Favorite button
+      const favoriteBtn = document.createElement('button');
+      favoriteBtn.type = 'button';
+      favoriteBtn.setAttribute('aria-label', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.setAttribute('title', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.innerHTML = '<img src="Icons 2/save1.svg" alt="Favorite icon" />';
+      
+      // Add active class if template is favorited
+      if (template.favorite) {
+        favoriteBtn.querySelector('img').classList.add('favorite-active');
+      }
+      
+      favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMyTemplateFavorite(template.id);
+      });
+
+      // EDIT BUTTON 
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.setAttribute('aria-label', 'Edit template');
+      editBtn.setAttribute('title', 'Edit template');
+      editBtn.innerHTML = '<img src="Icons 2/btnedit1.svg" alt="Edit icon" />';
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        alert(`Edit template: ${template.name}`);
+      });
+
+      // Delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.setAttribute('aria-label', 'Delete template');
+      deleteBtn.setAttribute('title', 'Delete template');
+      deleteBtn.innerHTML = '<img src="Icons 2/btndel1.svg" alt="Delete icon" />';
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this template?')) {
+          state.myTemplates = state.myTemplates.filter(t => t.id !== template.id);
+          renderMyTemplates();
+          renderFavorites(); 
+          addActivity(`Template "${template.name}" deleted from My Templates`);
+        }
+      });
+
+      // Add buttons to icons container
+      iconsDiv.appendChild(favoriteBtn);
+      iconsDiv.appendChild(editBtn); 
+      iconsDiv.appendChild(deleteBtn);
+
+      // Add drag events to the my template card
+      article.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', template.id);
+        e.dataTransfer.setData('template-type', 'my');
+        article.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'copy';
+      });
+      
+      article.addEventListener('dragend', () => {
+        article.classList.remove('dragging');
+      });
+
+      // Assemble the card
+      article.appendChild(photoContainer);
+      article.appendChild(tagsDiv);
+      article.appendChild(useBtn);
+      article.appendChild(iconsDiv);
+
+      return article;
+    }
+
+    // Toggle shared template favorite
+    function toggleSharedTemplateFavorite(templateId) {
+      const template = sharedTemplates.find(t => t.id === templateId);
+      if (template) {
+        template.favorite = !template.favorite;
+        renderSharedTemplates();
+        renderFavorites();
+        addActivity(`Template "${template.name}" ${template.favorite ? 'added to' : 'removed from'} favorites`);
+      }
+    }
+
+    // Toggle my template favorite
+    function toggleMyTemplateFavorite(templateId) {
+      const template = state.myTemplates.find(t => t.id === templateId);
+      if (template) {
+        template.favorite = !template.favorite;
+        renderMyTemplates();
+        renderFavorites();
+        addActivity(`Template "${template.name}" ${template.favorite ? 'added to' : 'removed from'} favorites`);
+      }
+    }
+
+    // Render shared templates grid 
+    function renderSharedTemplates() {
+      const sharedContainer = document.querySelector('#tab-shared .vertical-templates-container');
+      sharedContainer.innerHTML = '';
+      
+      if (sharedTemplates.length === 0) {
+        sharedContainer.innerHTML = `
+          <div class="empty-state">
+            <img src="Icons 2/templates.svg" alt="No templates">
+            <h3>No Shared Templates Yet</h3>
+            <p>When community members share templates, they'll appear here.</p>
+            <button onclick="alert('Creating your first template!')">Create Your First Template</button>
+          </div>
+        `;
+      } else {
+        sharedTemplates.forEach(tpl => {
+          const card = createSharedTemplateCard(tpl);
+          sharedContainer.appendChild(card);
+        });
+      }
+    }
+
+    // Function to render My Templates section
+    function renderMyTemplates() {
+      const myTemplatesContainer = document.querySelector('#tab-mytemplates .vertical-templates-container');
+      
+      // Always include the upload card first
+      myTemplatesContainer.innerHTML = `
+        <div class="template-upload-card" tabindex="0" role="button" aria-label="Upload your template" 
+          id="open-upload-modal-btn"
+          onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); alert('Upload template modal would open here'); }">
+          <div class="plus-sign">+</div>
+          Upload your template
+        </div>
+      `;
+
+      // Add existing templates if any
+      if (state.myTemplates && state.myTemplates.length > 0) {
+        state.myTemplates.forEach(template => {
+          const templateCard = createMyTemplateCard(template);
+          myTemplatesContainer.appendChild(templateCard);
+        });
+      }
+    }
+
+    // Tab switching for templates
+    const tabSharedBtn = document.getElementById('tab-shared-btn');
+    const tabMyTemplatesBtn = document.getElementById('tab-mytemplates-btn');
+    const tabShared = document.getElementById('tab-shared');
+    const tabMyTemplates = document.getElementById('tab-mytemplates');
+
+    tabSharedBtn.addEventListener('click', () => {
+      tabShared.style.display = 'block';
+      tabMyTemplates.style.display = 'none';
+      tabSharedBtn.classList.add('active');
+      tabSharedBtn.setAttribute('aria-selected', 'true');
+      tabMyTemplatesBtn.classList.remove('active');
+      tabMyTemplatesBtn.setAttribute('aria-selected', 'false');
+      renderSharedTemplates();
+    });
+
+    tabMyTemplatesBtn.addEventListener('click', () => {
+      tabShared.style.display = 'none';
+      tabMyTemplates.style.display = 'block';
+      tabMyTemplatesBtn.classList.add('active');
+      tabMyTemplatesBtn.setAttribute('aria-selected', 'true');
+      tabSharedBtn.classList.remove('active');
+      tabSharedBtn.setAttribute('aria-selected', 'false');
+      renderMyTemplates();
+    });
+    // Render favorites grid with vertical template design
+    const favoritesContainer = document.getElementById('favoritesContainer');
+    
+    function renderFavorites() {
+      favoritesContainer.innerHTML = '';
+      
+      // Combine favorites from both shared and my templates
+      const sharedFavorites = sharedTemplates.filter(t => t.favorite);
+      const myFavorites = state.myTemplates.filter(t => t.favorite);
+      const allFavorites = [...sharedFavorites, ...myFavorites];
+      
+      if (allFavorites.length === 0) {
+        const noFav = document.createElement('div');
+        noFav.className = 'no-favorites-msg';
+        noFav.textContent = 'No favorites yet. Click the heart icon on templates to add them to favorites, or drag templates here from the Feed.';
+        favoritesContainer.appendChild(noFav);
+        return;
+      }
+      
+      // Create vertical template cards for each favorite
+      allFavorites.forEach(template => {
+        const templateCard = createFavoriteTemplateCard(template);
+        favoritesContainer.appendChild(templateCard);
+      });
+      
+      // Set up drag and drop functionality
+      setupDragAndDrop();
+    }
+
+    // Create a favorite template card with vertical design
+    function createFavoriteTemplateCard(template) {
+      const article = document.createElement('article');
+      article.className = 'vertical-template-card';
+      article.draggable = true;
+      article.dataset.templateId = template.id;
+      article.dataset.templateType = template.shareToCommunity ? 'shared' : 'my';
+      
+      // Set background image if available
+      if (template.photos && template.photos.length > 0) {
+        article.style.backgroundImage = `url('${template.photos[0]}')`;
+      }
+      
+      article.setAttribute('aria-label', `Favorite template: ${template.name}`);
+
+      // Template photo container
+      const photoContainer = document.createElement('div');
+      photoContainer.className = 'template-photo-container';
+      
+      // Create photo layout based on shots
+      const shots = parseInt(template.shots || 1);
+      const frameSize = template.frameSize || '2x6';
+      const effect = template.effect || 'none';
+      
+      if (shots === 1) {
+        const photoDiv = document.createElement('div');
+        photoDiv.className = `template-photo-single frame-${frameSize} effect-${effect}`;
+        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        
+        photoContainer.appendChild(photoDiv);
+      } else {
+        const multipleContainer = document.createElement('div');
+        multipleContainer.className = `template-photo-multiple ${shots}-shots frame-${frameSize}`;
+        
+        for (let i = 0; i < shots; i++) {
+          const photoSlot = document.createElement('div');
+          photoSlot.className = `photo-slot effect-${effect}`;
+          photoSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+          multipleContainer.appendChild(photoSlot);
+        }
+        
+        photoContainer.appendChild(multipleContainer);
+      }
+
+      // Add stickers scattered across the entire card
+      if (template.photos && template.photos.length > 1) {
+        const stickerOverlay = document.createElement('div');
+        stickerOverlay.className = 'sticker-overlay';
+        
+        // Use saved positions if available, otherwise use default positions
+        const defaultPositions = [
+          { top: '10%', left: '10%', rotate: '5deg' },
+          { top: '15%', left: '80%', rotate: '-10deg' },
+          { top: '50%', left: '20%', rotate: '15deg' },
+          { top: '60%', left: '70%', rotate: '-5deg' },
+          { top: '80%', left: '30%', rotate: '10deg' },
+          { top: '85%', left: '85%', rotate: '-15deg' }
+        ];
+        
+        template.photos.slice(1).forEach((sticker, index) => {
+          const savedPosition = template.stickerPositions && template.stickerPositions[index];
+          const pos = savedPosition ? 
+            { top: savedPosition.top, left: savedPosition.left, rotate: '0deg' } : 
+            defaultPositions[index % defaultPositions.length];
+          
+          const stickerDiv = document.createElement('div');
+          stickerDiv.className = 'sticker';
+          stickerDiv.style.backgroundImage = `url('${sticker}')`;
+          stickerDiv.style.top = pos.top;
+          stickerDiv.style.left = pos.left;
+          stickerDiv.style.transform = `rotate(${pos.rotate})`;
+          stickerDiv.setAttribute('data-sticker-index', index);
+          stickerOverlay.appendChild(stickerDiv);
+        });
+        
+        article.appendChild(stickerOverlay);
+      }
+
+      // Template tags
+      const tagsDiv = document.createElement('div');
+      tagsDiv.className = 'template-tags';
+      tagsDiv.textContent = template.tags || '';
+
+      // Use button
+      const useBtn = document.createElement('button');
+      useBtn.className = 'vertical-use-template-btn';
+      useBtn.setAttribute('aria-label', 'Use this template');
+      useBtn.type = 'button';
+      useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
+      useBtn.addEventListener('click', () => {
+        alert(`Using favorite template: ${template.name}`);
+      });
+
+      // Icon buttons - FAVORITE (to remove from favorites) and DELETE (for my templates)
+      const iconsDiv = document.createElement('div');
+      iconsDiv.className = 'vertical-template-icons';
+      iconsDiv.setAttribute('role', 'group');
+      iconsDiv.setAttribute('aria-label', 'Favorite template controls');
+
+      // Favorite button (to remove from favorites)
+      const favoriteBtn = document.createElement('button');
+      favoriteBtn.type = 'button';
+      favoriteBtn.setAttribute('aria-label', 'Remove from favorites');
+      favoriteBtn.setAttribute('title', 'Remove from favorites');
+      favoriteBtn.innerHTML = '<img src="Icons 2/save1.svg" alt="Favorite icon" class="favorite-active" />';
+      
+      favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeFromFavorites(template.id, template.shareToCommunity);
+      });
+
+      // Delete button (only for my templates)
+      if (!template.shareToCommunity) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.setAttribute('aria-label', 'Delete template');
+        deleteBtn.setAttribute('title', 'Delete template');
+        deleteBtn.innerHTML = '<img src="Icons 2/btndel1.svg" alt="Delete icon" />';
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm('Are you sure you want to delete this template?')) {
+            state.myTemplates = state.myTemplates.filter(t => t.id !== template.id);
+            renderFavorites();
+            renderMyTemplates();
+            addActivity(`Template "${template.name}" deleted from My Templates`);
+          }
+        });
+        iconsDiv.appendChild(deleteBtn);
+      }
+
+      // Add favorite button to icons container
+      iconsDiv.appendChild(favoriteBtn);
+
+      // Assemble the card
+      article.appendChild(photoContainer);
+      article.appendChild(tagsDiv);
+      article.appendChild(useBtn);
+      article.appendChild(iconsDiv);
+
+      return article;
+    }
+
+    // Remove template from favorites
+    function removeFromFavorites(templateId, isShared) {
+      if (isShared) {
+        const template = sharedTemplates.find(t => t.id === templateId);
+        if (template) {
+          template.favorite = false;
+          addActivity(`Template "${template.name}" removed from favorites`);
+        }
+      } else {
+        const template = state.myTemplates.find(t => t.id === templateId);
+        if (template) {
+          template.favorite = false;
+          addActivity(`Template "${template.name}" removed from favorites`);
+        }
+      }
+      
+      renderFavorites();
+      renderSharedTemplates();
+      renderMyTemplates();
+    }
+
+    // Set up drag and drop functionality
+    function setupDragAndDrop() {
+      const favoriteCards = document.querySelectorAll('#favoritesContainer .vertical-template-card');
+      
+      favoriteCards.forEach(card => {
+        // Drag start event
+        card.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', card.dataset.templateId);
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        // Drag end event
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          favoritesContainer.classList.remove('drop-zone', 'active');
+        });
+      });
+      
+      // Drag over event for the favorites container
+      favoritesContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        favoritesContainer.classList.add('drop-zone', 'active');
+        e.dataTransfer.dropEffect = 'move';
+      });
+      
+      // Drag leave event for the favorites container
+      favoritesContainer.addEventListener('dragleave', (e) => {
+        if (!favoritesContainer.contains(e.relatedTarget)) {
+          favoritesContainer.classList.remove('drop-zone', 'active');
+        }
+      });
+      
+      // Drop event for the favorites container
+      favoritesContainer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        favoritesContainer.classList.remove('drop-zone', 'active');
+        
+        const templateId = parseInt(e.dataTransfer.getData('text/plain'));
+        const templateType = e.dataTransfer.getData('template-type');
+        
+        // Find the template in the appropriate array
+        let template;
+        if (templateType === 'shared') {
+          template = sharedTemplates.find(t => t.id === templateId);
+        } else {
+          template = state.myTemplates.find(t => t.id === templateId);
+        }
+        
+        if (template && !template.favorite) {
+          template.favorite = true;
+          addActivity(`Template "${template.name}" added to favorites`);
+          renderFavorites();
+          renderSharedTemplates();
+          renderMyTemplates();
+        }
+      });
+    }
+    // ADMIN DASHBOARD CODE
+
+    // Tab switching - Independent from sidebar
+    const subnav = document.querySelector('.subnav');
+    
     function showTab(idx) {
       let subnavBtns = document.querySelectorAll('.subnav button');
       let panels = document.querySelectorAll('.tab-panel');
+      
+      // Hide all sections first
+      document.getElementById('section-feed').style.display = 'none';
+      document.getElementById('section-favorites').style.display = 'none';
+      document.getElementById('section-activity').style.display = 'none';
+      
+      // Show the subnav when admin tabs are clicked
+      subnav.style.display = 'flex';
+      
+      // Update subnav buttons
       subnavBtns.forEach((btn, i) => {
         btn.classList.toggle('active', i === idx);
         btn.setAttribute('aria-selected', (i === idx).toString());
         panels[i].style.display = i === idx ? 'block' : 'none';
       });
+      
+      // Reset sidebar to feed (default)
+      document.querySelectorAll('.left-buttons button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector('[data-target="feed"]').classList.add('active');
     }
+
     document.addEventListener('DOMContentLoaded', function() {
       showTab(0);
+      // Initialize feed section
+      copyFirstTemplateToMyTemplates();
+      renderSharedTemplates();
+      renderMyTemplates();
+      renderFavorites();
+      renderActivity();
     });
 
-    // Modal Elements
-    const modal = document.getElementById('uploadModal');
-    const templateTypeSelect = document.getElementById('templateType');
-    const singleUploadContainer = document.getElementById('singleUploadContainer');
-    const dualUploadContainer = document.getElementById('dualUploadContainer');
-    const uploadInstruction = document.getElementById('uploadInstruction');
-    const singleUploadInput = document.getElementById('singleUpload');
-    const upload2x6Input = document.getElementById('upload2x6');
-    const upload4x6Input = document.getElementById('upload4x6');
+    // Sidebar navigation - Independent from subnav
+    const sidebarButtons = document.querySelectorAll('.left-buttons button');
 
-    function openModal() {
-      modal.style.display = 'flex';
-      resetForm();
+    sidebarButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.target === 'logout') {
+          alert('Logging out...');
+          return;
+        }
+        
+        // Hide ALL sections first
+        document.querySelectorAll('.section').forEach(section => {
+          section.style.display = 'none';
+        });
+        
+        // Hide all tab panels
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+          panel.style.display = 'none';
+        });
+        
+        // Hide the subnav 
+        subnav.style.display = 'none';
+        
+        // Reset subnav buttons
+        document.querySelectorAll('.subnav button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        // Show the selected section
+        if (btn.dataset.target === 'favorites') {
+          document.getElementById('section-favorites').style.display = 'block';
+          document.getElementById('section-activity').style.display = 'none';
+          document.getElementById('section-feed').style.display = 'none';
+          renderFavorites();
+        } else if (btn.dataset.target === 'activity') {
+          document.getElementById('section-activity').style.display = 'block';
+          document.getElementById('section-favorites').style.display = 'none';
+          document.getElementById('section-feed').style.display = 'none';
+          renderActivity();
+        } else if (btn.dataset.target === 'feed') {
+          document.getElementById('section-feed').style.display = 'block';
+          document.getElementById('section-favorites').style.display = 'none';
+          document.getElementById('section-activity').style.display = 'none';
+          // Feed section is already rendered on page load
+        } else {
+          // Default to template management (first tab)
+          document.getElementById('section-feed').style.display = 'none';
+          document.getElementById('section-favorites').style.display = 'none';
+          document.getElementById('section-activity').style.display = 'none';
+          showTab(1); // Template Management tab
+        }
+        
+        // Update active button in sidebar only
+        sidebarButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Activity log
+    const activityContainer = document.querySelector('.activity-container');
+    function addActivity(desc) {
+      const now = new Date();
+      const timestamp = now.toLocaleString();
+      state.activities.unshift({ desc, timestamp });
+      if (state.activities.length > 50) state.activities.length = 50;
+      renderActivity();
     }
 
-    function closeModal() {
-      modal.style.display = 'none';
-    }
-
-    // Reset form fields on open
-    function resetForm() {
-      document.getElementById('uploadForm').reset();
-      updateUploadFields();
-    }
-
-    // Update visible upload fields based on template type
-    function updateUploadFields() {
-      const selectedType = templateTypeSelect.value;
-
-      if (selectedType === 'Filter') {
-        singleUploadContainer.style.display = 'block';
-        dualUploadContainer.style.display = 'none';
-        uploadInstruction.textContent = "Upload Asset File (Filter Config or Single PNG)";
-        singleUploadInput.required = true;
-        upload2x6Input.required = false;
-        upload4x6Input.required = false;
-      } else if (selectedType === 'Background' || selectedType === 'Sticker Pack') {
-        singleUploadContainer.style.display = 'none';
-        dualUploadContainer.style.display = 'block';
-        uploadInstruction.textContent = "Dual Size Assets (Requires 2x6 and 4x6 PNGs)";
-        singleUploadInput.required = false;
-        upload2x6Input.required = true;
-        upload4x6Input.required = true;
+    function renderActivity() {
+      activityContainer.innerHTML = '';
+      if (state.activities.length === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'activity-post empty';
+        emptyDiv.textContent = 'No activity yet.';
+        activityContainer.appendChild(emptyDiv);
+        return;
       }
+      state.activities.forEach(act => {
+        const post = document.createElement('div');
+        post.className = 'activity-post';
+        post.textContent = `${act.desc}\n${act.timestamp}`;
+        activityContainer.appendChild(post);
+      });
     }
 
-    templateTypeSelect.addEventListener('change', updateUploadFields);
+    // Add some sample activities
+    addActivity('Profile picture updated');
+    addActivity('Photo 1 added to favorites');
+    addActivity('New comment on photo 2');
 
-    // Form submit handler (placeholder)
-    function submitForm() {
-      alert('Form submitted! Implement your upload logic here.');
-      closeModal();
+    // Modal functions (simplified for demo)
+    function openModal() {
+      document.getElementById('uploadModal').style.display = 'flex';
     }
-
-    // Template example data for demo
-    const exampleFilterTemplate = {
-      templateName: "Warm Filter",
-      tags: "warm, vintage, effect",
-      type: "Filter",
-      usageCount: 159,
-      status: "Active",
-      uploader: "Admin789 / 11-10-25",
-      configFile: "warm.js",
-      assetUrls: ["https://placehold.co/360x260?text=Warm+Filter+Preview"]
-    };
-
-    const exampleBackgroundTemplate = {
-      templateName: "Sunset Background",
-      tags: "sunset, scenic",
-      type: "Background",
-      usageCount: 42,
-      status: "Active",
-      uploader: "Designer123 / 11-12-25",
-      fileNames: ["sunset_2x6.png", "sunset_4x6.png"],
-      assetUrls: [
-        "https://placehold.co/150x200?text=2x6+Preview",
-        "https://placehold.co/150x200?text=4x6+Preview"
-      ]
-    };
-
-    const exampleStickerPackTemplate = {
-      templateName: "",
-      tags: "",
-      type: "",
-      usageCount: 0,
-      status: "",
-      assetUrls: [
-        "https://placehold.co/150x200?text=2x6+Sticker",
-        "https://placehold.co/150x200?text=4x6+Sticker"
-      ]
-    };
-
-    // Delete Modal Logic
-    let deleteTemplateName = null;
+    
+    function closeModal() {
+      document.getElementById('uploadModal').style.display = 'none';
+    }
+    
     function openDeleteModal(templateName) {
-      deleteTemplateName = templateName;
-      document.getElementById('deleteMessage').textContent = `Are you sure you want to permanently delete the template "${templateName}"?`;
       document.getElementById('deleteModal').style.display = 'flex';
+      document.getElementById('deleteMessage').textContent = `Are you sure you want to permanently delete "${templateName}"?`;
     }
+    
     function closeDeleteModal() {
-      deleteTemplateName = null;
       document.getElementById('deleteModal').style.display = 'none';
     }
+    
     function confirmDelete() {
-      alert(`Template "${deleteTemplateName}" deleted! Implement your deleting logic.`);
+      alert('Template deleted!');
       closeDeleteModal();
     }
 
-    // View modal logic
-    let currentViewTemplate = null;
+    // Example template data for modals
+    const exampleFilterTemplate = {
+      name: 'Warm Filter',
+      type: 'Filter',
+      tags: 'warm, soft, light',
+      usageCount: 159,
+      status: 'Active',
+      dateAdded: '2025-11-10'
+    };
+
+    const exampleBackgroundTemplate = {
+      name: 'Sunset Background',
+      type: 'Background',
+      tags: 'sunset, nature, warm',
+      usageCount: 42,
+      status: 'Active',
+      dateAdded: '2025-11-12'
+    };
 
     function openViewModal(template) {
-      // If no template passed, do nothing
-      if (!template) return;
-
-      currentViewTemplate = template || {};
-      const vm = document.getElementById('viewModal');
-      document.getElementById('viewStatus').textContent = currentViewTemplate.status || 'Unknown';
-      document.getElementById('viewTemplateName').value = currentViewTemplate.templateName || '';
-      document.getElementById('viewTags').value = currentViewTemplate.tags || '';
-      document.getElementById('viewType').value = currentViewTemplate.type || '';
-      document.getElementById('viewUsageCount').value = currentViewTemplate.usageCount !== undefined ? `${currentViewTemplate.usageCount} times` : '';
-      document.getElementById('viewUploader').value = currentViewTemplate.uploader || '';
-
-      // Show/hide containers depending on type
-      const configContainer = document.getElementById('viewConfigContainer');
-      const dualContainer = document.getElementById('viewDualAssets');
-      const singlePreview = document.getElementById('viewAssetPreview');
-
-      // If background or sticker pack, show dual UI
-      if (currentViewTemplate.type === 'Background' || currentViewTemplate.type === 'Sticker Pack') {
-        if (configContainer) configContainer.style.display = 'none';
-        if (dualContainer) dualContainer.style.display = 'block';
-
-        // Fill file name fields (prefer explicit file names, otherwise parse from URLs)
-        const nameFromUrl = (url) => {
-          try { return url.split('/').pop().split('?')[0]; } catch(e){return ''}
-        }
-
-        const fileName2x6 = (currentViewTemplate.fileNames && currentViewTemplate.fileNames[0]) || (currentViewTemplate.assetUrls && currentViewTemplate.assetUrls[0] ? nameFromUrl(currentViewTemplate.assetUrls[0]) : '');
-        const fileName4x6 = (currentViewTemplate.fileNames && currentViewTemplate.fileNames[1]) || (currentViewTemplate.assetUrls && currentViewTemplate.assetUrls[1] ? nameFromUrl(currentViewTemplate.assetUrls[1]) : '');
-
-        const el2 = document.getElementById('view2x6FileName');
-        const el4 = document.getElementById('view4x6FileName');
-        if (el2) el2.value = fileName2x6;
-        if (el4) el4.value = fileName4x6;
-
-        // Populate two preview images
-        const prev2 = document.getElementById('viewAssetPreview2x6');
-        const prev4 = document.getElementById('viewAssetPreview4x6');
-        if (prev2) prev2.innerHTML = '';
-        if (prev4) prev4.innerHTML = '';
-        if (currentViewTemplate.assetUrls && currentViewTemplate.assetUrls.length) {
-          if (currentViewTemplate.assetUrls[0] && prev2) {
-            const img2 = document.createElement('img'); img2.src = currentViewTemplate.assetUrls[0]; img2.alt = '2x6 preview'; img2.style.width='100%'; img2.style.height='auto'; prev2.appendChild(img2);
-          }
-          if (currentViewTemplate.assetUrls[1] && prev4) {
-            const img4 = document.createElement('img'); img4.src = currentViewTemplate.assetUrls[1]; img4.alt = '4x6 preview'; img4.style.width='100%'; img4.style.height='auto'; prev4.appendChild(img4);
-          }
-        }
-      } else {
-        // for other types show single config/preview
-        if (configContainer) configContainer.style.display = 'block';
-        if (dualContainer) dualContainer.style.display = 'none';
-        document.getElementById('viewConfigFile').value = currentViewTemplate.configFile || '';
-        if (singlePreview) {
-          singlePreview.innerHTML = '';
-          if (currentViewTemplate.assetUrls && currentViewTemplate.assetUrls.length) {
-            const img = document.createElement('img'); img.src = currentViewTemplate.assetUrls[0]; img.alt = 'Asset preview'; img.style.width='100%'; img.style.height='auto'; singlePreview.appendChild(img);
-          }
-        }
-      }
-
-      vm.style.display = 'flex';
+      document.getElementById('viewModal').style.display = 'flex';
+      document.getElementById('viewTemplateName').value = template.name;
+      document.getElementById('viewTags').value = template.tags;
+      document.getElementById('viewType').value = template.type;
+      document.getElementById('viewUsageCount').value = template.usageCount;
+      document.getElementById('viewUploader').value = `Admin - ${template.dateAdded}`;
     }
 
     function closeViewModal() {
-      const vm = document.getElementById('viewModal');
-      if (vm) vm.style.display = 'none';
-      currentViewTemplate = null;
-    }
-
-    function goToEditFromView() {
-      // Close view modal and open edit modal populated with the same template
-      if (currentViewTemplate) {
-        closeViewModal();
-        openEditModal(currentViewTemplate);
-      } else {
-        closeViewModal();
-      }
-    }
-
-    // Edit Modal Logic
-    let currentEditTemplate = null;
-    const editTypeSelect = document.getElementById('editType');
-
-    function updateEditModalTypeUI() {
-      const selectedType = editTypeSelect.value;
-
-      const filterUploadContainer = document.getElementById('editFilterUploadContainer');
-      const dualUploadContainer = document.getElementById('editDualUploadContainer');
-      const previewContainer = document.getElementById('assetPreviewContainer');
-
-      // Clear preview container first
-      previewContainer.innerHTML = '';
-
-      if (selectedType === 'Filter') {
-        filterUploadContainer.style.display = 'block';
-        dualUploadContainer.style.display = 'none';
-
-        // Show single preview image from currentEditTemplate if exists
-        if (currentEditTemplate && currentEditTemplate.assetUrls && currentEditTemplate.assetUrls[0]) {
-          const img = document.createElement('img');
-          img.src = currentEditTemplate.assetUrls[0];
-          img.alt = "Current Filter Preview";
-          img.className = 'preview-img';
-          previewContainer.appendChild(img);
-        }
-      } else if (selectedType === 'Background' || selectedType === 'Sticker Pack') {
-        filterUploadContainer.style.display = 'none';
-        dualUploadContainer.style.display = 'block';
-
-        // Show dual preview images from currentEditTemplate if exist
-        if (currentEditTemplate && currentEditTemplate.assetUrls) {
-          currentEditTemplate.assetUrls.forEach(url => {
-            if (url) {
-              const img = document.createElement('img');
-              img.src = url;
-              img.alt = "Current Asset Preview";
-              img.className = 'preview-img';
-              img.style.marginBottom = '0.5rem';
-              previewContainer.appendChild(img);
-            }
-          });
-        }
-      } else {
-        filterUploadContainer.style.display = 'none';
-        dualUploadContainer.style.display = 'none';
-      }
+      document.getElementById('viewModal').style.display = 'none';
     }
 
     function openEditModal(template) {
-      currentEditTemplate = template;
-
-      document.getElementById('editTemplateName').value = template.templateName;
+      document.getElementById('editModal').style.display = 'flex';
+      document.getElementById('editTemplateName').value = template.name;
       document.getElementById('editTags').value = template.tags;
-      editTypeSelect.value = template.type;
+      document.getElementById('editType').value = template.type;
       document.getElementById('editUsageCount').textContent = `Usage Count: ${template.usageCount} times`;
       document.getElementById('editStatus').value = template.status;
-
-      // Reset file status text for dual upload
-      const fileStatus2x6 = document.querySelector('[for="editReplace2x6File"]').closest('.dual-upload-item').querySelector('.file-status');
-      const fileStatus4x6 = document.querySelector('[for="editReplace4x6File"]').closest('.dual-upload-item').querySelector('.file-status');
-      if (fileStatus2x6) fileStatus2x6.textContent = 'No file selected';
-      if (fileStatus4x6) fileStatus4x6.textContent = 'No file selected';
-
-      updateEditModalTypeUI();
-
-      document.getElementById('editModal').style.display = 'flex';
     }
+
     function closeEditModal() {
-      currentEditTemplate = null;
       document.getElementById('editModal').style.display = 'none';
     }
+
     function saveChanges() {
-      alert("Save Changes clicked! Implement your save/update logic.");
+      alert('Changes saved!');
       closeEditModal();
     }
 
-    // Update preview and inputs on changing type in Edit modal
-    editTypeSelect.addEventListener('change', () => {
-      updateEditModalTypeUI();
-    });
-
-    // File selection status for edit modal
-    const editReplace2x6 = document.getElementById('editReplace2x6File');
-    const editReplace4x6 = document.getElementById('editReplace4x6File');
-
-    if (editReplace2x6) {
-      editReplace2x6.addEventListener('change', function() {
-        const statusEl = this.closest('.dual-upload-item').querySelector('.file-status');
-        if (statusEl) {
-          statusEl.textContent = this.files.length > 0 ? `📄 ${this.files[0].name}` : 'No file selected';
-        }
-      });
-    }
-
-    if (editReplace4x6) {
-      editReplace4x6.addEventListener('change', function() {
-        const statusEl = this.closest('.dual-upload-item').querySelector('.file-status');
-        if (statusEl) {
-          statusEl.textContent = this.files.length > 0 ? `📄 ${this.files[0].name}` : 'No file selected';
-        }
-      });
-    }
-
-    // Simple search/filter handlers for User Management and Audit Trail
-    function performUserSearch() {
-      const q = (document.getElementById('userSearchInput')?.value || '').toLowerCase().trim();
-      const group = document.getElementById('userGroupFilter')?.value || 'All groups';
-      const status = document.getElementById('userStatusFilter')?.value || 'Status';
-      const tbody = document.querySelector('.user-table tbody');
-      if (!tbody) return;
-      const rows = tbody.querySelectorAll('tr');
-      rows.forEach(r => {
-        const cells = r.querySelectorAll('td');
-        if (!cells || cells.length < 4) return;
-        const username = (cells[0].textContent || '').toLowerCase();
-        const email = (cells[1].textContent || '').toLowerCase();
-        const role = (cells[2].textContent || '').trim();
-        const st = (cells[3].textContent || '').trim();
-        const matchesQuery = q === '' || username.includes(q) || email.includes(q);
-        const matchesGroup = (group === 'All groups') || (role === group);
-        const matchesStatus = (status === 'Status') || (st === status);
-        r.style.display = (matchesQuery && matchesGroup && matchesStatus) ? '' : 'none';
-      });
-    }
-
-    function performAuditSearch() {
-      const q = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
-      const userType = document.getElementById('auditUserTypeFilter')?.value || 'User Type';
-      const actionType = document.getElementById('auditActionFilter')?.value || 'Action Type';
-      const tbody = document.querySelectorAll('.user-table')[1]?.querySelector('tbody') || document.querySelector('.user-table tbody');
-      if (!tbody) return;
-      const rows = tbody.querySelectorAll('tr');
-      rows.forEach(r => {
-        const txt = (r.textContent || '').toLowerCase();
-        const matchesQuery = q === '' || txt.includes(q);
-        // userType/actionType filters require domain-specific mapping; use simple string match against row
-        const matchesUserType = (userType === 'User Type') || txt.includes(userType.toLowerCase());
-        const matchesAction = (actionType === 'Action Type') || txt.includes(actionType.toLowerCase());
-        r.style.display = (matchesQuery && matchesUserType && matchesAction) ? '' : 'none';
-      });
-    }
-
-    // Manage User Modal Functions
-    function openManageUserModal(user) {
-      document.getElementById('manageUsername').value = user.username || '';
-      document.getElementById('manageEmail').value = user.email || '';
-      document.getElementById('manageJoined').value = user.joined || '';
-      document.getElementById('manageTotalPhotos').value = user.totalPhotos || '';
-      document.getElementById('manageStatus').value = user.status || 'Active';
-      document.getElementById('manageRole').value = user.role || 'User';
-      document.getElementById('manageUserModal').style.display = 'flex';
+    // User management functions
+    function switchTab(tabName) {
+      document.getElementById('accountDetailsContent').style.display = tabName === 'accountDetails' ? 'block' : 'none';
+      document.getElementById('activityContentsContent').style.display = tabName === 'activityContents' ? 'block' : 'none';
+      
+      document.getElementById('accountDetailsTab').classList.toggle('active', tabName === 'accountDetails');
+      document.getElementById('activityContentsTab').classList.toggle('active', tabName === 'activityContents');
     }
 
     function closeManageUserModal() {
       document.getElementById('manageUserModal').style.display = 'none';
     }
 
-    function deleteUser() {
-      // Open confirmation modal
-      document.getElementById('deleteUserModal').style.display = 'flex';
+    function saveChangesUser() {
+      alert('User changes saved!');
+      closeManageUserModal();
     }
 
     function closeDeleteUserModal() {
@@ -1164,73 +1796,20 @@
     }
 
     function confirmDeleteUser() {
-      // Placeholder for delete logic
-      alert('User deleted! Implement your delete logic here.');
+      alert('User deleted!');
       closeDeleteUserModal();
-      closeManageUserModal();
-    }
-
-    // Tab switching for Manage User Modal
-    function switchTab(tabName) {
-      const accountDetailsTab = document.getElementById('accountDetailsTab');
-      const activityContentsTab = document.getElementById('activityContentsTab');
-      const accountDetailsContent = document.getElementById('accountDetailsContent');
-      const activityContentsContent = document.getElementById('activityContentsContent');
-
-      if (tabName === 'accountDetails') {
-        accountDetailsTab.classList.add('active');
-        accountDetailsTab.style.borderBottom = '3px solid #ea3b91';
-        activityContentsTab.classList.remove('active');
-        activityContentsTab.style.borderBottom = '3px solid transparent';
-        accountDetailsContent.style.display = 'block';
-        activityContentsContent.style.display = 'none';
-      } else if (tabName === 'activityContents') {
-        activityContentsTab.classList.add('active');
-        activityContentsTab.style.borderBottom = '3px solid #ea3b91';
-        accountDetailsTab.classList.remove('active');
-        accountDetailsTab.style.borderBottom = '3px solid transparent';
-        activityContentsContent.style.display = 'block';
-        accountDetailsContent.style.display = 'none';
-      }
-    }
-
-    // Save changes for user
-    function saveChangesUser() {
-      // Placeholder for save logic
-      alert('Changes saved! Implement your save logic here.');
-      closeManageUserModal();
     }
 
     // Add event listeners for manage links
-    document.addEventListener('DOMContentLoaded', function() {
-      showTab(0);
-
-      // Existing manage link handlers
-      const manageLinks = document.querySelectorAll('.manage-link');
-      manageLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          const row = this.closest('tr');
-          const cells = row.querySelectorAll('td');
-          const username = cells[0].textContent.trim();
-          const email = cells[1].textContent.trim();
-          const role = cells[2].textContent.trim();
-          const status = cells[3].textContent.trim();
-          // Placeholder data for joined and total photos
-          const user = {
-            username: username,
-            email: email,
-            role: role,
-            status: status,
-            joined: '2023-01-01', // Placeholder
-            totalPhotos: '10' // Placeholder
-          };
-          openManageUserModal(user);
-        });
+    document.querySelectorAll('.manage-link').forEach(link => {
+      link.addEventListener('click', function() {
+        document.getElementById('manageUserModal').style.display = 'flex';
       });
+    });
 
-      // Delete user button
-      document.getElementById('deleteUserBtn').addEventListener('click', deleteUser);
+    // Add event listener for delete user button
+    document.getElementById('deleteUserBtn').addEventListener('click', function() {
+      document.getElementById('deleteUserModal').style.display = 'flex';
     });
   </script>
 </body>

@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script type="module" src="auth-check.js"></script>
   <title>Profile</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Fredoka+One&display=swap"
     rel="stylesheet" />
@@ -222,7 +223,7 @@
     .tags-input:focus {outline: none;border-color: #d23481;}
     /* Publish button - UPDATED */
     .publish-section {display: flex;justify-content: flex-end;margin-top: 8px;}
-    #publishBtn {background: #d23481;border: none;border-radius: 20px;padding: 12px 36px;font-weight: 600;color: white;cursor: pointer;font-size: 14px;transition: background-color 0.3s;user-select: none;}
+    #publishBtn {background: #d23481;border: none;border-radius: 20px;padding: 12px 36px;font-weight: 600;color: white;cursor: pointer;font-size: 14px;transition: background-color 0.3s;}
     #publishBtn:disabled {background: #ccc;cursor: not-allowed;}
     #publishBtn:not(:disabled):hover {background: #b52c6f;}
     /* Toggle input styling - UPDATED */
@@ -293,7 +294,8 @@
           <div>
             <span id="profile-bio-text">bio<br>0 photo</span>
           </div>
-        </div>
+        </section>
+
         <button class="btn-edit-profile" id="btn-edit-profile" aria-label="Edit Profile" type="button">
           <img src="Icons 2/edit.svg" alt="Edit icon" />
           Edit Profile
@@ -310,13 +312,13 @@
                 <img id="edit-profile-pic" src="" alt="Profile Picture" />
               </div>
               <button id="change-photo-btn" type="button" aria-label="Change Profile Photo">Change</button>
-              <input type="file" id="profile-photo-input" accept="image/*" style="display:none" />
+              <input type="file" id="profile-photo-input" accept="image/png, image/jpeg" style="display:none" />
             </div>
             <form id="edit-profile-form" novalidate>
               <label for="edit-username">Username</label>
               <input id="edit-username" name="username" type="text" autocomplete="username" required />
-              <label for="edit-bio">Bio</label>
-              <textarea id="edit-bio" name="bio" rows="3"></textarea>
+              <label for="edit-bio">Bio (<span id="bio-char-count">0</span>/50)</label> 
+              <textarea id="edit-bio" name="bio" rows="3" maxlength="50"></textarea>
               <div class="edit-profile-buttons">
                 <button type="button" id="edit-cancel-btn">Cancel</button>
                 <button type="submit" id="edit-save-btn">Save Changes</button>
@@ -478,12 +480,9 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    // *** NEW: FIREBASE STORAGE IMPORT ***
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-    // --- SUPABASE CONFIGURATION ---
-    const supabaseUrl = 'https://gnxwhyjuqgopzrfhhbwb.supabase.co';
-    const supabaseKey = 'sb_publishable_C5eAjvB394x_xkS184bxRw_0IBPaj16';
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // --- FIREBASE SETUP AND AUTHENTICATION ---
     const firebaseConfig = {
@@ -498,10 +497,15 @@
     
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    // *** NEW: FIREBASE STORAGE INITIALIZATION ***
+    const storage = getStorage(app);
+    
     setLogLevel('error'); 
 
     let currentUserId = null;
     let isAuthReady = false;
+    // --- NEW STATE VARIABLE FOR PROFILE PHOTO UPLOAD ---
+    let newProfileFile = null; 
 
     // --- APPLICATION STATE (From original HTML) ---
     const sharedTemplates = [
@@ -524,7 +528,7 @@
         username: 'Loading...', // Initial state set to Loading
         bio: 'bio',
         photoCount: 0,
-        profileImg: ''
+        profileImg: '' // This will now hold the Firebase Storage URL
       },
       photos: [
         {
@@ -544,98 +548,215 @@
           comments: []
         },
       ],
-      activities: [],
+      activities: [], // Activities starts empty, will be populated from DB
       myTemplates: []
     };
 
     /**
-     * Fetches the user's profile from the Supabase 'users' table or creates a default one.
+     * Uploads the profile image to Firebase Storage.
+     * @param {File} file - The image file to upload.
+     * @param {string} userId - The Firebase Auth UID.
+     * @returns {Promise<string>} The public URL of the uploaded image.
+     */
+    async function uploadProfileImage(file, userId) {
+      // *** FIX: Use a fixed filename to satisfy Storage Rules and ensure overwrite ***
+      const fileExtension = file.name.split('.').pop();
+      // Ensure the path is profile_images/{userId}/profile.jpg (or .png, etc.)
+      const filePath = `profile_images/${userId}/profile.${fileExtension}`; 
+      const storageRef = ref(storage, filePath);
+      
+      console.log("Starting profile image upload to Firebase Storage:", filePath);
+
+      try {
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        console.log("Upload successful. Download URL:", downloadURL);
+        return downloadURL;
+      } catch (error) {
+        console.error("Error uploading profile image to Firebase Storage:", error);
+        throw new Error("Image upload failed.");
+      }
+    }
+
+
+    /**
+     * Fetches the user's profile from the DB or creates a default one via PHP API.
      * @param {string} userId - The Firebase Auth UID.
      * @param {string} email - The user's email.
-     * @param {string | null} displayName - The user's display name from Firebase (e.g., Google login name).
+     * @param {string | null} displayName - The user's display name from Firebase.
      */
     async function fetchOrCreateProfile(userId, email, displayName) {
       if (!userId) return;
-      console.log(`Fetching profile for user: ${userId} from Supabase 'users' table.`);
+      console.log(`Fetching profile for user: ${userId} via api.php.`);
 
       try {
-        // 1. Try to fetch the existing profile from the 'users' table
-        let { data: profileData, error } = await supabase
-          .from('users') 
-          .select('username, bio')
-          .eq('user_id', userId) // Assuming 'id' is the column that stores the Firebase UID (Primary Key)
-          .single();
+        const response = await fetch('http://localhost:80/api.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'fetchOrCreateProfile',
+            user_id: userId,
+            email: email,
+            display_name: displayName
+          })
+        });
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 is the code for 'No rows found' (expected for new users)
-          console.error("Supabase fetch error (not 404):", error);
-        }
+        const result = await response.json();
 
-        if (profileData) {
-          // Profile exists: update state with fetched data
+        if (result.success) {
+          const profileData = result.data;
           state.user.username = profileData.username || `User_${userId.substring(0, 4)}`;
           state.user.bio = profileData.bio || 'Set your bio here.';
-          console.log("Profile found in Supabase 'users' table. Username:", state.user.username);
-        } else {
-          // Profile does not exist: create a new record
-          console.log("No profile found in Supabase 'users' table. Creating default.");
+          state.user.profileImg = profileData.profile_img_url || '';
+          console.log("Profile process successful. Username:", state.user.username);
           
-          // Use displayName (full name) as primary default, then email prefix, then fallback ID
-          const defaultUsername = displayName || (email ? email.split('@')[0] : `User_${userId.substring(0, 4)}`);
-          
-          const defaultProfile = {
-            id: userId, // CRITICAL: Supabase PK must match Auth ID
-            username: defaultUsername,
-            bio: 'Welcome to your new profile!',
-            created_at: new Date().toISOString()
-          };
-          
-          const { error: insertError } = await supabase
-            .from('users') // Updated to 'users' table
-            .insert([defaultProfile]);
-
-          if (insertError) {
-            console.error("Supabase insert error on 'users' table:", insertError);
-            state.user.username = defaultUsername; // Fallback to local default if insert fails
-            state.user.bio = defaultProfile.bio;
-          } else {
-            state.user.username = defaultUsername;
-            state.user.bio = defaultProfile.bio;
+          if (result.created) {
+            // Log the creation activity if a new profile was created
+            addActivity('New profile created.');
           }
+        } else {
+          console.error("API Error fetching/creating profile:", result.error);
+          // Fallback to local default if API fails
+          const defaultUsername = displayName || (email ? email.split('@')[0] : `User_${userId.substring(0, 4)}`);
+          state.user.username = defaultUsername; 
+          state.user.bio = 'Profile could not be loaded.';
         }
       } catch (error) {
-        console.error("Unexpected Supabase operation error:", error);
+        console.error("Unexpected fetch error in fetchOrCreateProfile:", error);
       }
       updateUserUI();
     }
 
     /**
-     * Saves the current user state (username and bio) to Supabase 'users' table.
+     * Fetches the user's activity log from the DB via PHP API.
+     * @param {string} userId - The Firebase Auth UID.
      */
-    async function saveProfileChanges(newUsername, newBio) {
+    async function fetchActivityLog(userId) {
+      if (!userId) return;
+      console.log(`Fetching activity log for user: ${userId}`);
+
+      try {
+        const response = await fetch('http://localhost:80/api.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'fetchActivityLog',
+            user_id: userId
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          state.activities = result.data.map(item => ({
+            desc: item.action,
+            timestamp: new Date(item.created_at).toLocaleString() 
+          }));
+          console.log(`Loaded ${state.activities.length} activity items.`);
+        } else {
+          console.error("API Error fetching activity log:", result.error);
+          state.activities = [];
+        }
+      } catch (error) {
+        console.error("Unexpected fetch error in fetchActivityLog:", error);
+      }
+      
+      if (document.getElementById('section-activity').style.display === 'block') {
+          renderActivity();
+      }
+    }
+
+
+    /**
+     * Saves the current user state (username and bio) to the DB via PHP API.
+     * @param {string} newUsername - The new username.
+     * @param {string} newBio - The new bio.
+     * @param {string} profileImgUrl - The new profile image URL (or existing one).
+     */
+    async function saveProfileChanges(newUsername, newBio, profileImgUrl) {
       if (!currentUserId) {
         console.error("Cannot save profile: User not authenticated.");
         return;
       }
+
+      if (newBio > 50) {
+        alert("Bio cannot exceed 50 characters.");
+        return;
+      }
+      
       const updateData = {
         username: newUsername,
         bio: newBio,
-        updated_at: new Date().toISOString()
+        profile_img_url: profileImgUrl
       };
-      try {
-        const { error } = await supabase
-          .from('users')
-          .update(updateData)
-          .eq('id', currentUserId); // Match the Supabase row ID to the Firebase Auth ID
 
-        if (error) {
-          console.error("Error saving profile changes to Supabase 'users' table:", error);
-        } else {
-          console.log("Profile successfully updated in Supabase 'users' table.");
+      try {
+        const response = await fetch('http://localhost:80/api.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'saveProfileChanges',
+            user_id: currentUserId,
+            data: updateData
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          console.log("Profile successfully updated via pdo/api.php.");
+          // Log activity AFTER successful save
           addActivity('Profile information saved.');
+        } else {
+          console.error("API Error saving profile changes:", result.error);
+          alert(`Error: ${result.error}`);
         }
       } catch (error) {
-        console.error("Unexpected Supabase save error:", error);
+        console.error("Unexpected fetch error in saveProfileChanges:", error);
       }
+    }
+
+    /**
+     * Logs an activity to the DB via PHP API and updates local state.
+     * @param {string} desc - The activity description.
+     */
+    async function addActivity(desc) {
+      if (!currentUserId) {
+        console.error("Cannot log activity: User not authenticated.");
+        return;
+      }
+      
+      // 1. Log to DB via API
+      try {
+        const response = await fetch('http://localhost:80/api.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'addActivity',
+            user_id: currentUserId,
+            activity: desc
+          })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          console.error("API Error logging activity:", result.error);
+        }
+      } catch (error) {
+        console.error("Unexpected fetch error in addActivity:", error);
+      }
+
+      // 2. Update local state and re-render (by fetching all activities)
+      await fetchActivityLog(currentUserId);
     }
 
     // Handle authentication state and profile loading
@@ -645,6 +766,8 @@
         currentUserId = user.uid;
         // PASS email and displayName for profile lookup/creation
         fetchOrCreateProfile(user.uid, user.email, user.displayName);
+        // *** NEW: Fetch the activity log after the user is confirmed/loaded ***
+        fetchActivityLog(user.uid); 
       } else {
         // User is signed out. Redirect to login
         currentUserId = null;
@@ -653,7 +776,7 @@
       }
     });
 
-    // UPLOAD TEMPLATE MODAL FUNCTIONALITY (Original code follows)
+    // UPLOAD TEMPLATE MODALITY (Original code follows)
     const uploadModal = document.getElementById('upload-template-modal');
     const openUploadModalBtn = document.getElementById('open-upload-modal-btn');
     const uploadCloseBtn = document.getElementById('upload-close-btn');
@@ -980,6 +1103,7 @@
           };
           alert(`Successfully updated template: ${templateData.name}`);
           delete uploadModal.dataset.editingTemplateId;
+          addActivity(`Template "${templateData.name}" updated`);
         }
       } else {
         // Create new template
@@ -1002,12 +1126,12 @@
         }
         
         alert(`Successfully published template: ${newTemplate.name}`);
+        addActivity(`Template "${newTemplate.name}" uploaded`);
       }
       
       closeUploadModal();
       renderMyTemplates();
       renderSharedTemplates();
-      addActivity(`Template "${templateData.name}" ${editingTemplateId ? 'updated' : 'uploaded'}`);
     }
 
     // Update the publish button event listener
@@ -1033,7 +1157,11 @@
       document.getElementById('profile-username').textContent = state.user.username;
       document.getElementById('profile-bio-text').innerHTML = state.user.bio.replace(/\n/g, '<br>') +
         `<br>${state.user.photoCount} photo${state.user.photoCount !== 1 ? "s" : ""}`;
-      document.getElementById('profile-img').style.backgroundImage = `url('${state.user.profileImg}')`;
+      
+      // *** UPDATED: Load profile image from state.user.profileImg URL ***
+      const imgUrl = state.user.profileImg || '';
+      document.getElementById('profile-img').style.backgroundImage = `url('${imgUrl}')`;
+      document.getElementById('edit-profile-pic').src = imgUrl; // Update modal preview
     }
     // updateUserUI(); // Initial call moved to onAuthStateChanged completion
 
@@ -1145,13 +1273,6 @@
 
     // Activity log
     const activityContainer = document.querySelector('.activity-container');
-    function addActivity(desc) {
-      const now = new Date();
-      const timestamp = now.toLocaleString();
-      state.activities.unshift({ desc, timestamp });
-      if (state.activities.length > 50) state.activities.length = 50;
-      renderActivity();
-    }
 
     function renderActivity() {
       activityContainer.innerHTML = '';
@@ -1169,7 +1290,8 @@
         activityContainer.appendChild(post);
       });
     }
-    renderActivity();
+    // renderActivity is now called from fetchActivityLog
+    // renderActivity(); 
 
     // Templates functionality
     const sharedGrid = document.querySelector('#tab-shared .vertical-templates-container');
@@ -1602,7 +1724,9 @@
           renderFavorites();
         } else if (btn.dataset.target === 'activity') {
           document.getElementById('section-activity').style.display = 'block';
-          renderActivity();
+          // Since fetchActivityLog is called on auth state change, render from local state
+          // Re-fetch is unnecessary unless we want to guarantee the latest data
+          renderActivity(); 
         } else if (btn.dataset.target === 'templates') {
           document.getElementById('section-templates').style.display = 'block';
           renderSharedTemplates();
@@ -1640,19 +1764,37 @@
     const editProfileForm = document.getElementById('edit-profile-form');
     const editUsernameInput = document.getElementById('edit-username');
     const editBioInput = document.getElementById('edit-bio');
+    const bioCharCountSpan = document.getElementById('bio-char-count');
     const editProfilePic = document.getElementById('edit-profile-pic');
     const changePhotoBtn = document.getElementById('change-photo-btn');
     const profilePhotoInput = document.getElementById('profile-photo-input');
     const profileMainImg = document.getElementById('profile-img');
-
+    const MAX_BIO_LENGTH = 50;
     // Function to open edit profile modal and fill current state values
     function openEditProfileModal() {
       editUsernameInput.value = state.user.username;
       editBioInput.value = state.user.bio;
       editProfilePic.src = state.user.profileImg || '';
+      updateBioCharCount();
+      // *** UPDATED: Load URL from state (fetched from DB) ***
       editProfileModal.classList.add('active');
       editUsernameInput.focus();
       trapFocus(editProfileModal);
+
+    }
+
+    
+
+    function updateBioCharCount() {
+      const currentLength = editBioInput.value.length;
+      bioCharCountSpan.textContent = currentLength;
+      
+      // Optional: Change color if limit is exceeded
+      if (currentLength > MAX_BIO_LENGTH) {
+        bioCharCountSpan.style.color = 'red';
+      } else {
+        bioCharCountSpan.style.color = '#a4154f'; // Original label color
+      }
     }
 
     // Close modal function for edit profile
@@ -1660,6 +1802,8 @@
       editProfileModal.classList.remove('active');
       releaseFocusTrap();
     }
+
+    editBioInput.addEventListener('input', updateBioCharCount);
 
     // Open modal on Edit Profile button click
     editProfileBtn.addEventListener('click', openEditProfileModal);
@@ -1694,57 +1838,89 @@
       profilePhotoInput.click();
     });
 
-    // Handle file selection from file explorer
+    // *** UPDATED: Handle file selection and preview ***
     profilePhotoInput.addEventListener('change', () => {
       if (profilePhotoInput.files && profilePhotoInput.files[0]) {
         const file = profilePhotoInput.files[0];
         
-        // Check if file is an image
         if (!file.type.startsWith('image/')) {
           alert('Please select a valid image file (JPEG, PNG, GIF, etc.).');
           return;
         }
         
-        // Create a FileReader to read the file
+        // Store the file object to be uploaded on form submission
+        newProfileFile = file; 
+
+        // Create a FileReader to read the file for local preview (better UX)
         const reader = new FileReader();
         
         reader.onload = function(e) {
-          // Update the profile picture with the selected image
           const newProfilePic = e.target.result;
           editProfilePic.src = newProfilePic;
           profileMainImg.style.backgroundImage = `url('${newProfilePic}')`;
-          state.user.profileImg = newProfilePic;
+          // We update the state.user.profileImg with the temporary local URL for immediate display
+          // The final Firebase URL will be saved on form submit.
+          state.user.profileImg = newProfilePic; 
         };
         
         reader.onerror = function() {
           alert('Error reading the selected file. Please try again.');
         };
         
-        // Read the file as a data URL
         reader.readAsDataURL(file);
       }
     });
 
-    // Handle edit profile form submission
+    // *** UPDATED: Handle edit profile form submission (Upload to Firebase & Save URL to DB via PHP) ***
     editProfileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      const oldUsername = state.user.username;
+      const oldBio = state.user.bio;
+      
       const newUsername = editUsernameInput.value.trim();
       const newBio = editBioInput.value.trim();
+      let finalProfileImgUrl = state.user.profileImg; // Start with current URL
+      let profilePicChanged = !!newProfileFile;
+
+      if (oldUsername === newUsername && oldBio === newBio && !profilePicChanged) {
+        // No changes made
+        closeEditProfileModal();
+        console.log('did nothing');
+        return;
+      }
+
       if (newUsername.length === 0) {
         alert('Username cannot be empty.');
         editUsernameInput.focus();
         return;
       }
       
-      // Save changes to Supabase
-      await saveProfileChanges(newUsername, newBio);
+      // 1. Handle Image Upload if a new file was selected (still Firebase)
+      if (profilePicChanged && currentUserId) {
+        try {
+          // Upload file to Firebase Storage
+          finalProfileImgUrl = await uploadProfileImage(newProfileFile, currentUserId);
+          // Reset the temporary file state
+          newProfileFile = null; 
+        } catch (error) {
+          alert('Failed to upload profile picture. Please try again.');
+          console.error(error);
+          return;
+        }
+      }
 
-      // Update state and UI
+      // 2. Save changes (including image URL) to DB via PHP API
+      await saveProfileChanges(newUsername, newBio, finalProfileImgUrl);
+
+      // 3. Update local state and UI
       state.user.username = newUsername;
       state.user.bio = newBio;
+      state.user.profileImg = finalProfileImgUrl; // Store the final, permanent URL
       updateUserUI();
       closeEditProfileModal();
     });
+
 
     // Open modal with only the selected photo in the left section
     function openPostModal(photoId) {
@@ -1937,7 +2113,7 @@
     });
 
     // Handle comment submit
-    commentForm.addEventListener('submit', e => {
+    commentForm.addEventListener('submit', async e => {
       e.preventDefault();
       if (currentPhotoId === null) return;
       const photo = state.photos.find(p => p.id === currentPhotoId);
@@ -1949,11 +2125,14 @@
           text: commentInput.value.trim(),
           date: new Date().toLocaleDateString()
         });
+        
+        // Log activity for the comment
+        await addActivity(`New comment on photo ${photo.id}`);
+
         commentInput.value = '';
         commentPostBtn.disabled = true;
         renderComments(photo);
         noCommentsText.style.display = 'none';
-        addActivity(`New comment on photo ${photo.id}`);
       }
     });
 
@@ -1987,7 +2166,10 @@
       element.addEventListener('keydown', handleKeyDown);
       element._focusTrapHandler = handleKeyDown;
 
-      firstFocusable.focus();
+      // Check if there are focusable elements before trying to focus
+      if (firstFocusable) {
+        firstFocusable.focus();
+      }
     }
 
     function releaseFocusTrap() {
@@ -2009,18 +2191,12 @@
       }
     }
 
-    // Add some sample activities
-    addActivity('Profile picture updated');
-    addActivity('Photo 1 added to favorites');
-    addActivity('New comment on photo 2');
-
     // Initialize the page 
     copyFirstTemplateToMyTemplates();
     renderSharedTemplates();
     renderMyTemplates();
     renderPhotoLibrary();
     renderFavorites();
-    renderActivity();
   </script>
 </body>
 

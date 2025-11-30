@@ -23,7 +23,7 @@ const currentPage = window.location.pathname.split("/").pop();
 // Listen for authentication state changes
 onAuthStateChanged(auth, (user) => {
     // Define protected pages that require a login
-    const protectedPages = ['mainhome.html', 'dashboard.html', 'settings.html'];
+    const protectedPages = ['mainhome.html', 'dashboard.html', 'settings.html', 'finalprof.html'];
     
     // Define unauthorized pages (login/signup) that should redirect when logged in
     const authPages = ['login.html', 'signin.html'];

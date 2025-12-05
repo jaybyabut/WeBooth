@@ -14,7 +14,6 @@
 
     <style>
 /*
-/*
  * This file contains the custom CSS from the original <style> block.
  * Tailwind CSS utilities (like flex, p-4, md:p-8, etc.) remain in the HTML.
  */
@@ -33,54 +32,54 @@ body {
     color: #c32d6c;
 }
 
- .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
 
-    .topbar h1 {
-      font-family: 'Fredoka One', cursive;
-      font-size: 40px;
-      font-weight: 900;
-      color: #d23481;
-      margin: 0;
-      letter-spacing: -1px;
-    }
+.topbar h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 40px;
+    font-weight: 900;
+    color: #d23481;
+    margin: 0;
+    letter-spacing: -1px;
+}
 
-    .right-buttons {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
+.right-buttons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 
-    .right-buttons button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      font-size: 1rem;
-      border-radius: 12px;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      border: 2px solid #d23481;
-      background-color: #fff;
-      color: #d23481;
-      transition: background-color 0.3s, color 0.3s;
-    }
+.right-buttons button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border: 2px solid #d23481;
+    background-color: #fff;
+    color: #d23481;
+    transition: background-color 0.3s, color 0.3s;
+}
 
-    .right-buttons button img {
-      width: 28px;
-      height: 28px;
-    }
+.right-buttons button img {
+    width: 28px;
+    height: 28px;
+}
 
-    .right-buttons button:hover,
-    .admin-btn {
-      background-color: #d23481;
-      color: #fff;
-      border: 2px solid #d23481;
-    }
+.right-buttons button:hover,
+.admin-btn {
+    background-color: #d23481;
+    color: #fff;
+    border: 2px solid #d23481;
+}
 
 
 /* Card Container Styles (Camera, Layout, Effects) */
@@ -91,6 +90,8 @@ body {
     box-shadow: 0 4px 10px rgba(221, 61, 147, 0.15); 
     backdrop-filter: blur(5px);
     border: 1px solid #f9d7e2; 
+    /* The main card styles, position: relative is key for stacking context */
+    position: relative; 
 }
 
 /* New style for the transparent camera preview card */
@@ -115,6 +116,7 @@ body {
     text-align: left;
     transition: all 0.2s ease;
     position: relative;
+    cursor: pointer; /* Added cursor for better UX on the button replacement */
 }
 
 .control-button:hover {
@@ -247,15 +249,61 @@ body {
 
 /* Consolidated utility class for select arrow icon */
 .select-icon-arrow {
-    position: absolute; /* absolute */
-    right: 1rem; /* right-4 */
-    top: 50%; /* top-1/2 */
-    transform: translateY(-50%); /* transform -translate-y-1/2 */
-    width: 1.25rem; /* w-5 (assuming 1rem = 4 units, 1.25rem = 5 units) */
-    height: 1.25rem; /* h-5 */
-    color: #9ca3af; /* text-gray-400 */
+    position: absolute; 
+    right: 1rem; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    width: 1.25rem; 
+    height: 1.25rem; 
+    color: #9ca3af; 
     pointer-events: none;
     z-index: 10;
+}
+
+/* --- CUSTOM DROPDOWN STYLES --- */
+.custom-options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-weight: 500;
+    /* High z-index to ensure the list item is above everything else */
+    z-index: 999; 
+}
+
+.custom-options-list li {
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.custom-options-list li:hover {
+    background-color: #fecaca;
+    color: #d23481;
+}
+
+.option-active {
+    font-weight: 700;
+    color: #d23481; /* Highlight selected option */
+    background-color: #fce7f3;
+}
+
+/* Container for all dropdowns to establish a stacking context for the list */
+.dropdown-container {
+    position: relative;
+    width: 100%; 
+    /* This z-index is lower than the list (z-999) but higher than default elements */
+    z-index: 30; 
+}
+
+/* Custom class for Camera Card to ensure its dropdown (Timer) is on top of Layout card */
+.camera-card {
+    position: relative;
+    z-index: 20; 
+}
+/* Custom class for Layout Card to ensure its dropdowns are on top of Effects card */
+.layout-card {
+    position: relative;
+    z-index: 10; 
 }
 </style>
 
@@ -267,8 +315,8 @@ body {
         <header class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
             <div class="flex items-center">
                 <img src="Icons/11.svg" alt="WeBooth Logo"
-                     class="w-12 h-12 md:w-16 md:h-16 mr-3"
-                     onerror="this.outerHTML = '<div class=\'icon-fallback p-2 text-xl\'>W</div>'">
+                    class="w-12 h-12 md:w-16 md:h-16 mr-3"
+                    onerror="this.outerHTML = '<div class=\'icon-fallback p-2 text-xl\'>W</div>'">
 
                 <h1 class="text-2xl md:text-3xl text-brand-pink leading-tight font-fredoka">
                     WeBooth is Ready<br>to Snap
@@ -294,77 +342,85 @@ body {
 
             <div class="lg:col-span-1 flex flex-col gap-6">
 
-                <section class="card">
+                <section class="card camera-card"> 
                     <h2 class="text-2xl font-bold mb-4">Camera</h2>
                     <div class="grid grid-cols-2 gap-4">
 
                         <button id="switch-camera-btn" class="control-button">
                             <img src="Icons/2.svg" alt="Switch Camera"
-                                 class="w-6 h-6 mr-2"
-                                 onerror="this.outerHTML = '<div class=\'icon-fallback\'>SC</div>'">
+                                class="w-6 h-6 mr-2"
+                                onerror="this.outerHTML = '<div class=\'icon-fallback\'>SC</div>'">
                             <span class="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
                                 Mirror
                             </span>
                         </button>
 
-                        <div class="control-button relative items-center">
-                            <label for="timer-select" class="cursor-pointer z-10">
-                                <img src="Icons/1.svg" alt="Timer"
-                                      class="w-6 h-6 mr-2"
-                                      onerror="this.outerHTML = '<div class=\'icon-fallback\'>T</div>'">
-                            </label>
+                        <div class="dropdown-container">
+                            <button id="custom-timer-toggle" class="control-button justify-between">
+                                <div class="flex items-center">
+                                    <img src="Icons/1.svg" alt="Timer"
+                                        class="w-6 h-6 mr-2"
+                                        onerror="this.outerHTML = '<div class=\'icon-fallback\'>T</div>'">
+                                    <span id="selected-timer-text">Timer</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 ml-2" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
 
-                            <select id="timer-select" class="appearance-none bg-transparent border-none w-full h-full py-1 outline-none cursor-pointer text-gray-800 z-20 pr-8">
-                                <option value="">Timer</option>
-                                <option value="3">3 Seconds</option>
-                                <option value="10">10 Seconds</option>
-                            </select>
-
-                            <svg class="select-icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
+                            <ul id="custom-timer-options" class="hidden absolute top-full left-0 mt-2 w-full bg-white border border-pink-200 rounded-xl shadow-xl custom-options-list">
+                                <li class="p-3 cursor-pointer timer-option option-active" data-value="0" data-label="Timer">None</li>
+                                <li class="p-3 cursor-pointer timer-option" data-value="3" data-label="3 Seconds">3 Seconds</li>
+                                <li class="p-3 cursor-pointer timer-option" data-value="5" data-label="5 Seconds">5 Seconds</li>
+                                <li class="p-3 cursor-pointer timer-option" data-value="10" data-label="10 Seconds">10 Seconds</li>
+                            </ul>
                         </div>
-                    </div>
+                        </div>
                 </section>
 
-                <section class="card">
+                <section class="card layout-card">
                     <h2 class="text-2xl font-bold mb-4">Layout</h2>
                     <div class="grid grid-cols-2 gap-4">
 
-                        <div class="control-button relative items-center">
-                            <label for="frame-select" class="cursor-pointer z-10">
-                                <img src="Icons/6.svg" alt="Frame Size"
-                                      class="w-6 h-6 mr-2"
-                                      onerror="this.outerHTML = '<div class=\'icon-fallback\'>FS</div>'">
-                            </label>
-                            <select id="frame-select" class="appearance-none bg-transparent border-none w-full h-full py-1 outline-none cursor-pointer text-gray-800 z-20 pr-8">
-                                <option value="">Frame Size</option>
-                                <option value="2 x 6">2 x 6 inches</option>
-                                <option value="4 x 6">4 x 6 inches</option>
-                            </select>
-                            <svg class="select-icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
+                        <div class="dropdown-container">
+                            <button id="custom-frame-toggle" class="control-button justify-between">
+                                <div class="flex items-center">
+                                    <img src="Icons/6.svg" alt="Frame Size"
+                                        class="w-6 h-6 mr-2"
+                                        onerror="this.outerHTML = '<div class=\'icon-fallback\'>FS</div>'">
+                                    <span id="selected-frame-text">Frame Size </span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 ml-2" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <ul id="custom-frame-options" class="hidden absolute top-full left-0 mt-2 w-full bg-white border border-pink-200 rounded-xl shadow-xl custom-options-list">
+                                <li class="p-3 cursor-pointer frame-option option-active" data-value="" data-label="Frame Size">Frame Size</li>
+                                <li class="p-3 cursor-pointer frame-option" data-value="2 x 6" data-label="2 x 6 inches">2 x 6 inches</li>
+                                <li class="p-3 cursor-pointer frame-option" data-value="4 x 6" data-label="4 x 6 inches">4 x 6 inches</li>
+                            </ul>
                         </div>
-
-                        <div class="control-button relative items-center">
-                            <label for="shots-select" class="cursor-pointer z-10">
-                                <img src="Icons/7.svg" alt="Shots"
-                                      class="w-6 h-6 mr-2"
-                                      onerror="this.outerHTML = '<div class=\'icon-fallback\'>S</div>'">
-                            </label>
-                            <select id="shots-select" class="appearance-none bg-transparent border-none w-full h-full py-1 outline-none cursor-pointer text-gray-800 z-20 pr-8">
-                                <option value="">Shots</option>
-                                <option value="1">1 Shot</option>
-                                <option value="2">2 Shots</option>
-                                <option value="3">3 Shots</option>
-                                <option value="4">4 Shots</option>
-                            </select>
-                            <svg class="select-icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
+                        <div class="dropdown-container">
+                            <button id="custom-shots-toggle" class="control-button justify-between">
+                                <div class="flex items-center">
+                                    <img src="Icons/7.svg" alt="Shots"
+                                        class="w-6 h-6 mr-2"
+                                        onerror="this.outerHTML = '<div class=\'icon-fallback\'>S</div>'">
+                                    <span id="selected-shots-text">Shots</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 ml-2" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <ul id="custom-shots-options" class="hidden absolute top-full left-0 mt-2 w-full bg-white border border-pink-200 rounded-xl shadow-xl custom-options-list">
+                                <li class="p-3 cursor-pointer shots-option option-active" data-value="0" data-label="Shots">Shots</li>
+                                <li class="p-3 cursor-pointer shots-option" data-value="1" data-label="1 Shot">1 Shot</li>
+                                <li class="p-3 cursor-pointer shots-option" data-value="2" data-label="2 Shots">2 Shots</li>
+                                <li class="p-3 cursor-pointer shots-option" data-value="3" data-label="3 Shots">3 Shots</li>
+                                <li class="p-3 cursor-pointer shots-option" data-value="4" data-label="4 Shots">4 Shots</li>
+                            </ul>
                         </div>
-                    </div>
+                        </div>
                 </section>
 
                 <section class="card">
@@ -405,7 +461,7 @@ body {
     </section>
 </div>
 
-             </div>
+            </div>
 
         </main>
     </div>
@@ -419,6 +475,108 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const retakeIndex = urlParams.get('retake');
     let existingImages = [];
+    
+    // --- Custom Control Elements and State ---
+    
+    // Timer
+    const customTimerToggle = document.getElementById('custom-timer-toggle');
+    const customTimerOptions = document.getElementById('custom-timer-options');
+    const selectedTimerText = document.getElementById('selected-timer-text');
+    let selectedTimerValue = 0; 
+    
+    // Frame Size (New)
+    const customFrameToggle = document.getElementById('custom-frame-toggle');
+    const customFrameOptions = document.getElementById('custom-frame-options');
+    const selectedFrameText = document.getElementById('selected-frame-text');
+    let selectedFrameSize = ""; // e.g., "2 x 6"
+    
+    // Shots (New)
+    const customShotsToggle = document.getElementById('custom-shots-toggle');
+    const customShotsOptions = document.getElementById('custom-shots-options');
+    const selectedShotsText = document.getElementById('selected-shots-text');
+    let selectedNumShots = 0; // e.g., 4
+    
+    // The rest of the elements
+    const cameraPreview = document.getElementById('camera-preview');
+    const startButton = document.getElementById('start-btn');
+    const uploadButton = document.getElementById('upload-btn');
+    const fileInput = document.getElementById('file-input');
+    
+    // --- Utility Functions for Custom Dropdowns ---
+    
+    function setupDropdown(toggleBtn, optionsList, activeClass, setValueCallback) {
+        // Toggle visibility
+        toggleBtn.addEventListener('click', () => {
+            // Close other open dropdowns
+            [customTimerOptions, customFrameOptions, customShotsOptions].forEach(ul => {
+                if (ul !== optionsList) ul.classList.add('hidden');
+            });
+            optionsList.classList.toggle('hidden');
+        });
+
+        // Handle option selection
+        optionsList.addEventListener('click', (event) => {
+            const option = event.target.closest(`.${activeClass}-option`);
+            if (option) {
+                optionsList.querySelectorAll(`.${activeClass}-option`).forEach(opt => opt.classList.remove('option-active'));
+                
+                option.classList.add('option-active');
+                
+                // Update global state and button text
+                const value = option.dataset.value;
+                const label = option.dataset.label || option.textContent;
+                setValueCallback(value, label);
+                
+                optionsList.classList.add('hidden'); // Hide after selection
+            }
+        });
+    }
+
+    // Set up initial state (Frame Size and Shots)
+    const initOption = (optionsList, activeClass, defaultValue, defaultLabel) => {
+        const initialOpt = optionsList.querySelector(`[data-value="${defaultValue}"]`);
+        if (initialOpt) {
+            initialOpt.classList.add('option-active');
+            // Ensure the initial button text is correct
+            document.getElementById(`selected-${activeClass}-text`).textContent = defaultLabel;
+        }
+    };
+
+
+    // --- Setup All Dropdowns ---
+
+    // Timer Setup
+    setupDropdown(customTimerToggle, customTimerOptions, 'timer', (value, label) => {
+        selectedTimerValue = parseInt(value);
+        selectedTimerText.textContent = label;
+    });
+    initOption(customTimerOptions, 'timer', selectedTimerValue, "Timer");
+
+    // Frame Size Setup
+    setupDropdown(customFrameToggle, customFrameOptions, 'frame', (value, label) => {
+        selectedFrameSize = value;
+        selectedFrameText.textContent = label;
+    });
+    initOption(customFrameOptions, 'frame', selectedFrameSize, "Frame Size");
+
+    // Shots Setup
+    setupDropdown(customShotsToggle, customShotsOptions, 'shots', (value, label) => {
+        selectedNumShots = parseInt(value) || 0;
+        selectedShotsText.textContent = label;
+    });
+    initOption(customShotsOptions, 'shots', selectedNumShots, "Shots");
+
+    // Close dropdowns when clicking anywhere outside
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('.dropdown-container')) {
+            [customTimerOptions, customFrameOptions, customShotsOptions].forEach(ul => {
+                ul.classList.add('hidden');
+            });
+        }
+    });
+
+    // --- End Custom Dropdown Setup ---
+
 
     // If retake mode is active, load the existing array of images
     if (retakeIndex !== null) {
@@ -439,18 +597,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         document.getElementById('upload-btn').disabled = true;
         document.getElementById('upload-btn').textContent = 'DISABLED';
-        document.getElementById('shots-select').disabled = true;
-        document.getElementById('frame-select').disabled = true;
         
-        // Show only the timer selection, as only one shot will be taken
+        // Disable other controls
+        customShotsToggle.disabled = true;
+        customFrameToggle.disabled = true;
+        
         console.log(`RETAKE MODE: Preparing to capture and replace index ${retakeIndex}`);
     }
 
 
     // -------------------------------------------
-    // UI Interaction: Apply Visual Effects (UNCHANGED)
+    // UI Interaction: Apply Visual Effects
     // -------------------------------------------
-    const cameraPreview = document.getElementById('camera-preview');
     const allFilterClasses = [
         'filter-none', 'filter-bw', 'filter-warm',
         'filter-cool', 'filter-retro', 'filter-noir'
@@ -471,14 +629,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // -------------------------------------------
-    // Core Logic: Settings & Navigation (UPDATED)
+    // Core Logic: Capture Functions
     // -------------------------------------------
-    const startButton = document.getElementById('start-btn');
-    const uploadButton = document.getElementById('upload-btn');
-    const fileInput = document.getElementById('file-input');
-    const frameSelect = document.getElementById('frame-select');
-    const shotsSelect = document.getElementById('shots-select');
-    const timerSelect = document.getElementById('timer-select');
 
     // Function to capture photo from video (FIXED FOR MIRRORING)
     function capturePhoto() {
@@ -532,8 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
             overlay.style.zIndex = '10';
             overlay.style.pointerEvents = 'none';
-            cameraPreview.parentElement.style.position = 'relative'; 
-            cameraPreview.parentElement.appendChild(overlay);
+            
+            // Find the container of the video preview
+            const previewContainer = cameraPreview.closest('.card.transparent-card');
+            previewContainer.style.position = 'relative'; 
+            previewContainer.appendChild(overlay);
 
             let count = seconds;
             overlay.textContent = count;
@@ -653,11 +808,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle 'Start' Button: Start multi-shot/retake capture sequence
     if (startButton) {
         startButton.addEventListener('click', () => {
-            const frameSize = frameSelect.value;
-            // In retake mode, numShots is determined by the existing array length, 
-            // but we still need a valid selection for non-retake mode.
-            const numShots = parseInt(shotsSelect.value) || 0; 
-            const timerDuration = parseInt(timerSelect.value) || 0; 
+            const frameSize = selectedFrameSize;
+            const numShots = selectedNumShots; 
+            const timerDuration = selectedTimerValue; 
 
             // Validate required fields only if NOT in retake mode
             if (retakeIndex === null) {
@@ -687,10 +840,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle 'Upload' Button: Trigger the hidden file input
     if (uploadButton && fileInput) {
         uploadButton.addEventListener('click', () => {
-            const frameSize = frameSelect.value;
-            const numShots = shotsSelect.value;
+            const frameSize = selectedFrameSize;
+            const numShots = selectedNumShots;
             
-            if (frameSize === "" || numShots === "") {
+            if (frameSize === "" || numShots === 0) {
                 alert('Please select a "Frame Size" and "Shots" before uploading.');
                 return;
             }
@@ -711,8 +864,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (fileInput) {
         fileInput.addEventListener('change', async (event) => {
             const files = event.target.files;
-            const numShots = parseInt(shotsSelect.value); 
-            const frameSize = frameSelect.value;
+            const numShots = selectedNumShots; 
+            const frameSize = selectedFrameSize;
             
             if (files.length === 0) {
                 // No files selected, exit
@@ -773,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 // -------------------------------------------
-// Camera Activation and Management (UNCHANGED)
+// Camera Activation and Management
 // -------------------------------------------
     let currentStream = null;
     let currentDeviceId = null;

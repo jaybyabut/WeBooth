@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Fredoka+One&family=Poppins&family=Montserrat&family=Roboto&family=Open+Sans&family=Lora&family=Raleway&family=Playfair+Display&family=Nunito&family=Merriweather&family=Quicksand&family=Ubuntu&family=Oswald&family=DM+Sans&family=Cabin&family=Lobster&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         body {
@@ -23,54 +25,54 @@
         .text-brand-pink {
             color: #c32d6c;
         }
- .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
 
-    .topbar h1 {
-      font-family: 'Fredoka One', cursive;
-      font-size: 40px;
-      font-weight: 900;
-      color: #d23481;
-      margin: 0;
-      letter-spacing: -1px;
-    }
+        .topbar h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 40px;
+            font-weight: 900;
+            color: #d23481;
+            margin: 0;
+            letter-spacing: -1px;
+        }
 
-    .right-buttons {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
+        .right-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
 
-    .right-buttons button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      font-size: 1rem;
-      border-radius: 12px;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      border: 2px solid #d23481;
-      background-color: #fff;
-      color: #d23481;
-      transition: background-color 0.3s, color 0.3s;
-    }
+        .right-buttons button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border: 2px solid #d23481;
+            background-color: #fff;
+            color: #d23481;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-    .right-buttons button img {
-      width: 28px;
-      height: 28px;
-    }
+        .right-buttons button img {
+            width: 28px;
+            height: 28px;
+        }
 
-    .right-buttons button:hover,
-    .admin-btn {
-      background-color: #d23481;
-      color: #fff;
-      border: 2px solid #d23481;
-    }
+        .right-buttons button:hover,
+        .admin-btn {
+            background-color: #d23481;
+            color: #fff;
+            border: 2px solid #d23481;
+        }
 
 
         .icon-fallback {
@@ -147,7 +149,6 @@
             gap: 0.75rem; 
         }
         
-        /* FIXED: Restored background grid layout */
         #background-grid {
             display: grid;
             grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -178,7 +179,6 @@
         }
 
         .bg-selection-item {
-            aspect-ratio: 1 / 3; 
             border: 2px solid white;
             border-radius: 0.5rem; 
             object-fit: cover;
@@ -325,6 +325,7 @@
         }
 
         .photobooth-template-container {
+            /* KEY FIX 1: Set positioning context for overlays */
             position: relative; 
             background-color: #ffffff;
             border-radius: 0.75rem;
@@ -339,107 +340,30 @@
             transition: background-color 0.3s ease, background-image 0.3s ease;
             overflow: hidden; 
         }
-
+        
+        /* Styles applied when frameSize is 4x6 (Wider format) */
         .photobooth-template-container.layout-4x6 {
             max-width: 300px; 
             width: 100%;
+            display: grid; 
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
         }
         
-        .photobooth-template-container.layout-4x6 .photo-strip-image {
-            aspect-ratio: 4 / 3; 
-        }
-
-        .photobooth-template-container.layout-4x6 .bg-selection-item {
-            aspect-ratio: 2 / 3; 
-        }
-        
-        .sticker-overlay-layer {
-            position: absolute; 
-            top: 0;
-            left: 0;
+        /* Styles for 4x6 grid layout (4 shots) */
+        .photobooth-template-container.layout-4x6.layout-4shots .photo-strip-image {
             width: 100%;
-            height: 100%;
-            pointer-events: none; 
-            z-index: 10; 
-            display: none;
+            aspect-ratio: 4 / 3; 
+            margin-bottom: 0;
+        }
+
+        /* Styles for 2x6 strip layout (4 shots or less) */
+        .photobooth-template-container:not(.layout-4x6) {
+            display: block; 
         }
         
-        .draggable-text {
-            position: absolute;
-            cursor: move;
-            z-index: 20; 
-            padding: 5px;
-            user-select: none; 
-            border: 1px dashed transparent;
-            white-space: pre-wrap; 
-            line-height: 1.2; 
-            font-size: 16px; 
-            min-width: 20px; 
-        }
-        .draggable-text:hover {
-            border-color: #f4b744; 
-        }
-        .draggable-text.is-editing {
-            border-color: #f4b744;
-            border-style: solid;
-            cursor: text;
-        }
-
-        .resize-handle {
-            width: 15px;
-            height: 15px;
-            background: #f4b744;
-            border: 2px solid white;
-            position: absolute;
-            z-index: 21;
-            opacity: 0; 
-            transition: opacity 0.2s ease;
-        }
-        .draggable-text:hover .resize-handle {
-            opacity: 1; 
-        }
-        
-        .resize-handle-font {
-            right: -5px;
-            bottom: -5px;
-            cursor: se-resize;
-        }
-        
-        .resize-handle-width {
-            right: -5px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: ew-resize;
-            height: 25px; 
-            border-radius: 4px;
-        }
-
-        .remove-handle {
-            width: 18px;
-            height: 18px;
-            background: #ef4444; 
-            border: 2px solid white;
-            position: absolute;
-            z-index: 21;
-            opacity: 0; 
-            transition: opacity 0.2s ease;
-            right: -7px;
-            top: -7px;
-            cursor: pointer;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            line-height: 1;
-        }
-        .draggable-text:hover .remove-handle {
-            opacity: 1;
-        }
-
-
+        /* Individual photo box aspect ratio (default 2x6, non-4-shot) */
         .photo-strip-image {
             background-color: #e5e7eb; 
             border-radius: 0.25rem;
@@ -456,15 +380,28 @@
         .photo-strip-image:last-child {
             margin-bottom: 0;
         }
+
+        /* Sticker overlay and Footer positioning for 4x6 grid */
+        .photobooth-template-container.layout-4x6 .sticker-overlay-layer,
+        .photobooth-template-container.layout-4x6 #text-overlay-layer {
+            grid-column: 1 / -1;
+            grid-row: 1 / -1;
+            z-index: 10;
+        }
+        .photobooth-template-container.layout-4x6 .template-footer {
+            grid-column: 1 / -1;
+            margin-top: auto;
+            width: 100%;
+        }
+
         .template-footer {
             text-align: center;
             padding-top: 0.5rem; 
-            margin-top: 0.5rem; 
             border-top: 1px dashed #cbd5e100; 
             background-color: rgba(255, 255, 255, 0);
             border-radius: 0 0 0.25rem 0.25rem;
-            margin: 0.5rem -0.5rem -0.5rem -0.5rem; 
-            padding: 0.5rem;
+            margin: 0; 
+            padding: 0.5rem 0.5rem 0.5rem 0.5rem; 
         }
         .template-footer .footer-brand {
             display: flex;
@@ -488,14 +425,15 @@
         .footer-extras {
             margin-top: 0.5rem; 
             display: flex;
-            flex-direction: row; 
+            flex-direction: column; 
             flex-wrap: wrap; 
             justify-content: center; 
             align-items: center;
-            gap: 0.5rem; 
+            gap: 0.2rem; 
         }
 
-        .footer-input {
+        /* Updated CSS for non-editable date/time spans */
+        .footer-display {
             background: transparent;
             border: none;
             text-align: center;
@@ -506,11 +444,8 @@
             border-radius: 0.25rem;
             transition: all 0.2s ease;
             font-family: 'Inter', sans-serif;
-        }
-        .footer-input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.7);
-            box-shadow: 0 0 0 1px #cbd5e1; 
+            display: inline-block; 
+            min-width: 80px; 
         }
 
         .social-icons-vertical {
@@ -582,14 +517,272 @@
             opacity: 0.9;
         }
 
-        /* --- ADDED CSS FILTER DEFINITIONS --- */
+        /* --- CSS FILTER DEFINITIONS --- */
         .filter-none { filter: none; }
         .filter-bw { filter: grayscale(100%); }
         .filter-warm { filter: sepia(70%); }
         .filter-cool { filter: contrast(1.1) brightness(1.1) saturate(1.3) hue-rotate(-15deg); }
         .filter-retro { filter: sepia(100%) brightness(0.9) contrast(1.1); }
         .filter-noir { filter: grayscale(100%) contrast(1.2) brightness(0.8); }
-        /* --- END ADDED CSS --- */
+        /* --- END CSS FILTER --- */
+
+        /* Styles for the draggable text element */
+        .draggable-text {
+            position: absolute; 
+            cursor: grab;
+            padding: 5px;
+            border: 1px dashed rgba(195, 45, 108, 0.5); /* Visual cue */
+            z-index: 100; /* Ensure it's on top of everything */
+            white-space: pre-wrap; /* Preserve line breaks from textarea input */
+            text-align: center;
+            line-height: 1.2;
+            user-select: none;
+            min-width: 50px;
+            min-height: 20px;
+            box-sizing: border-box;
+            word-wrap: break-word;
+        }
+        .draggable-text:active {
+            cursor: grabbing;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #f4b744;
+            border: 2px solid white;
+            border-radius: 50%;
+            z-index: 101; 
+        }
+
+        .resize-handle-font {
+            bottom: -7px;
+            right: -7px;
+            cursor: se-resize; /* For font size control */
+        }
+
+        .resize-handle-width {
+            top: -7px;
+            right: -7px;
+            cursor: e-resize; /* For text box width control */
+        }
+
+        .remove-handle {
+            position: absolute;
+            top: -7px;
+            left: -7px;
+            width: 15px;
+            height: 15px;
+            background: #dd3d93;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+            z-index: 101; 
+        }
+        
+        /* Apply absolute positioning to the sticker layer */
+        .sticker-overlay-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; 
+            z-index: 50; 
+            pointer-events: none;
+        }
+        /* Add layer for text to also be positioned absolutely */
+        #text-overlay-layer {
+            position: absolute;
+            top: 0.5rem; 
+            left: 0.5rem;
+            width: calc(100% - 1rem); 
+            height: calc(100% - 0.5rem); 
+            z-index: 100; 
+            pointer-events: none; 
+        }
+        #text-overlay-layer .draggable-text {
+            pointer-events: auto; 
+        }
+
+        /* --- ADDED MODAL CSS --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black backdrop */
+            z-index: 200; /* High z-index to ensure it's on top */
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content-inner {
+            position: relative;
+            z-index: 10;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 237, 249, 0.7) 0%, rgba(248, 255, 232, 0.7) 100%);
+            opacity: 0.8;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #c32d6c; 
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .modal-label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #c32d6c;
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            filter: drop-shadow(0 1px 1px rgba(195, 45, 108, 0.2));
+        }
+
+        .modal-input, .modal-textarea {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border-radius: 0.5rem; 
+            border: 2px solid #ffdeea;
+            background-color: rgba(255, 255, 255, 0.95);
+            outline: none;
+            transition: all 0.2s ease;
+            color: #374151; 
+        }
+        .modal-input:focus, .modal-textarea:focus {
+            border-color: #dd3d93;
+            box-shadow: 0 0 0 2px rgba(221, 61, 147, 0.3);
+        }
+
+        .custom-toggle {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+            margin-right: 0.75rem;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .slider {
+            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+        }
+
+        .toggle-switch input:focus + .slider {
+            box-shadow: 0 0 1px #f645b1;
+        }
+
+        .toggle-switch input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .modal-button-cancel {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .modal-button-cancel:hover {
+            background-color: #e5e7eb;
+            border-color: #d1d5db;
+        }
+
+        .modal-button-post {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; 
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.1s ease;
+            border: none; 
+        }
+        .modal-button-post:hover {
+            background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);
+        }
+        .modal-button-post:active {
+            transform: scale(0.98);
+        }
+        /* --- END ADDED MODAL CSS --- */
 
     </style>
 </head>
@@ -599,9 +792,9 @@
         
         <header class="flex flex-col md:flex-row items-center md:items-baseline justify-between gap-4 mb-8">
             <div class="flex items-center">
-                <img src="Icons/11.svg" alt="WeBooth Logo" 	
-                     class="w-12 h-12 md:w-16 md:h-16 mr-3"
-                     onerror="this.outerHTML = '<div class=\'icon-fallback p-2 text-xl\'>W</div>'">
+                <img src="Icons/11.svg" alt="WeBooth Logo" 
+                    class="w-12 h-12 md:w-16 md:h-16 mr-3"
+                    onerror="this.outerHTML = '<div class=\'icon-fallback p-2 text-xl\'>W</div>'">
                 
                 <h1 class="text-2xl md:text-3xl text-brand-pink leading-tight font-fredoka">
                     Customize Your Photo
@@ -610,15 +803,16 @@
 
             <div class="flex flex-col items-center md:items-end">
                 <header class="topbar">
+                    
         <div class="right-buttons">
-          <button onclick="window.location.href='booth.html'">
-            <img src="Icons/2.svg" alt="Booth icon" />
-            Booth
-          </button>
-          <button onclick="window.location.href='finalprof.html'">
-            <img src="Icons/4.svg" alt="Profile icon" />
-            Profile
-          </button>
+            <button onclick="window.location.href='mainhome.html'">
+                <img src="Icons/2.svg" alt="Booth icon" />
+                Booth
+            </button>
+            <button onclick="window.location.href='finalprof.html'">
+                <img src="Icons/4.svg" alt="Profile icon" />
+                Profile
+            </button>
         </div>
       </header>
 
@@ -642,94 +836,94 @@
                             </button>
 
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="/sticker pack (2 x 6 in)/clover2x6.png" alt="Sticker 1" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/clover2x6.png" alt="Sticker 1" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/cloverX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/birthday2x6.png" alt="Sticker 2" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/birthday2x6.png" alt="Sticker 2" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/birthdayX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/cat2x6.png" alt="Sticker 3" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/cat2x6.png" alt="Sticker 3" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/catX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/butterfly2x6.png" alt="Sticker 4" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/butterfly2x6.png" alt="Sticker 4" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/butterflyX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/comic2x6.png" alt="Sticker 5" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/comic2x6.png" alt="Sticker 5" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/comicX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/cat2x6.png" alt="Sticker 6" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/cat2x6.png" alt="Sticker 6" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/catX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/dog2x6.png" alt="Sticker 7" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/dog2x6.png" alt="Sticker 7" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/dogX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/doodle2x6.png" alt="Sticker 8" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/doodle2x6.png" alt="Sticker 8" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/doodleX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/fairy2x6.png" alt="Sticker 9" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/fairy2x6.png" alt="Sticker 9" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/fairyX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/kitten2x6.png" alt="Sticker 10" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/kitten2x6.png" alt="Sticker 10" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/kittenX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/flower2x6.png" alt="Sticker 11" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/flower2x6.png" alt="Sticker 11" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/flowerX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/doodle2x6.png" alt="Sticker 12" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/doodle2x6.png" alt="Sticker 12" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/doodleX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/dog2x6.png" alt="Sticker 13" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/dog2x6.png" alt="Sticker 13" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/dogX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/capybara2x6.png" alt="Sticker 14" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/capybara2x6.png" alt="Sticker 14" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/capybaraX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/kitten2x6.png" alt="Sticker 15" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/kitten2x6.png" alt="Sticker 15" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/kittenX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/cafe2x6.png" alt="Sticker 16" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/cafe2x6.png" alt="Sticker 16" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/cafeX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/flower2x6.png" alt="Sticker 17" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/flower2x6.png" alt="Sticker 17" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/flowerX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/fairy2x6.png" alt="Sticker 18" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/fairy2x6.png" alt="Sticker 18" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/fairyX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/bear2x6.png" alt="Sticker 19" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/bear2x6.png" alt="Sticker 19" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/bearX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/doodle2x6.png" alt="Sticker 20" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/doodle2x6.png" alt="Sticker 20" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/doodleX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/travel2x6.png" alt="Sticker 21" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/travel2x6.png" alt="Sticker 21" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/travelX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/vinyl2x6.png" alt="Sticker 22" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/vinyl2x6.png" alt="Sticker 22" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/vinylX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/xoxo2x6.png" alt="Sticker 23" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/xoxo2x6.png" alt="Sticker 23" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/xoxoX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/bear2x6.png" alt="Sticker 24" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/bear2x6.png" alt="Sticker 24" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/bearX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/butterfly2x6.png" alt="Sticker 25" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/butterfly2x6.png" alt="Sticker 25" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/butterflyX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/flower2x6.png" alt="Sticker 26" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/flower2x6.png" alt="Sticker 26" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/flowerX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/blue2x6.png" alt="Sticker 27" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/blue2x6.png" alt="Sticker 27" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/blueX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/brownie2x6.png" alt="Sticker 28" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/brownie2x6.png" alt="Sticker 28" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/brownieX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/blue2x6.png" alt="Sticker 29" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/blue2x6.png" alt="Sticker 29" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/blueX.png">
                             </button>
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/butterfly2x6.png" alt="Sticker 30" class="w-full h-full object-cover rounded-lg">
+                                <img src="sticker pack (2 x 6 in)/butterfly2x6.png" alt="Sticker 30" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/butterflyX.png">
                             </button>
                         </div>
                     </div>
@@ -767,507 +961,804 @@
                         </div>
                         
                         <div>
-                   <label class="color-picker-wrapper">
-                         <span>Text Color</span>
-                         <input type="color" id="text-color" class="color-picker-input" value="#c32d6c">
+                           <label class="color-picker-wrapper">
+                                <span>Text Color</span>
+                                <input type="color" id="text-color" class="color-picker-input" value="#c32d6c">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 flex flex-col gap-8 justify-start"> 
+                <div class="custom-section-container">
+                    <h2 class="custom-section-title">Backgrounds</h2>
+                    <div class="item-grid" id="background-grid"> 
+                        
+                        <label class="color-picker-grid-item">
+                            <div class="icon"></div>
+                            <input type="color" id="bg-color" value="#FFFFFF" class="opacity-0 absolute inset-0 w-full h-full">
+                            <span class="sr-only">Custom Background Color</span>
+                        </label>
+                        
+                        <img src="Bg_svg_1/1.svg.png" alt="Background 1" class="bg-selection-item">
+                        <img src="Bg_svg_1/2.svg.png" alt="Background 2" class="bg-selection-item">
+                        <img src="Bg_svg_1/3.svg.png" alt="Background 3" class="bg-selection-item">
+                        <img src="Bg_svg_1/4.svg.png" alt="Background 4" class="bg-selection-item">
+                        <img src="Bg_svg_1/5.svg.png" alt="Background 5" class="bg-selection-item">
+                        <img src="Bg_svg_1/6.svg.png" alt="Background 6" class="bg-selection-item">
+                        <img src="Bg_svg_1/7.svg.png" alt="Background 7" class="bg-selection-item">
+                        <img src="Bg_svg_1/8.svg.png" alt="Background 8" class="bg-selection-item">
+                        <img src="Bg_svg_1/9.svg.png" alt="Background 9" class="bg-selection-item">
+                        <img src="Bg_svg_1/10.svg.png" alt="Background 10" class="bg-selection-item">
+                        <img src="Bg_svg_1/11.svg.png" alt="Background 11" class="bg-selection-item">
+                        <img src="Bg_svg_1/12.svg.png" alt="Background 12" class="bg-selection-item">
+                        <img src="Bg_svg_1/13.svg.png" alt="Background 13" class="bg-selection-item">
+                        <img src="Bg_svg_1/14.svg.png" alt="Background 14" class="bg-selection-item">
+                        <img src="Bg_svg_1/15.svg.png" alt="Background 15" class="bg-selection-item">
+                        <img src="Bg_svg_1/16.svg.png" alt="Background 16" class="bg-selection-item">
+                        <img src="Bg_svg_1/17.svg.png" alt="Background 17" class="bg-selection-item">
+                        <img src="Bg_svg_1/18.svg.png" alt="Background 18" class="bg-selection-item">
+                        <img src="Bg_svg_1/19.svg.png" alt="Background 19" class="bg-selection-item">
+                        <img src="Bg_svg_1/20.svg.png" alt="Background 20" class="bg-selection-item">
+                        <img src="Bg_svg_1/21.svg.png" alt="Background 21" class="bg-selection-item">
+                        <img src="Bg_svg_1/22.svg.png" alt="Background 22" class="bg-selection-item">
+                        <img src="Bg_svg_1/23.svg.png" alt="Background 23" class="bg-selection-item">
+                        <img src="Bg_svg_1/24.svg.png" alt="Background 24" class="bg-selection-item">
+                        <img src="Bg_svg_1/25.svg.png" alt="Background 25" class="bg-selection-item">
+                        <img src="Bg_svg_1/26.svg.png" alt="Background 26" class="bg-selection-item">
+                        <img src="Bg_svg_1/27.svg.png" alt="Background 27" class="bg-selection-item">
+                        <img src="Bg_svg_1/28.svg.png" alt="Background 28" class="bg-selection-item">
+                        <img src="Bg_svg_1/29.svg.png" alt="Background 29" class="bg-selection-item">
+                        <img src="Bg_svg_1/30.svg.png" alt="Background 30" class="bg-selection-item">
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 flex flex-col items-center relative">
+                
+                <style>
+                    /* Custom CSS for 2x2 Grid Layout (used for 4x6, 4 shots) */
+                    .photobooth-template-container.layout-grid-2x2 {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        align-content: center;
+                        gap: 0.5rem;
+                        padding-bottom: 0.5rem;
+                        /* Ensure the footer/overlay covers the entire grid area */
+                        grid-template-rows: auto 1fr auto; 
+                    }
+                    .photobooth-template-container.layout-grid-2x2 .sticker-overlay-layer,
+                    .photobooth-template-container.layout-grid-2x2 #text-overlay-layer {
+                        grid-column: 1 / -1;
+                        grid-row: 1 / -1;
+                        z-index: 10;
+                    }
+                    .photobooth-template-container.layout-grid-2x2 .template-footer {
+                        grid-column: 1 / -1;
+                        margin-top: auto;
+                        width: 100%;
+                    }
+                    .photobooth-template-container.layout-grid-2x2 .photo-strip-image {
+                        width: 100%;
+                        aspect-ratio: 4 / 3; /* Standard photo aspect ratio for 4x6 grid */
+                        margin-bottom: 0;
+                    }
+                    .sticker-overlay-layer {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain; 
+                        z-index: 50; 
+                        pointer-events: none;
+                    }
+                    #text-overlay-layer {
+                        position: absolute;
+                        top: 0.5rem; 
+                        left: 0.5rem;
+                        width: calc(100% - 1rem); 
+                        height: calc(100% - 0.5rem); 
+                        z-index: 100; 
+                        pointer-events: none; 
+                    }
+                    #text-overlay-layer .draggable-text {
+                        pointer-events: auto; 
+                    }
+                </style>
+
+                <div class="photobooth-template-container" id="photostrip-preview">
+                    <img id="sticker-overlay" class="sticker-overlay-layer" src="" alt="" style="display: none;">
+                    
+                    <div id="text-overlay-layer">
+                    </div>
+                    
+                    <div class="template-footer">
+                        <div class="footer-brand">
+                            <img id="footer-brand-logo" src="Icons_svg_1/11.svg" 
+                                alt="WeBooth Logo" 
+                                class="logo-footer hidden"
+                                onerror="this.outerHTML = '<div class=\'w-8 h-8 rounded-full bg-slate-300 text-slate-600 flex items-center justify-center font-bold text-lg hidden\'>W</div>'">
+                            <span id="footer-brand-text" class="footer-text font-fredoka hidden">WeBooth</span>
+                        </div>
+                        
+                        <div class="footer-extras">
+                            <span id="footer-time-dynamic" class="footer-display hidden"></span>
+                            <span id="footer-date-dynamic" class="footer-display hidden"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-row items-center justify-center gap-4 mb-4"> <label class="flex items-center space-x-1.5 cursor-pointer text-brand-pink font-medium">
+                        <input type="checkbox" id="logo-checkbox" class="w-5 h-5 rounded accent-[#c32d6c] border-gray-300 focus:ring-[#c32d6c]"/>
+                        <span>Logo</span>
                     </label>
+                    <label class="flex items-center space-x-1.5 cursor-pointer text-brand-pink font-medium">
+                        <input type="checkbox" id="date-checkbox" class="w-5 h-5 rounded accent-[#c32d6c] border-gray-300 focus:ring-[#c32d6c]"/>
+                        <span>Date</span>
+                    </label>
+                    <label class="flex items-center space-x-1.5 cursor-pointer text-brand-pink font-medium">
+                        <input type="checkbox" id="time-checkbox" class="w-5 h-5 rounded accent-[#c32d6c] border-gray-300 focus:ring-[#c32d6c]"/>
+                        <span>Time</span>
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <button class="action-button" id="main-post-btn">
+                        POST
+                    </button>
+                </div>
+
+                <div class="social-icons-vertical">
+                    <button class="social-icon-button" id="save-btn" title="Save">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z"></path></svg>
+                    </button>
+                    <button class="social-icon-button" id="send-btn" title="Send / Share">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    </button>
+                    <button class="social-icon-button" id="download-btn" title="Download">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </button>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <div id="post-modal-overlay" class="modal-overlay">
+        <div class="modal-content" id="post-modal-content">
+            <div class="modal-content-inner">
+                <h3 class="modal-title font-fredoka">Photo Details</h3>
+                
+                <label for="photo-title-input" class="modal-label">Photo Title</label>
+                <input type="text" id="photo-title-input" placeholder="Give your photo a fun title!" class="modal-input">
+
+                <label for="photo-description-textarea" class="modal-label">Description</label>
+                <textarea id="photo-description-textarea" placeholder="Describe your moment..." class="modal-textarea" rows="3"></textarea>
+
+                <div class="custom-toggle">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="share-to-community-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="text-brand-pink font-medium">Share to community</span>
+                </div>
+                
+                <div class="flex justify-end gap-3 mt-8">
+                    <button id="modal-cancel-btn" class="modal-button-cancel">Cancel</button>
+                    <button id="modal-post-btn" class="modal-button-post">Post</button>
                 </div>
             </div>
         </div>
-</div>
-
-<div class="lg:col-span-1 flex flex-col gap-8 justify-start"> 
-    <div class="custom-section-container">
-        <h2 class="custom-section-title">Backgrounds</h2>
-        <div class="item-grid" id="background-grid"> 
-            
-            <label class="color-picker-grid-item">
-                <div class="icon"></div>
-                <input type="color" id="bg-color" value="#FFFFFF" class="opacity-0 absolute inset-0 w-full h-full">
-                <span class="sr-only">Custom Background Color</span>
-            </label>
-            
-            <img src="Bg_svg_1/1.svg.png" alt="Background 1" class="bg-selection-item">
-            <img src="Bg_svg_1/2.svg.png" alt="Background 2" class="bg-selection-item">
-            <img src="Bg_svg_1/3.svg.png" alt="Background 3" class="bg-selection-item">
-            <img src="Bg_svg_1/4.svg.png" alt="Background 4" class="bg-selection-item">
-            <img src="Bg_svg_1/5.svg.png" alt="Background 5" class="bg-selection-item">
-            <img src="Bg_svg_1/6.svg.png" alt="Background 6" class="bg-selection-item">
-            <img src="Bg_svg_1/7.svg.png" alt="Background 7" class="bg-selection-item">
-            <img src="Bg_svg_1/8.svg.png" alt="Background 8" class="bg-selection-item">
-            <img src="Bg_svg_1/9.svg.png" alt="Background 9" class="bg-selection-item">
-            <img src="Bg_svg_1/10.svg.png" alt="Background 10" class="bg-selection-item">
-            <img src="Bg_svg_1/11.svg.png" alt="Background 11" class="bg-selection-item">
-            <img src="Bg_svg_1/12.svg.png" alt="Background 12" class="bg-selection-item">
-            <img src="Bg_svg_1/13.svg.png" alt="Background 13" class="bg-selection-item">
-            <img src="Bg_svg_1/14.svg.png" alt="Background 14" class="bg-selection-item">
-            <img src="Bg_svg_1/15.svg.png" alt="Background 15" class="bg-selection-item">
-            <img src="Bg_svg_1/16.svg.png" alt="Background 16" class="bg-selection-item">
-            <img src="Bg_svg_1/17.svg.png" alt="Background 17" class="bg-selection-item">
-            <img src="Bg_svg_1/18.svg.png" alt="Background 18" class="bg-selection-item">
-            <img src="Bg_svg_1/19.svg.png" alt="Background 19" class="bg-selection-item">
-            <img src="Bg_svg_1/20.svg.png" alt="Background 20" class="bg-selection-item">
-            <img src="Bg_svg_1/21.svg.png" alt="Background 21" class="bg-selection-item">
-            <img src="Bg_svg_1/22.svg.png" alt="Background 22" class="bg-selection-item">
-            <img src="Bg_svg_1/23.svg.png" alt="Background 23" class="bg-selection-item">
-            <img src="Bg_svg_1/24.svg.png" alt="Background 24" class="bg-selection-item">
-            <img src="Bg_svg_1/25.svg.png" alt="Background 25" class="bg-selection-item">
-            <img src="Bg_svg_1/26.svg.png" alt="Background 26" class="bg-selection-item">
-            <img src="Bg_svg_1/27.svg.png" alt="Background 27" class="bg-selection-item">
-            <img src="Bg_svg_1/28.svg.png" alt="Background 28" class="bg-selection-item">
-            <img src="Bg_svg_1/29.svg.png" alt="Background 29" class="bg-selection-item">
-            <img src="Bg_svg_1/30.svg.png" alt="Background 30" class="bg-selection-item">
-        </div>
     </div>
-</div>
 
-<div class="lg:col-span-1 flex flex-col items-center relative">
-    
-    <style>
-        .photobooth-template-container.layout-grid-2x2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-content: center;
-            gap: 0.5rem;
-            padding-bottom: 0.5rem;
-        }
-        .photobooth-template-container.layout-grid-2x2 .sticker-overlay-layer {
-            grid-column: 1 / -1;
-            grid-row: 1 / -1;
-            z-index: 10;
-        }
-        .photobooth-template-container.layout-grid-2x2 .template-footer {
-            grid-column: 1 / -1;
-            margin-top: auto;
-            width: 100%;
-        }
-        .photobooth-template-container.layout-grid-2x2 .photo-strip-image {
-            width: 100%;
-            aspect-ratio: 4 / 3; 
-            margin-bottom: 0;
-        }
-    </style>
-
-    <div class="photobooth-template-container" id="photostrip-preview">
-        <img id="sticker-overlay" class="sticker-overlay-layer" src="" alt="">
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
         
-        <div class="template-footer">
-            <div class="footer-brand">
-                <img id="footer-brand-logo" src="Icons_svg_1/11.svg" 
-                     alt="WeBooth Logo" 
-                     class="logo-footer hidden"
-                     onerror="this.outerHTML = '<div class=\'w-8 h-8 rounded-full bg-slate-300 text-slate-600 flex items-center justify-center font-bold text-lg hidden\'>W</div>'">
-                <span id="footer-brand-text" class="footer-text font-fredoka hidden">WeBooth</span>
-            </div>
+        // 1. Get saved settings and data from Storage
+        const frameSize = localStorage.getItem('frameSize') || '2x6';
+        const activeFilter = localStorage.getItem('activeFilter') || 'filter-none';
+        
+        let capturedImages = [];
+        try {
+            const imagesJson = sessionStorage.getItem('capturedImagesArray');
+            if (imagesJson) {
+                capturedImages = JSON.parse(imagesJson);
+            }
+        } catch (e) {
+            console.error("Error parsing captured images array:", e);
+        }
+        
+        const storedShotCount = parseInt(localStorage.getItem('numShots'));
+        const shotCount = capturedImages.length > 0 ? capturedImages.length : (storedShotCount || 3);
+        
+        const photoStrip = document.getElementById('photostrip-preview');
+        const templateFooter = photoStrip.querySelector('.template-footer');
+        const textOverlayLayer = document.getElementById('text-overlay-layer'); 
+        const stickerOverlay = document.getElementById('sticker-overlay'); 
+        
+        // --- Helper to Create Image Element with Filter ---
+        const createStripImage = (imageDataUrl, filterClass) => {
+            const img = document.createElement('img');
+            img.src = imageDataUrl;
+            img.classList.add('w-full', 'h-full', 'object-cover', filterClass); 
+            return img;
+        };
+        
+        // --- 2. Apply Frame Size & Layout ---
+        
+        let shotAspectRatio = '4/3'; 
+        
+        if (frameSize === '2x6') {
+            photoStrip.classList.remove('layout-4x6');
+            shotAspectRatio = '4/3'; 
+            photoStrip.classList.remove('layout-grid-2x2');
+        } else if (frameSize === '4x6') {
+            photoStrip.classList.add('layout-4x6');
             
-            <div class="footer-extras">
-                <input type="text" id="footer-time-dynamic" class="footer-input hidden" size="8">
-                <input type="text" id="footer-date-dynamic" class="footer-input hidden" size="8">
-            </div>
-        </div>
-    </div>
-    
-    <div class="flex flex-row items-center justify-center gap-4 mb-4"> <label class="flex items-center space-x-1.5 cursor-pointer text-brand-pink font-medium">
-            <input type="checkbox" id="logo-checkbox" class="w-5 h-5 rounded accent-[#c32d6c] border-gray-300 focus:ring-[#c32d6c]"/>
-            <span>Logo</span>
-        </label>
-        <label class="flex items-center space-x-1.5 cursor-pointer text-brand-pink font-medium">
-            <input type="checkbox" id="date-checkbox" class="w-5 h-5 rounded accent-[#c32d6c] border-gray-300 focus:ring-[#c32d6c]"/>
-            <span>Date</span>
-        </label>
-        <label class="flex items-center space-x-1.5 cursor-pointer text-brand-pink font-medium">
-            <input type="checkbox" id="time-checkbox" class="w-5 h-5 rounded accent-[#c32d6c] border-gray-300 focus:ring-[#c32d6c]"/>
-            <span>Time</span>
-        </label>
-    </div>
-
-    <div class="flex items-center gap-6">
-        <button class="action-button">
-            POST
-        </button>
-    </div>
-
-    <div class="social-icons-vertical">
-        <button class="social-icon-button" id="save-btn" title="Save">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z"></path></svg>
-        </button>
-        <button class="social-icon-button" id="send-btn" title="Send / Share">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-        </button>
-        <button class="social-icon-button" id="download-btn" title="Download">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-        </button>
-    </div>
-
-    </div>
-
-</main>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // 1. Get saved settings and data from Storage
-    const frameSize = localStorage.getItem('frameSize') || '2x6';
-    const activeFilter = localStorage.getItem('activeFilter') || 'filter-none'; // <-- Filter retrieved
-    
-    // Get the array of all captured images (or uploaded single image, saved as an array of one)
-    let capturedImages = [];
-    try {
-        const imagesJson = sessionStorage.getItem('capturedImagesArray');
-        if (imagesJson) {
-            capturedImages = JSON.parse(imagesJson);
-        }
-    } catch (e) {
-        console.error("Error parsing captured images array:", e);
-    }
-    
-    // The number of shots determines the size of the template
-    const shotCount = capturedImages.length > 0 ? capturedImages.length : (parseInt(localStorage.getItem('numShots')) || 3);
-    
-    const photoStrip = document.getElementById('photostrip-preview');
-    const templateFooter = photoStrip.querySelector('.template-footer');
-    
-    // --- Helper to Create Image Element with Filter (FIX APPLIED HERE) ---
-    const createStripImage = (imageDataUrl, filterClass) => {
-        const img = document.createElement('img');
-        img.src = imageDataUrl;
-        // FIX: Apply the filter class saved from the previous page
-        img.classList.add('w-full', 'h-full', 'object-cover', filterClass); 
-        return img;
-    };
-    
-    // --- 2. Apply Frame Size & Layout ---
-    if (frameSize === '4x6') {
-        photoStrip.classList.add('layout-4x6');
-        
-        // Update sticker image paths if needed (assuming 4x6 versions exist)
-        document.querySelectorAll('.sticker-button img').forEach(img => {
-            // FIX: Replace both old path formats and update image size suffix
-            img.src = img.src.replace('sticker pack (2x6 ) 1', 'sticker pack (2 x 6 in)')
-                             .replace(/2x6/g, '4x6');
-        });
-
-        if (shotCount === 4) {
-            photoStrip.classList.add('layout-grid-2x2');
-        }
-    }
-
-    // --- 3. Apply Number of Shots (Dynamic Loop) ---
-    
-    photoStrip.querySelectorAll('.photo-strip-image').forEach(photo => photo.remove());
-
-    for (let i = 0; i < shotCount; i++) {
-        const photoDiv = document.createElement('div');
-        photoDiv.classList.add('photo-strip-image');
-        
-        const imageDataUrl = capturedImages[i];
-
-        if (imageDataUrl) {
-            // FIX: Ensure the activeFilter is passed to the creation function
-            const img = createStripImage(imageDataUrl, activeFilter); 
-            photoDiv.appendChild(img);
-        } else {
-            // Fallback for missing shot data
-            photoDiv.textContent = `Photo ${i + 1}`;
-        }
-
-        photoStrip.insertBefore(photoDiv, templateFooter);
-    }
-
-    
-    // Button Functionality 
-    const saveBtn = document.getElementById('save-btn');
-    const sendBtn = document.getElementById('send-btn');
-    const downloadBtn = document.getElementById('download-btn');
-
-    if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-            alert('Saved! (Functionality to be built)');
-        });
-    }
-
-    if (sendBtn) {
-        sendBtn.addEventListener('click', () => {
-            alert('Ready to send! (Functionality to be built)');
-        });
-    }
-
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', () => {
-            alert('Downloading! (Functionality to be built)');
-        });
-    }
-
-    // Background Functionality 
-    const bgColorPicker = document.getElementById('bg-color');
-    const bgImages = document.querySelectorAll('.bg-selection-item');
-
-    if (photoStrip && bgColorPicker) {
-        bgColorPicker.addEventListener('input', (e) => {
-            photoStrip.style.backgroundImage = 'none';
-            photoStrip.style.backgroundColor = e.target.value;
-        });
-    }
-
-    if (photoStrip && bgImages.length > 0) {
-        bgImages.forEach(img => {
-            img.addEventListener('click', () => {
-                photoStrip.style.backgroundImage = `url(${img.src})`;
-                photoStrip.style.backgroundColor = 'transparent'; 
-            });
-        });
-    }
-
-    // Footer Checkbox Functionality 
-    const logoCheckbox = document.getElementById('logo-checkbox');
-    const dateCheckbox = document.getElementById('date-checkbox');
-    const timeCheckbox = document.getElementById('time-checkbox');
-
-    const footerLogo = document.getElementById('footer-brand-logo');
-    const footerDate = document.getElementById('footer-date-dynamic');
-    const footerTime = document.getElementById('footer-time-dynamic');
-    const footerWeBoothText = document.getElementById('footer-brand-text'); 
-
-    // date/time
-    const now = new Date();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const year = String(now.getFullYear()).slice(-2);
-    const formattedDate = `${month}/${day}/${year}`;
-    let hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const formattedTime = `${hours}:${minutes} ${ampm}`;
-
-    if (logoCheckbox && footerLogo && footerWeBoothText) {
-        logoCheckbox.addEventListener('change', (e) => {
-            footerLogo.classList.toggle('hidden', !e.target.checked);
-            footerWeBoothText.classList.toggle('hidden', !e.target.checked);
-        });
-    }
-
-    if (dateCheckbox && footerDate) {
-        dateCheckbox.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                if (footerDate.value === '') {
-                    footerDate.value = formattedDate;
-                }
-                footerDate.classList.remove('hidden');
+            if (shotCount === 4) {
+                photoStrip.classList.add('layout-grid-2x2', 'layout-4shots');
+                shotAspectRatio = '4/3'; 
             } else {
-                footerDate.classList.add('hidden');
+                photoStrip.classList.remove('layout-grid-2x2', 'layout-4shots');
+                shotAspectRatio = '3/2'; 
             }
-        });
-    }
-
-    if (timeCheckbox && footerTime) {
-        timeCheckbox.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                if (footerTime.value === '') {
-                    footerTime.value = formattedTime;
-                }
-                footerTime.classList.remove('hidden');
-            } else {
-                footerTime.classList.add('hidden');
-            }
-        });
-    }
-    
-    // --- JAVASCRIPT FOR ADD/CLEAR/RESIZE TEXT ---
-    
-    const addTextBtn = document.getElementById('add-text-btn');
-    const customTextInput = document.getElementById('custom-text'); 
-    const fontSelect = document.getElementById('font-select');
-    const textColorPicker = document.getElementById('text-color');
-    const targetTextElements = [footerDate, footerTime];
-    
-    if (fontSelect) {
-        fontSelect.addEventListener('change', (e) => {
-            const newFontFamily = e.target.value;
-            targetTextElements.forEach(el => {
-                if (el) {
-                    el.style.fontFamily = `'${newFontFamily}', sans-serif`;
-                }
-            });
-        });
-    }
-
-    if (textColorPicker) {
-        textColorPicker.addEventListener('input', (e) => {
-            const newColor = e.target.value;
-            targetTextElements.forEach(el => {
-                if (el) {
-                    el.style.color = newColor;
-                }
-            });
-        });
-    }
-
-    if (addTextBtn && photoStrip) {
-        addTextBtn.addEventListener('click', () => {
-            const text = customTextInput.value; 
-            if (text.trim() === '') {
-                alert('Please type some text first!');
-                return;
-            }
-            
-            const color = textColorPicker.value;
-            const font = fontSelect.value;
-            
-            const newTextElement = document.createElement('div');
-            newTextElement.textContent = text;
-            newTextElement.style.color = color;
-            newTextElement.style.fontFamily = `'${font}', sans-serif`;
-            newTextElement.classList.add('draggable-text');
-            newTextElement.style.left = '20px'; 
-            newTextElement.style.top = '20px'; 
-
-            const resizeHandleFont = document.createElement('div');
-            resizeHandleFont.classList.add('resize-handle', 'resize-handle-font');
-            newTextElement.appendChild(resizeHandleFont);
-
-            const resizeHandleWidth = document.createElement('div');
-            resizeHandleWidth.classList.add('resize-handle', 'resize-handle-width');
-            newTextElement.appendChild(resizeHandleWidth);
-
-            const removeHandle = document.createElement('div');
-            removeHandle.classList.add('remove-handle');
-            removeHandle.innerHTML = '&#x2715;'; 
-            newTextElement.appendChild(removeHandle);
-
-            photoStrip.appendChild(newTextElement);
-
-            makeDraggableAndResizable(newTextElement, resizeHandleFont, resizeHandleWidth, removeHandle);
-        });
-    }
-    
-    function makeDraggableAndResizable(element, fontHandle, widthHandle, removeHandle) {
-        let isDragging = false;
-        let isResizingFont = false;
-        let isResizingWidth = false;
-
-        let initialFontSize = 16; 
-        let initialWidth = element.clientWidth;
-        let startMouseX, startMouseY;
-        let offsetX, offsetY;
+        }
         
-        element.style.fontSize = `${initialFontSize}px`;
+        // --- CRITICAL STICKER PATH FIX (Run first to update buttons/preview based on frame size) ---
+        const updateStickerPaths = (targetFrameSize) => {
+            const stickerPathReplace = targetFrameSize === '4x6' ? '4x6' : '2x6';
+            const imagePathSegment = targetFrameSize === '4x6' ? '4 x 6 in' : '2 x 6 in';
+            
+            document.querySelectorAll('.sticker-button img').forEach(img => {
+                const basePath = img.dataset.baseSrc;
+                if (basePath) {
+                    // Update the visible image source in the button grid
+                    img.src = basePath.replace('(X in)', `(${imagePathSegment})`).replace(/X/g, stickerPathReplace);
+                }
+            });
+            return { stickerPathReplace, imagePathSegment };
+        };
+        
+        // Update all sticker preview images
+        const { stickerPathReplace, imagePathSegment } = updateStickerPaths(frameSize);
 
-        element.addEventListener('mousedown', (e) => {
-            if (e.target === element) {
-                isDragging = true;
-                offsetX = e.clientX - element.getBoundingClientRect().left;
-                offsetY = e.clientY - element.getBoundingClientRect().top;
-                element.style.opacity = '0.7'; 
+        // --- Initial Sticker Load based on Frame Size ---
+        const storedStickerBase = localStorage.getItem('activeStickerBase');
+        if (storedStickerBase && stickerOverlay) {
+            
+            const initialStickerSrc = storedStickerBase
+                .replace('(X in)', `(${imagePathSegment})`)
+                .replace(/X/g, stickerPathReplace);
+
+            stickerOverlay.src = initialStickerSrc;
+            stickerOverlay.style.display = 'block';
+        }
+        // ------------------------------------------------
+
+
+        // --- 3. Apply Number of Shots (Dynamic Loop) ---
+        
+        // Remove existing shots before re-rendering (must leave sticker and text layers)
+        photoStrip.querySelectorAll('.photo-strip-image').forEach(photo => photo.remove());
+
+        // Find the index of the first non-image element (like sticker layer or footer) to insert before
+        const firstNonImageIndex = Array.from(photoStrip.children).findIndex(el => 
+            el.id === 'sticker-overlay' || el.id === 'text-overlay-layer' || el.classList.contains('template-footer')
+        );
+        const insertBeforeElement = firstNonImageIndex !== -1 ? photoStrip.children[firstNonImageIndex] : templateFooter;
+
+        for (let i = 0; i < shotCount; i++) {
+            const photoDiv = document.createElement('div');
+            photoDiv.classList.add('photo-strip-image');
+            
+            // Set the calculated aspect ratio for the shot
+            photoDiv.style.aspectRatio = shotAspectRatio;
+
+            const imageDataUrl = capturedImages[i];
+
+            if (imageDataUrl) {
+                const img = createStripImage(imageDataUrl, activeFilter); 
+                photoDiv.appendChild(img);
+            } else {
+                // Fallback for missing shot data
+                photoDiv.textContent = `Photo ${i + 1}`;
+            }
+
+            // Insert the shot div before the sticker layer, text layer, or footer (whichever is first)
+            photoStrip.insertBefore(photoDiv, insertBeforeElement);
+        }
+
+        
+        // Button Functionality (omitted for brevity, assume original logic is fine)
+        const saveBtn = document.getElementById('save-btn');
+        const sendBtn = document.getElementById('send-btn');
+        const downloadBtn = document.getElementById('download-btn');
+
+
+        // --------------------------------------------------------------------------------
+        // --- FIX: UPDATED FILTER APPLICATION LOGIC FOR DOWNLOAD ---
+        
+        // Helper function to map your CSS classes to the Canvas filter string
+        const getCanvasFilterString = (filterClass) => {
+            switch (filterClass) {
+                case 'filter-bw':
+                    return 'grayscale(100%)';
+                case 'filter-warm':
+                    return 'sepia(70%)'; 
+                case 'filter-cool':
+                    return 'contrast(1.1) brightness(1.1) saturate(1.3) hue-rotate(-15deg)';
+                case 'filter-retro':
+                    return 'sepia(100%) brightness(0.9) contrast(1.1)';
+                case 'filter-noir':
+                    return 'grayscale(100%) contrast(1.2) brightness(0.8)';
+                case 'filter-none':
+                default:
+                    return 'none';
+            }
+        };
+
+        // Helper function to draw an image onto a canvas with a filter applied
+        const applyFilterToCanvas = (imageDataUrl, filterClass, callback) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                
+                // Apply the filter using the Canvas API filter property
+                ctx.filter = getCanvasFilterString(filterClass);
+                
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                callback(canvas.toDataURL('image/png'));
+            };
+            img.src = imageDataUrl;
+            img.crossOrigin = 'Anonymous'; 
+        };
+
+
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                const photostripElement = document.getElementById('photostrip-preview');
+                const draggableTexts = photostripElement.querySelectorAll('.draggable-text');
+                const photoContainers = photostripElement.querySelectorAll('.photo-strip-image');
+                
+                const originalData = [];
+                
+                // Use a promise queue to ensure all images are filtered/reloaded before capture
+                const filterPromises = Array.from(photoContainers).map((container, index) => {
+                    return new Promise(resolve => {
+                        const img = container.querySelector('img');
+                        const originalImageDataUrl = capturedImages[index]; // Use the original source from storage
+                        const filterClass = activeFilter;
+                        
+                        if (img && originalImageDataUrl && filterClass !== 'filter-none') {
+                            
+                            // Store original state and remove CSS filter class
+                            originalData.push({ element: img, originalSrc: img.src, originalClasses: img.className });
+                            img.classList.remove(filterClass);
+
+                            // Apply the filter via canvas and update the img.src
+                            applyFilterToCanvas(originalImageDataUrl, filterClass, (filteredDataUrl) => {
+                                img.src = filteredDataUrl;
+                                resolve();
+                            });
+                        } else {
+                            // No image, no filter, or filter-none. Just save the state.
+                            if (img) {
+                                originalData.push({ element: img, originalSrc: img.src, originalClasses: img.className });
+                                img.classList.remove(filterClass);
+                            }
+                            resolve();
+                        }
+                    });
+                });
+
+                // Wait for all images to be processed before running html2canvas
+                Promise.all(filterPromises).then(() => {
+
+                    // Hide drag/resize handles
+                    draggableTexts.forEach(el => {
+                        el.style.border = '1px dashed transparent'; 
+                        el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                            handle.style.display = 'none';
+                        });
+                    });
+
+                    setTimeout(() => {
+                        html2canvas(photostripElement, {
+                            scale: 3, 
+                            useCORS: true, 
+                            allowTaint: true, 
+                        }).then(canvas => {
+                            
+                            // Revert all changes immediately after capture
+                            originalData.forEach(data => {
+                                data.element.src = data.originalSrc;
+                                data.element.className = data.originalClasses; // Re-apply all original classes
+                            });
+
+                            draggableTexts.forEach(el => {
+                                el.style.border = ''; 
+                                el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                                    handle.style.display = ''; 
+                                });
+                            });
+
+                            // Trigger Download
+                            const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+                            const link = document.createElement('a');
+                            link.download = 'webooth-photo-strip.png';
+                            link.href = image;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+
+                        }).catch(error => {
+                            console.error("Error during photo strip capture:", error);
+                            
+                            // Ensure cleanup happens even on error
+                            originalData.forEach(data => {
+                                data.element.src = data.originalSrc;
+                                data.element.className = data.originalClasses; 
+                            });
+                            draggableTexts.forEach(el => {
+                                el.style.border = '';
+                                el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                                    handle.style.display = '';
+                                });
+                            });
+                            alert('An error occurred during download. Check the console for details.');
+                        });
+                    }, 50); 
+                }).catch(err => {
+                    console.error("Error processing filters:", err);
+                    alert('A filter error occurred. Check console.');
+                });
+            });
+        }
+        // --- END DOWNLOAD FILTER FIX ---
+
+
+        // Background Functionality (Original logic preserved)
+        const bgColorPicker = document.getElementById('bg-color');
+        const bgImages = document.querySelectorAll('.bg-selection-item');
+
+        if (photoStrip && bgColorPicker) {
+            bgColorPicker.addEventListener('input', (e) => {
+                photoStrip.style.backgroundImage = 'none';
+                photoStrip.style.backgroundColor = e.target.value;
+            });
+        }
+
+        if (photoStrip && bgImages.length > 0) {
+            bgImages.forEach(img => {
+                img.addEventListener('click', () => {
+                    photoStrip.style.backgroundImage = `url(${img.src})`;
+                    photoStrip.style.backgroundColor = 'transparent'; 
+                });
+            });
+        }
+
+        // Footer Checkbox Functionality
+        const logoCheckbox = document.getElementById('logo-checkbox');
+        const dateCheckbox = document.getElementById('date-checkbox');
+        const timeCheckbox = document.getElementById('time-checkbox');
+
+        const footerLogo = document.getElementById('footer-brand-logo');
+        const footerDate = document.getElementById('footer-date-dynamic');
+        const footerTime = document.getElementById('footer-time-dynamic');
+        const footerWeBoothText = document.getElementById('footer-brand-text'); 
+        
+        // date/time generation
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const year = String(now.getFullYear()).slice(-2);
+        const formattedDate = `${month}/${day}/${year}`;
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const formattedTime = `${hours}:${minutes} ${ampm}`;
+
+        if (logoCheckbox && footerLogo && footerWeBoothText) {
+            logoCheckbox.addEventListener('change', (e) => {
+                footerLogo.classList.toggle('hidden', !e.target.checked);
+                footerWeBoothText.classList.toggle('hidden', !e.target.checked);
+            });
+        }
+
+        if (dateCheckbox && footerDate) {
+            // Directly setting textContent and toggling visibility
+            footerDate.textContent = formattedDate; 
+            dateCheckbox.addEventListener('change', (e) => {
+                footerDate.classList.toggle('hidden', !e.target.checked);
+            });
+        }
+
+        if (timeCheckbox && footerTime) {
+            // Directly setting textContent and toggling visibility
+            footerTime.textContent = formattedTime; 
+            timeCheckbox.addEventListener('change', (e) => {
+                footerTime.classList.toggle('hidden', !e.target.checked);
+            });
+        }
+        
+        // --- JAVASCRIPT FOR DRAGGABLE TEXT (Original logic preserved) ---
+        
+        const addTextBtn = document.getElementById('add-text-btn');
+        const customTextInput = document.getElementById('custom-text'); 
+        const fontSelect = document.getElementById('font-select');
+        const textColorPicker = document.getElementById('text-color');
+        
+        // Simplified event handlers for font and color
+        const updateTextStyles = () => {
+            const newColor = textColorPicker.value;
+            const newFontFamily = fontSelect.value;
+            // Queries .draggable-text and the static .footer-display spans
+            const activeTextElements = photoStrip.querySelectorAll('.draggable-text, .footer-display:not(.hidden)'); 
+            activeTextElements.forEach(el => {
+                el.style.fontFamily = `'${newFontFamily}', sans-serif`;
+                el.style.color = newColor;
+            });
+        };
+        fontSelect.addEventListener('change', updateTextStyles);
+        textColorPicker.addEventListener('input', updateTextStyles);
+
+
+        if (addTextBtn && photoStrip) {
+            addTextBtn.addEventListener('click', () => {
+                const text = customTextInput.value; 
+                if (text.trim() === '') {
+                    alert('Please type some text first!');
+                    return;
+                }
+                
+                const color = textColorPicker.value;
+                const font = fontSelect.value;
+                
+                const newTextElement = document.createElement('div');
+                newTextElement.textContent = text;
+                newTextElement.style.color = color;
+                newTextElement.style.fontFamily = `'${font}', sans-serif`;
+                newTextElement.classList.add('draggable-text');
+                newTextElement.style.left = '20px'; 
+                newTextElement.style.top = '20px'; 
+                newTextElement.style.pointerEvents = 'auto'; 
+
+                const resizeHandleFont = document.createElement('div');
+                resizeHandleFont.classList.add('resize-handle', 'resize-handle-font');
+                newTextElement.appendChild(resizeHandleFont);
+
+                const resizeHandleWidth = document.createElement('div');
+                resizeHandleWidth.classList.add('resize-handle', 'resize-handle-width');
+                newTextElement.appendChild(resizeHandleWidth);
+
+                const removeHandle = document.createElement('div');
+                removeHandle.classList.add('remove-handle');
+                removeHandle.innerHTML = '&#x2715;'; 
+                newTextElement.appendChild(removeHandle);
+
+                // Append text element to the dedicated text overlay layer
+                textOverlayLayer.appendChild(newTextElement);
+
+                makeDraggableAndResizable(newTextElement, resizeHandleFont, resizeHandleWidth, removeHandle);
+            });
+        }
+        
+        function makeDraggableAndResizable(element, fontHandle, widthHandle, removeHandle) {
+            let isDragging = false;
+            let isResizingFont = false;
+            let isResizingWidth = false;
+
+            let initialFontSize = 16; 
+            let initialWidth = element.clientWidth;
+            let startMouseX, startMouseY;
+            let offsetX, offsetY;
+            
+            element.style.fontSize = `${initialFontSize}px`;
+
+            element.addEventListener('mousedown', (e) => {
+                if (e.target === element) {
+                    isDragging = true;
+                    // Calculate offset relative to the element's top/left (which is relative to textOverlayLayer)
+                    offsetX = e.clientX - element.getBoundingClientRect().left;
+                    offsetY = e.clientY - element.getBoundingClientRect().top;
+                    element.style.opacity = '0.7'; 
+                    e.preventDefault();
+                }
+            });
+            
+            fontHandle.addEventListener('mousedown', (e) => {
+                isResizingFont = true;
+                startMouseX = e.clientX;
+                startMouseY = e.clientY;
+                initialFontSize = parseFloat(window.getComputedStyle(element).fontSize);
+                element.style.opacity = '0.7';
                 e.preventDefault();
-            }
-        });
-        
-        fontHandle.addEventListener('mousedown', (e) => {
-            isResizingFont = true;
-            startMouseX = e.clientX;
-            startMouseY = e.clientY;
-            initialFontSize = parseFloat(window.getComputedStyle(element).fontSize);
-            element.style.opacity = '0.7';
-            e.preventDefault();
-            e.stopPropagation(); 
-        });
+                e.stopPropagation(); 
+            });
 
-        widthHandle.addEventListener('mousedown', (e) => {
-            isResizingWidth = true;
-            startMouseX = e.clientX;
-            initialWidth = element.clientWidth;
-            element.style.opacity = '0.7';
-            e.preventDefault();
-            e.stopPropagation(); 
-        });
+            widthHandle.addEventListener('mousedown', (e) => {
+                isResizingWidth = true;
+                startMouseX = e.clientX;
+                initialWidth = element.clientWidth;
+                element.style.opacity = '0.7';
+                e.preventDefault();
+                e.stopPropagation(); 
+            });
 
-        removeHandle.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            element.remove();
-        });
-        
-        element.addEventListener('dblclick', (e) => {
-            if (e.target.classList.contains('resize-handle') || e.target.classList.contains('remove-handle')) return;
-            
-            element.contentEditable = true;
-            element.focus();
-            element.classList.add('is-editing');
-        });
-        
-        element.addEventListener('blur', () => {
-            element.contentEditable = false;
-            element.classList.remove('is-editing');
-            if (element.textContent.trim() === '') {
+            removeHandle.addEventListener('click', (e) => {
+                e.stopPropagation(); 
                 element.remove();
-            }
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            const stripRect = photoStrip.getBoundingClientRect();
-
-            if (isDragging) {
-                let newX = e.clientX - stripRect.left - offsetX;
-                let newY = e.clientY - stripRect.top - offsetY;
-                
-                newX = Math.max(0, Math.min(newX, stripRect.width - element.offsetWidth));
-                newY = Math.max(0, Math.min(newY, stripRect.height - element.offsetHeight));
-
-                element.style.left = `${newX}px`;
-                element.style.top = `${newY}px`;
-            } else if (isResizingFont) {
-                const dx = e.clientX - startMouseX;
-                const dy = e.clientY - startMouseY;
-                const distance = Math.max(dx, dy); 
-                
-                const newFontSize = Math.max(8, initialFontSize + (distance * 0.5)); 
-                element.style.fontSize = `${newFontSize}px`;
+            });
             
-            } else if (isResizingWidth) {
-                const dx = e.clientX - startMouseX;
-                const newWidth = Math.max(50, initialWidth + dx); 
+            element.addEventListener('dblclick', (e) => {
+                if (e.target.classList.contains('resize-handle') || e.target.classList.contains('remove-handle')) return;
                 
-                element.style.width = `${newWidth}px`;
+                element.contentEditable = true;
+                element.focus();
+                element.classList.add('is-editing');
+            });
+            
+            element.addEventListener('blur', () => {
+                element.contentEditable = false;
+                element.classList.remove('is-editing');
+                if (element.textContent.trim() === '') {
+                    element.remove();
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                const overlayRect = textOverlayLayer.getBoundingClientRect();
+
+                if (isDragging) {
+                    let newX = e.clientX - overlayRect.left - offsetX;
+                    let newY = e.clientY - overlayRect.top - offsetY;
+                    
+                    newX = Math.max(0, Math.min(newX, overlayRect.width - element.offsetWidth));
+                    newY = Math.max(0, Math.min(newY, overlayRect.height - element.offsetHeight));
+
+                    element.style.left = `${newX}px`;
+                    element.style.top = `${newY}px`;
+                } else if (isResizingFont) {
+                    const dx = e.clientX - startMouseX;
+                    const dy = e.clientY - startMouseY;
+                    const distance = Math.max(dx, dy); 
+                    
+                    const newFontSize = Math.max(8, initialFontSize + (distance * 0.5)); 
+                    element.style.fontSize = `${newFontSize}px`;
+                
+                } else if (isResizingWidth) {
+                    const dx = e.clientX - startMouseX;
+                    const newWidth = Math.max(50, initialWidth + dx); 
+                    
+                    const currentX = parseFloat(element.style.left);
+                    const maxWidth = overlayRect.width - currentX;
+                    
+                    element.style.width = `${Math.min(newWidth, maxWidth)}px`;
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                isResizingFont = false;
+                isResizingWidth = false;
+                element.style.opacity = '1'; 
+            });
+        }
+
+        // --- STICKER SELECTION LOGIC (Correctly uses current frame size) ---
+        const stickerButtons = document.querySelectorAll('.sticker-button');
+        const noStickerButton = document.querySelector('.pack-button[data-pack-name="No Stickers"]');
+
+
+        stickerButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const imgElement = button.querySelector('img');
+                const basePath = imgElement.dataset.baseSrc; 
+
+                const currentFrameSize = localStorage.getItem('frameSize') || '2x6';
+                const sizeTag = currentFrameSize === '4x6' ? '4 x 6 in' : '2 x 6 in';
+                const stickerTag = currentFrameSize === '4x6' ? '4x6' : '2x6';
+
+                if (basePath) {
+                    const finalStickerSrc = basePath
+                        .replace('(X in)', `(${sizeTag})`) 
+                        .replace(/X/g, stickerTag); 
+                        
+                    if (stickerOverlay) {
+                        stickerOverlay.src = finalStickerSrc;
+                        stickerOverlay.style.display = 'block';
+                    }
+                    
+                    localStorage.setItem('activeStickerBase', basePath);
+                }
+            });
+        });
+        
+        if (noStickerButton && stickerOverlay && photoStrip) {
+            noStickerButton.addEventListener('click', () => {
+                stickerOverlay.style.display = 'none';
+                localStorage.removeItem('activeStickerBase');
+            });
+        }
+
+        // --- MODAL JAVASCRIPT LOGIC (New) ---
+        const mainPostBtn = document.getElementById('main-post-btn');
+        const modalOverlay = document.getElementById('post-modal-overlay');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const modalPostBtn = document.getElementById('modal-post-btn');
+        const photoTitleInput = document.getElementById('photo-title-input');
+        const photoDescriptionTextarea = document.getElementById('photo-description-textarea');
+        const shareToggle = document.getElementById('share-to-community-toggle');
+
+        // Function to show the modal
+        const showModal = () => {
+            if (modalOverlay) {
+                modalOverlay.style.display = 'flex';
+                // Reset form fields on show
+                photoTitleInput.value = '';
+                photoDescriptionTextarea.value = '';
+                shareToggle.checked = true;
             }
-        });
+        };
 
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            isResizingFont = false;
-            isResizingWidth = false;
-            element.style.opacity = '1'; 
-        });
-    }
-
-    // Sticker Functionality 
-    const stickerOverlay = document.getElementById('sticker-overlay');
-    const stickerButtons = document.querySelectorAll('.sticker-button');
-    const noStickerButton = document.querySelector('.pack-button[data-pack-name="No Stickers"]');
-
-    stickerButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const stickerSrc = button.querySelector('img').src;
-            if (stickerOverlay) {
-                stickerOverlay.src = stickerSrc;
-                stickerOverlay.style.display = 'block';
+        // Function to hide the modal
+        const hideModal = () => {
+            if (modalOverlay) {
+                modalOverlay.style.display = 'none';
             }
-        });
+        };
+
+        // Event listener for the main POST button
+        if (mainPostBtn) {
+            mainPostBtn.addEventListener('click', showModal);
+        }
+
+        // Event listener for the modal Cancel button
+        if (modalCancelBtn) {
+            modalCancelBtn.addEventListener('click', hideModal);
+        }
+
+        // Event listener for clicking the backdrop
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    hideModal();
+                }
+            });
+        }
+
+        // Event listener for the modal Post button (simulated post)
+        if (modalPostBtn) {
+            modalPostBtn.addEventListener('click', () => {
+                const title = photoTitleInput.value;
+                const description = photoDescriptionTextarea.value;
+                const share = shareToggle.checked;
+                
+                // *** In a real application, you would perform image rendering and upload here ***
+                
+                alert(`
+                    Photo Post Initiated!
+                    Title: ${title || '(No Title)'}
+                    Description: ${description || '(No Description)'}
+                    Shared to Community: ${share ? 'Yes' : 'No'}
+                `);
+                
+                // Close the modal after submission
+                hideModal();
+            });
+        }
     });
-    
-    if (noStickerButton && stickerOverlay && photoStrip) {
-        noStickerButton.addEventListener('click', () => {
-            stickerOverlay.style.display = 'none';
-            // Note: Background color/image controls are handled by the Backgrounds section, 
-            // so we don't reset them here unless we want 'No Stickers' to imply 'No Background'.
-            // photoStrip.style.backgroundImage = 'none';
-            // photoStrip.style.backgroundColor = '#ffffff'; 
-        });
-    }
-
-});
-    
-</script>
+        
+    </script>
 </body>
 </html>

@@ -48,7 +48,9 @@
             }
         });
 
-        // 3. REAL FIREBASE STORAGE UPLOAD FUNCTION
+        // 3. REAL FIREBASE STORAGE UPLOAD FUNCTIONS
+        
+        // Template Upload Function (for saving templates)
         window.uploadTemplateImage = async (imageBlob, userId) => {
             if (!userId) {
                 throw new Error("User ID is required for image upload.");
@@ -60,6 +62,21 @@
             const downloadURL = await getDownloadURL(storageRef);
             return downloadURL;
         };
+        
+        // Post Image Upload Function (for posting the final photo strip)
+        window.uploadPostImage = async (imageBlob, userId) => {
+            if (!userId) {
+                throw new Error("User ID is required for image upload.");
+            }
+            const filename = `post-${Date.now()}.png`;
+            // Store in a different directory than templates
+            const storageRef = ref(storage, `posts/${userId}/${filename}`); 
+            console.log(`Uploading post image to Firebase Storage: posts/${userId}/${filename}`);
+            await uploadBytes(storageRef, imageBlob, { contentType: 'image/png' });
+            const downloadURL = await getDownloadURL(storageRef);
+            return downloadURL;
+        };
+
 
         // --- GLOBAL FILTER HELPERS (Required for Download button logic) ---
         window.getCanvasFilterString = (filterClass) => {
@@ -228,26 +245,22 @@
             const sendBtn = document.getElementById('send-btn');
             const downloadBtn = document.getElementById('download-btn');
 
-
-            // --------------------------------------------------------------------------------
-            // --- DOWNLOAD LOGIC (Unchanged) ---
-            
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', () => {
+            // --- Capture Helper Function (Refactored from Download logic for re-use in POST) ---
+            const capturePhotoStripForUpload = () => {
+                return new Promise(async (resolve, reject) => {
                     const draggableTexts = photostripElement.querySelectorAll('.draggable-text');
                     const photoContainers = photostripElement.querySelectorAll('.photo-strip-image');
                     
                     const originalData = [];
                     
-                    // Use a promise queue to ensure all images are filtered/reloaded before capture
+                    // Re-apply filters via canvas before capture (similar to download logic)
                     const filterPromises = Array.from(photoContainers).map((container, index) => {
-                        return new Promise(resolve => {
+                        return new Promise(filterResolve => {
                             const img = container.querySelector('img');
-                            const originalImageDataUrl = capturedImages[index]; // Use the original source from storage
+                            const originalImageDataUrl = capturedImages[index]; 
                             const filterClass = activeFilter;
                             
                             if (img && originalImageDataUrl && filterClass !== 'filter-none') {
-                                
                                 // Store original state and remove CSS filter class
                                 originalData.push({ element: img, originalSrc: img.src, originalClasses: img.className });
                                 img.classList.remove(filterClass);
@@ -255,80 +268,90 @@
                                 // Apply the filter via canvas and update the img.src
                                 window.applyFilterToCanvas(originalImageDataUrl, filterClass, (filteredDataUrl) => {
                                     img.src = filteredDataUrl;
-                                    resolve();
+                                    filterResolve();
                                 });
                             } else {
-                                // No image, no filter, or filter-none. Just save the state.
                                 if (img) {
                                     originalData.push({ element: img, originalSrc: img.src, originalClasses: img.className });
                                     img.classList.remove(filterClass);
                                 }
-                                resolve();
+                                filterResolve();
                             }
                         });
                     });
 
-                    // Wait for all images to be processed before running html2canvas
-                    Promise.all(filterPromises).then(() => {
+                    await Promise.all(filterPromises);
 
-                        // Hide drag/resize handles
-                        draggableTexts.forEach(el => {
-                            el.style.border = '1px dashed transparent'; 
-                            el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
-                                handle.style.display = 'none';
-                            });
+                    // Temporarily hide drag/resize handles and dashed borders
+                    draggableTexts.forEach(el => {
+                        el.style.border = '1px dashed transparent'; 
+                        el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                            handle.style.display = 'none';
                         });
+                    });
 
-                        setTimeout(() => {
-                            html2canvas(photostripElement, {
+                    // Capture the image after filters are applied and handles are hidden
+                    setTimeout(async () => {
+                        try {
+                            const canvas = await html2canvas(photostripElement, {
                                 scale: 3, 
                                 useCORS: true, 
                                 allowTaint: true, 
-                            }).then(canvas => {
-                                
-                                // Revert all changes immediately after capture
-                                originalData.forEach(data => {
-                                    data.element.src = data.originalSrc;
-                                    data.element.className = data.originalClasses; // Re-apply all original classes
-                                });
-
-                                draggableTexts.forEach(el => {
-                                    el.style.border = ''; 
-                                    el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
-                                        handle.style.display = ''; 
-                                    });
-                                });
-
-                                // Trigger Download
-                                const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-                                const link = document.createElement('a');
-                                link.download = 'webooth-photo-strip.png';
-                                link.href = image;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-
-                            }).catch(error => {
-                                console.error("Error during photo strip capture:", error);
-                                
-                                // Ensure cleanup happens even on error
-                                originalData.forEach(data => {
-                                    data.element.src = data.originalSrc;
-                                    data.element.className = data.originalClasses; 
-                                });
-                                draggableTexts.forEach(el => {
-                                    el.style.border = '';
-                                    el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
-                                        handle.style.display = '';
-                                    });
-                                });
-                                alert('An error occurred during download. Check the console for details.');
                             });
-                        }, 50); 
-                    }).catch(err => {
-                        console.error("Error processing filters:", err);
-                        alert('A filter error occurred. Check console.');
-                    });
+                            
+                            // Revert all changes immediately after capture
+                            originalData.forEach(data => {
+                                data.element.src = data.originalSrc;
+                                data.element.className = data.originalClasses; // Re-apply all original classes
+                            });
+
+                            draggableTexts.forEach(el => {
+                                el.style.border = ''; 
+                                el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                                    handle.style.display = ''; 
+                                });
+                            });
+
+                            resolve(canvas);
+                        } catch (error) {
+                            console.error("Error during photo strip capture:", error);
+                            // Ensure cleanup happens even on error
+                            originalData.forEach(data => {
+                                data.element.src = data.originalSrc;
+                                data.element.className = data.originalClasses; 
+                            });
+                            draggableTexts.forEach(el => {
+                                el.style.border = '';
+                                el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                                    handle.style.display = '';
+                                });
+                            });
+                            reject(error);
+                        }
+                    }, 50); // Small delay to ensure DOM updates are processed
+                });
+            };
+
+            // --------------------------------------------------------------------------------
+            // --- DOWNLOAD LOGIC (Now using capturePhotoStripForUpload) ---
+            
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', async () => {
+                    try {
+                        const canvas = await capturePhotoStripForUpload();
+                        
+                        // Trigger Download
+                        const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+                        const link = document.createElement('a');
+                        link.download = 'webooth-photo-strip.png';
+                        link.href = image;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                    } catch (error) {
+                        alert('An error occurred during download. Check the console for details.');
+                    }
                 });
             }
             // --- END DOWNLOAD LOGIC ---
@@ -400,22 +423,14 @@
             // --- CONTENT HASH GENERATION ---
             const getTemplateContentString = (templateState) => {
                 const dataToHash = {
-                    sticker: templateState.sticker,
-                    background: templateState.background,
-                    show_logo: templateState.show_logo,
-                    show_date: templateState.show_date,
-                    show_time: templateState.show_time,
-                    frame_size: templateState.frame_size,
-                    shot_count: templateState.shot_count,
-                    effects: templateState.effects,
-                    font: templateState.font,
-                    text_color: templateState.text_color,
+                    // ... other properties
                     // Sorting is CRITICAL for predictable hashing
-                    text: JSON.stringify(templateState.text.sort((a, b) => {
+                    // USE OF `?? []` ENSURES .sort() IS ALWAYS CALLED ON AN ARRAY
+                    text: JSON.stringify(templateState.text?.sort((a, b) => {
                         if (a.text > b.text) return 1;
                         if (a.text < b.text) return -1;
                         return 0;
-                    }))
+                    }) ?? []) // <- The fix is ensuring it's an array before sorting
                 };
                 return JSON.stringify(dataToHash);
             };
@@ -712,7 +727,7 @@
                 });
             }
 
-            // --- MODAL JAVASCRIPT LOGIC (Original logic preserved) ---
+            // --- MODAL JAVASCRIPT LOGIC (Original logic preserved, POST button modified) ---
             const mainPostBtn = document.getElementById('main-post-btn');
             const modalOverlay = document.getElementById('post-modal-overlay');
             const modalCancelBtn = document.getElementById('modal-cancel-btn');
@@ -752,22 +767,83 @@
                 });
             }
 
+            // --- POST BUTTON IMPLEMENTATION (MODIFIED) ---
             if (modalPostBtn) {
-                modalPostBtn.addEventListener('click', () => {
+                modalPostBtn.addEventListener('click', async () => {
+                    const userId = window.checkAuthAndGetUid();
+                    if (!userId) {
+                        hideModal();
+                        return;
+                    }
+                    
+                    modalPostBtn.disabled = true;
+                    modalPostBtn.textContent = 'Posting...';
+
                     const title = photoTitleInput.value;
                     const description = photoDescriptionTextarea.value;
                     const share = shareToggle.checked;
                     
-                    alert(`
-                        Photo Post Initiated!
-                        Title: ${title || '(No Title)'}
-                        Description: ${description || '(No Description)'}
-                        Shared to Community: ${share ? 'Yes' : 'No'}
-                    `);
-                    
-                    hideModal();
+                    try {
+                        // 1. CAPTURE THE FINAL IMAGE
+                        const canvas = await capturePhotoStripForUpload();
+                        
+                        // 2. CONVERT TO BLOB AND UPLOAD TO FIREBASE
+                        const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                        const imageURL = await window.uploadPostImage(imageBlob, userId);
+                        
+                        // 3. LOG ACTIVITY 
+                        const activityPostData = {
+                            action: 'addActivity',
+                            user_id: userId,
+                            activity: `Posted a new photo: "${title || 'Untitled'}"`
+                        };
+                        // Note: Ignoring result of activity log
+                        fetch('http://localhost:80/api.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(activityPostData)
+                        });
+                        
+                        // 4. SAVE POST DETAILS TO SUPABASE (PostgreSQL)
+                        const postData = {
+                            action: 'createPost', // <<< NEW ACTION
+                            user_id: userId,
+                            image_url: imageURL,
+                            title: title,
+                            description: description,
+                            share_to_community: String(share),
+                            template_hash_id: generateTemplateHashId(collectTemplateState(null, userId)) 
+                        };
+
+                        const response = await fetch('http://localhost:80/api.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(postData)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            console.log('Post created successfully with ID:', result.post_id);
+                            window.location.href = `finalprof.html`;
+
+                            
+                        } else {
+                            console.error("API Error posting photo:", result.error);
+                        
+                        }
+                        
+                    } catch (error) {
+                        console.error("Post creation failed:", error);
+                        alert('A critical error occurred during the posting process.');
+                    } finally {
+                        modalPostBtn.disabled = false;
+                        modalPostBtn.textContent = 'Post';
+                        hideModal();
+                    }
                 });
             }
+            // --- END POST BUTTON IMPLEMENTATION ---
             
             // --- SAVE BUTTON IMPLEMENTATION (Modified for Hash ID and Status Update) ---
             if (saveBtn) {

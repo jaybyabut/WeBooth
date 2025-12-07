@@ -28,8 +28,6 @@ try {
 
 // --- INPUT HANDLING ---
 $input = file_get_contents('php://input');
-echo $input;
-echo $data;
 $data = json_decode($input, true);
 
 if (!isset($data['action'])) {
@@ -50,6 +48,72 @@ if (!$user_id && $action !== 'fetchOrCreateProfile') {
 
 // --- API HANDLER ---
 switch ($action) {
+    case 'test':
+        echo json_encode(['success' => true, 'message' => 'API is working']);
+        break;
+
+    case 'saveTemplateState':
+        $templateData = $data['template_state'] ?? [];
+        
+        // Validate required fields
+        $requiredFields = ['frame_size', 'shot_count', 'effects']; 
+        foreach ($requiredFields as $field) {
+            if (!isset($templateData[$field])) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => "Missing required template field: {$field}"]);
+                exit();
+            }
+        }
+        
+        // Extract data - map frontend keys to DB fields
+        $sticker = $templateData['sticker'] ?? null;
+        $text = $templateData['text'] ?? [];
+        $font = $templateData['font'] ?? 'Inter';
+        $text_color = $templateData['text_color'] ?? '#000000';
+        $background = $templateData['background'] ?? '#ffffff';
+        $show_logo = (bool)($templateData['show_logo'] ?? false);
+        $show_date = (bool)($templateData['show_date'] ?? false);
+        $show_time = (bool)($templateData['show_time'] ?? false);
+        $frame_size = $templateData['frame_size'];
+        $shot_count = (string)$templateData['shot_count'];
+        $share = (bool)($templateData['share'] ?? false);
+        $effects = $templateData['effects'];
+        $template_img = $templateData['template_img'] ?? null;
+
+        try {
+            $sql = "INSERT INTO saved_templates (
+                        user_id, sticker, text, font, text_color, background, 
+                        show_logo, show_date, show_time, 
+                        frame_size, shot_count, share, effects, template_img
+                    ) VALUES (
+                        ?, ?, ?, ?, ?, ?, 
+                        ?, ?, ?,
+                        ?, ?, ?, ?, ?
+                    ) RETURNING template_id";
+                    
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $user_id, $sticker, json_encode($text), $font, $text_color, $background,
+                $show_logo, $show_date, $show_time,
+                $frame_size, $shot_count, $share, $effects, $template_img
+            ]);
+
+            $newTemplate = $stmt->fetch();
+
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Template saved successfully', 
+                'template_id' => $newTemplate['template_id']
+            ]);
+            
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            error_log("Database INSERT error: " . $e->getMessage());
+            echo json_encode(["success"=> false, "error" => "Database error in saveTemplateState: " . $e->getMessage()]);
+        }
+        break;
+
+
     case 'fetchOrCreateProfile':
         $email = $data['email'] ?? null;
         $display_name = $data['display_name'] ?? null;
@@ -150,9 +214,12 @@ switch ($action) {
         }
         break;
 
+        
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Invalid action specified']);
         break;
 }
 ?>
+
+

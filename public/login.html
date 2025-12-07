@@ -7,7 +7,6 @@
   <script type="module" src="auth-check.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Roboto&display=swap" rel="stylesheet" />
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <script type="module">
     // --- FIREBASE AND SUPABASE IMPORTS (Using ES Modules for Firebase SDK) ---
@@ -19,7 +18,6 @@
         GoogleAuthProvider, 
         FacebookAuthProvider 
     } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
     // --- CONFIGURATION ---
     const firebaseConfig = {
@@ -34,10 +32,6 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-
-    const supabaseUrl = 'https://gnxwhyjuqgopzrfhhbwb.supabase.co';
-    const supabaseKey = 'sb_publishable_C5eAjvB394x_xkS184bxRw_0IBPaj16'; 
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
 
     // --- 1. Traditional Email/Password Login Handler ---
@@ -202,7 +196,8 @@
       border: 1.5px solid #f7f7f7;
       border-radius: 10px;
       font-size: 0.9rem;
-      color: #fff;
+      /* FIX: Changed color from white to black for readability against the input background */
+      color: #00020a; 
       background: transparent;
       outline: none;
       transition: all 0.3s ease;
@@ -216,7 +211,7 @@
       top: 30%;
       left: 15px;
       font-size: 0.9rem;
-      color: #fff;
+      color: #fff; /* Default label color */
       pointer-events: none;
       background: #f297c2; 
       padding: 0 5px;
@@ -227,7 +222,8 @@
       top: -6px;
       left: 8px;
       font-size: 12px;
-      color: #00020a;
+      /* FIX: Ensure label text is readable when moved outside the input */
+      color: #00020a; 
     }
 
     .login-form button {
@@ -340,7 +336,7 @@
           <input type="password" id="password" required /> 
           <label>Password</label>
         </div>
-        <div id="error-message" style="color: red; padding: 5px 10px; border-radius: 5px; font-size: 0.85rem; text-align: center; margin-bottom: 15px; margin-left: 40px; width: 80%; opacity: 0; transition: opacity 0.5s ease;"></div>
+        <div id="error-message" style="color: #610023; background: #fff0f5; padding: 5px 10px; border-radius: 5px; font-size: 0.85rem; text-align: center; margin-bottom: 15px; margin-left: 40px; width: 80%; opacity: 0; transition: opacity 0.5s ease;"></div>
         
         <button type="submit">Login</button>
       </form>

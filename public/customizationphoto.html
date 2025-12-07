@@ -5,786 +5,905 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customize Your Photo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="customizationphoto-style.css">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Fredoka+One&family=Poppins&family=Montserrat&family=Roboto&family=Open+Sans&family=Lora&family=Raleway&family=Playfair+Display&family=Nunito&family=Merriweather&family=Quicksand&family=Ubuntu&family=Oswald&family=DM+Sans&family=Cabin&family=Lobster&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 
-    <style>
-        body {
-            background: linear-gradient(to bottom, #ffdeea 0%, #d4e893 100%);
-            font-family: 'Inter', 'DM Sans', sans-serif, 'Fredoka One', cursive;
-            min-height: 100vh;
-        }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
 
-        .font-fredoka {
-            font-family: 'Fredoka One', cursive;
-        }
-
-        .text-brand-pink {
-            color: #c32d6c;
-        }
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
-        }
-
-        .topbar h1 {
-            font-family: 'Fredoka One', cursive;
-            font-size: 40px;
-            font-weight: 900;
-            color: #d23481;
-            margin: 0;
-            letter-spacing: -1px;
-        }
-
-        .right-buttons {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .right-buttons button {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            font-size: 1rem;
-            border-radius: 12px;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            border: 2px solid #d23481;
-            background-color: #fff;
-            color: #d23481;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .right-buttons button img {
-            width: 28px;
-            height: 28px;
-        }
-
-        .right-buttons button:hover,
-        .admin-btn {
-            background-color: #d23481;
-            color: #fff;
-            border: 2px solid #d23481;
-        }
-
-
-        .icon-fallback {
-            width: 1.25rem;
-            height: 1.25rem;
-            background-color: #cbd5e1; 
-            color: #475569; 
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.75rem;
-            margin-right: 0.5rem;
-        }
-
-        .custom-section-container {
-            background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 1.5rem; /* rounded-3xl */
-            padding: 1rem;
-            border: 2px solid white;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            max-height: 600px;
-            overflow-y: auto; 
-            position: relative; 
-            height: 100%; 
-        }
-
-        .stacked-custom-section-container {
-            background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 1.5rem; /* rounded-3xl */
-            padding: 1rem;
-            border: 2px solid white;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            overflow-y: auto; 
-            position: relative; 
-            max-height: 280px; 
-        }
+        // 2. FIREBASE CONFIG AND INITIALIZATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
+            authDomain: "photobooth-c42a9.firebaseapp.com",
+            projectId: "photobooth-c42a9",
+            storageBucket: "photobooth-c42a9.firebasestorage.app",
+            messagingSenderId: "994496567051",
+            appId: "1:994496567051:web:81d507ace1fbd2db77b40e",
+            measurementId: "G-4FHWWBR2BJ"
+        };
         
-        .custom-section-container, .stacked-custom-section-container {
-            scrollbar-width: thin;
-            scrollbar-color: #4b5563 transparent; 
-        }
-        
-        .custom-section-container::-webkit-scrollbar,
-        .stacked-custom-section-container::-webkit-scrollbar {
-            width: 12px;
-        }
-        .custom-section-container::-webkit-scrollbar-track,
-        .stacked-custom-section-container::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-section-container::-webkit-scrollbar-thumb,
-        .stacked-custom-section-container::-webkit-scrollbar-thumb {
-            background-color: #4b5563;
-            border-radius: 20px;
-            border: 3px solid transparent;
-            background-clip: content-box;
-        }
-        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
 
-        .custom-section-title {
-            font-size: 1.25rem; 
-            font-weight: 700; 
-            color: #c32d6c; 
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #fbcfe8; 
-        }
+        // Define a global variable to store the current user's UID
+        window.currentUserId = null;
 
-        .item-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.75rem; 
-        }
-        
-        #background-grid {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 0.5rem; 
-        }
-
-        .item-placeholder {
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 0.75rem; 
-            border: 2px solid white;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9ca3af; 
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .item-placeholder:hover {
-            transform: scale(1.05);
-            border-color: #f4b744;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .item-placeholder.sticker-button:hover {
-            border-color: #dd3d93; 
-        }
-
-        .bg-selection-item {
-            border: 2px solid white;
-            border-radius: 0.5rem; 
-            object-fit: cover;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .bg-selection-item:hover {
-            transform: scale(1.05);
-            border-color: #f4b744;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .back-button {
-            background: none;
-            border: none;
-            color: #c32d6c;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease;
-            margin-bottom: 0.75rem; 
-        }
-        .back-button:hover {
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .custom-input, .custom-select {
-            width: 100%;
-            padding: 0.65rem 0.75rem;
-            border-radius: 0.5rem; 
-            border: 2px solid white;
-            background-color: rgba(255, 255, 255, 0.9);
-            outline: none;
-            transition: all 0.2s ease;
-            color: #374151; 
-        }
-        textarea.custom-input {
-            line-height: 1.5;
-        }
-        
-        .custom-input:focus, .custom-select:focus {
-            border-color: #f4b744;
-            box-shadow: 0 0 0 2px rgba(244, 183, 68, 0.3);
-        }
-        
-        .color-picker-wrapper {
-            position: relative;
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 0.5rem; 
-            border: 2px solid white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem 0.75rem;
-            font-weight: 500;
-            color: #374151; 
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .color-picker-wrapper:hover {
-            border-color: #f4b744;
-        }
-        
-        .color-picker-input {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            width: 36px; 
-            height: 36px;
-            padding: 0;
-            border: none;
-            border-radius: 50%; 
-            background: conic-gradient(
-                from 90deg,
-                hsl(0, 100%, 50%),
-                hsl(39, 100%, 50%),
-                hsl(60, 100%, 50%),
-                hsl(120, 100%, 50%),
-                hsl(240, 100%, 50%),
-                hsl(262, 100%, 50%),
-                hsl(300, 100%, 50%),
-                hsl(0, 100%, 50%)
-            );
-            cursor: pointer;
-        }
-        .color-picker-input::-webkit-color-swatch-wrapper {
-            padding: 0;
-            border-radius: 50%;
-        }
-        .color-picker-input::-webkit-color-swatch {
-            border: 2px solid #e5e7eb; 
-            border-radius: 50%;
-        }
-        .color-picker-input::-moz-color-swatch {
-            border: 2px solid #e5e7eb; 
-            border-radius: 50%;
-        }
-        
-        .color-picker-grid-item {
-            position: relative;
-            cursor: pointer;
-            padding: 0;
-            overflow: hidden; 
-            border-radius: 50%; 
-            aspect-ratio: 1 / 1; 
-            border: 2px solid white; 
-            transition: all 0.2s ease;
-        }
-        .color-picker-grid-item:hover {
-            transform: scale(1.05);
-            border-color: #f4b744;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .color-picker-grid-item .icon {
-            width: 100%;
-            height: 100%;
-            background: conic-gradient(
-                from 90deg,
-                hsl(0, 100%, 50%),
-                hsl(39, 100%, 50%),
-                hsl(60, 100%, 50%),
-                hsl(120, 100%, 50%),
-                hsl(240, 100%, 50%),
-                hsl(262, 100%, 50%),
-                hsl(300, 100%, 50%),
-                hsl(0, 100%, 50%)
-            );
-            transition: transform 0.2s ease;
-            border-radius: 50%; 
-        }
-        .color-picker-grid-item:hover .icon {
-            transform: scale(1.1);
-        }
-        .color-picker-grid-item input[type="color"] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0; 
-            cursor: pointer;
-        }
-
-        .photobooth-template-container {
-            /* KEY FIX 1: Set positioning context for overlays */
-            position: relative; 
-            background-color: #ffffff;
-            border-radius: 0.75rem;
-            border: 4px solid white;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem; 
-            width: 100%;
-            max-width: 150px; 
-            margin-bottom: 1.5rem; 
-            background-size: cover;
-            background-position: center;
-            transition: background-color 0.3s ease, background-image 0.3s ease;
-            overflow: hidden; 
-        }
-        
-        /* Styles applied when frameSize is 4x6 (Wider format) */
-        .photobooth-template-container.layout-4x6 {
-            max-width: 300px; 
-            width: 100%;
-            display: grid; 
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            padding-bottom: 0.5rem;
-        }
-        
-        /* Styles for 4x6 grid layout (4 shots) */
-        .photobooth-template-container.layout-4x6.layout-4shots .photo-strip-image {
-            width: 100%;
-            aspect-ratio: 4 / 3; 
-            margin-bottom: 0;
-        }
-
-        /* Styles for 2x6 strip layout (4 shots or less) */
-        .photobooth-template-container:not(.layout-4x6) {
-            display: block; 
-        }
-        
-        /* Individual photo box aspect ratio (default 2x6, non-4-shot) */
-        .photo-strip-image {
-            background-color: #e5e7eb; 
-            border-radius: 0.25rem;
-            width: 100%;
-            aspect-ratio: 1 / 1; 
-            margin-bottom: 0.5rem; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280; 
-            font-weight: 500;
-            overflow: hidden; 
-        }
-        .photo-strip-image:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Sticker overlay and Footer positioning for 4x6 grid */
-        .photobooth-template-container.layout-4x6 .sticker-overlay-layer,
-        .photobooth-template-container.layout-4x6 #text-overlay-layer {
-            grid-column: 1 / -1;
-            grid-row: 1 / -1;
-            z-index: 10;
-        }
-        .photobooth-template-container.layout-4x6 .template-footer {
-            grid-column: 1 / -1;
-            margin-top: auto;
-            width: 100%;
-        }
-
-        .template-footer {
-            text-align: center;
-            padding-top: 0.5rem; 
-            border-top: 1px dashed #cbd5e100; 
-            background-color: rgba(255, 255, 255, 0);
-            border-radius: 0 0 0.25rem 0.25rem;
-            margin: 0; 
-            padding: 0.5rem 0.5rem 0.5rem 0.5rem; 
-        }
-        .template-footer .footer-brand {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .template-footer .footer-brand img {
-            height: 2.5rem; 
-            width: auto; 
-            margin-right: 0.5rem; 
-            transition: all 0.2s ease;
-        }
-        .template-footer .footer-brand .footer-text { 
-            font-size: 1rem;
-            color: #dd3d93; 
-            font-weight: 700; 
-            font-family: 'Fredoka One', cursive; 
-            transition: all 0.2s ease;
-        }
-        
-        .footer-extras {
-            margin-top: 0.5rem; 
-            display: flex;
-            flex-direction: column; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-            align-items: center;
-            gap: 0.2rem; 
-        }
-
-        /* Updated CSS for non-editable date/time spans */
-        .footer-display {
-            background: transparent;
-            border: none;
-            text-align: center;
-            font-size: 0.875rem; 
-            color: #4b5563; 
-            width: auto; 
-            padding: 0.125rem 0.25rem;
-            border-radius: 0.25rem;
-            transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
-            display: inline-block; 
-            min-width: 80px; 
-        }
-
-        .social-icons-vertical {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem; 
-            position: absolute; 
-            
-            right: -3rem; 
-            bottom: 0; 
-            transform: translateY(0); 
-            
-            @media (min-width: 1024px) { 
-                right: -4rem; 
-                bottom: 0; 
-                transform: translateY(0);
+        // AUTH CHECK - RUNS INSIDE MODULE SCOPE
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.currentUserId = user.uid;
+            } else {
+                window.currentUserId = null;
             }
-        }
-        .social-icon-button {
-            width: 3rem; 
-            height: 3rem;
-            border-radius: 50%;
-            background-color: #feefff; 
-            border: 2px solid #dd3d93; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .social-icon-button:hover {
-            background-color: #dd3d93;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .social-icon-button svg {
-            width: 1.5rem;
-            height: 1.5rem;
-            color: #c32d6c; 
-            transition: color 0.2s ease;
-        }
-        .social-icon-button:hover svg {
-            color: white; 
-        }
+        });
 
-        .action-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px; 
-            font-size: 1.125rem;
-            font-weight: 700;
-            box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
-            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
-            color: white;
-            cursor: pointer;
-            margin-bottom: 15px;
-            transition: background 0.3s ease;
-            text-decoration: none;
-            border: none; 
-        }
-        .action-button:hover {
-            background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);
-        }
-        .action-button:active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
+        // 3. REAL FIREBASE STORAGE UPLOAD FUNCTION
+        window.uploadTemplateImage = async (imageBlob, userId) => {
+            if (!userId) {
+                throw new Error("User ID is required for image upload.");
+            }
+            const filename = `template-${Date.now()}.png`;
+            const storageRef = ref(storage, `template/${userId}/${filename}`); 
+            console.log(`Uploading template image to Firebase Storage: template/${userId}/${filename}`);
+            await uploadBytes(storageRef, imageBlob, { contentType: 'image/png' });
+            const downloadURL = await getDownloadURL(storageRef);
+            return downloadURL;
+        };
 
-        /* --- CSS FILTER DEFINITIONS --- */
-        .filter-none { filter: none; }
-        .filter-bw { filter: grayscale(100%); }
-        .filter-warm { filter: sepia(70%); }
-        .filter-cool { filter: contrast(1.1) brightness(1.1) saturate(1.3) hue-rotate(-15deg); }
-        .filter-retro { filter: sepia(100%) brightness(0.9) contrast(1.1); }
-        .filter-noir { filter: grayscale(100%) contrast(1.2) brightness(0.8); }
-        /* --- END CSS FILTER --- */
-
-        /* Styles for the draggable text element */
-        .draggable-text {
-            position: absolute; 
-            cursor: grab;
-            padding: 5px;
-            border: 1px dashed rgba(195, 45, 108, 0.5); /* Visual cue */
-            z-index: 100; /* Ensure it's on top of everything */
-            white-space: pre-wrap; /* Preserve line breaks from textarea input */
-            text-align: center;
-            line-height: 1.2;
-            user-select: none;
-            min-width: 50px;
-            min-height: 20px;
-            box-sizing: border-box;
-            word-wrap: break-word;
-        }
-        .draggable-text:active {
-            cursor: grabbing;
-        }
-
-        .resize-handle {
-            position: absolute;
-            width: 15px;
-            height: 15px;
-            background: #f4b744;
-            border: 2px solid white;
-            border-radius: 50%;
-            z-index: 101; 
-        }
-
-        .resize-handle-font {
-            bottom: -7px;
-            right: -7px;
-            cursor: se-resize; /* For font size control */
-        }
-
-        .resize-handle-width {
-            top: -7px;
-            right: -7px;
-            cursor: e-resize; /* For text box width control */
-        }
-
-        .remove-handle {
-            position: absolute;
-            top: -7px;
-            left: -7px;
-            width: 15px;
-            height: 15px;
-            background: #dd3d93;
-            color: white;
-            border: 2px solid white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            cursor: pointer;
-            z-index: 101; 
-        }
+        // --- GLOBAL FILTER HELPERS (Required for Download button logic) ---
+        window.getCanvasFilterString = (filterClass) => {
+            switch (filterClass) {
+                case 'filter-bw': return 'grayscale(100%)';
+                case 'filter-warm': return 'sepia(70%)'; 
+                case 'filter-cool': return 'contrast(1.1) brightness(1.1) saturate(1.3) hue-rotate(-15deg)';
+                case 'filter-retro': return 'sepia(100%) brightness(0.9) contrast(1.1)';
+                case 'filter-noir': return 'grayscale(100%) contrast(1.2) brightness(0.8)';
+                case 'filter-none':
+                default: return 'none';
+            }
+        };
+        window.applyFilterToCanvas = (imageDataUrl, filterClass, callback) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                ctx.filter = window.getCanvasFilterString(filterClass);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                callback(canvas.toDataURL('image/png'));
+            };
+            img.src = imageDataUrl;
+            img.crossOrigin = 'Anonymous'; 
+        };
         
-        /* Apply absolute positioning to the sticker layer */
-        .sticker-overlay-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain; 
-            z-index: 50; 
-            pointer-events: none;
-        }
-        /* Add layer for text to also be positioned absolutely */
-        #text-overlay-layer {
-            position: absolute;
-            top: 0.5rem; 
-            left: 0.5rem;
-            width: calc(100% - 1rem); 
-            height: calc(100% - 0.5rem); 
-            z-index: 100; 
-            pointer-events: none; 
-        }
-        #text-overlay-layer .draggable-text {
-            pointer-events: auto; 
-        }
+        // Pass the window.currentUserId check function outside the module
+        window.checkAuthAndGetUid = () => {
+            if (!window.currentUserId) {
+                alert("Authentication failed. Please log in.");
+                return null;
+            }
+            return window.currentUserId;
+        };
 
-        /* --- ADDED MODAL CSS --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black backdrop */
-            z-index: 200; /* High z-index to ensure it's on top */
-            display: none; /* Hidden by default */
-            justify-content: center;
-            align-items: center;
-        }
 
-        .modal-content {
-            background-color: white;
-            padding: 2.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 450px;
-            position: relative;
-            overflow: hidden;
-        }
+        // --- APPLICATION LOGIC MOVED INTO MODULE SCOPE ---
+        document.addEventListener('DOMContentLoaded', () => {
+        
+            const saveBtn = document.getElementById('save-btn');
+            const photostripElement = document.getElementById('photostrip-preview');
+            const textOverlayLayer = document.getElementById('text-overlay-layer'); 
+            const fontSelect = document.getElementById('font-select');
+            const textColorPicker = document.getElementById('text-color');
+            const logoCheckbox = document.getElementById('logo-checkbox');
+            const dateCheckbox = document.getElementById('date-checkbox');
+            const timeCheckbox = document.getElementById('time-checkbox');
 
-        .modal-content-inner {
-            position: relative;
-            z-index: 10;
-        }
+            // Initial settings from localStorage
+            const frameSize = localStorage.getItem('frameSize') || '2x6';
+            const activeFilter = localStorage.getItem('activeFilter') || 'filter-none';
+            
+            let capturedImages = [];
+            try {
+                const imagesJson = sessionStorage.getItem('capturedImagesArray');
+                if (imagesJson) {
+                    capturedImages = JSON.parse(imagesJson);
+                }
+            } catch (e) {
+                console.error("Error parsing captured images array:", e);
+            }
+            
+            const storedShotCount = parseInt(localStorage.getItem('numShots'));
+            const shotCount = capturedImages.length > 0 ? capturedImages.length : (storedShotCount || 3);
+            
+            const photoStrip = document.getElementById('photostrip-preview');
+            const templateFooter = photoStrip.querySelector('.template-footer');
+            const stickerOverlay = document.getElementById('sticker-overlay'); 
+            
+            // --- Helper to Create Image Element with Filter ---
+            const createStripImage = (imageDataUrl, filterClass) => {
+                const img = document.createElement('img');
+                img.src = imageDataUrl;
+                img.classList.add('w-full', 'h-full', 'object-cover', filterClass); 
+                return img;
+            };
+            
+            // --- 2. Apply Frame Size & Layout ---
+            
+            let shotAspectRatio = '4/3'; 
+            
+            if (frameSize === '2x6') {
+                photoStrip.classList.remove('layout-4x6');
+                shotAspectRatio = '4/3'; 
+                photoStrip.classList.remove('layout-grid-2x2');
+            } else if (frameSize === '4x6') {
+                photoStrip.classList.add('layout-4x6');
+                
+                if (shotCount === 4) {
+                    photoStrip.classList.add('layout-grid-2x2', 'layout-4shots');
+                    shotAspectRatio = '4/3'; 
+                } else {
+                    photoStrip.classList.remove('layout-grid-2x2', 'layout-4shots');
+                    shotAspectRatio = '3/2'; 
+                }
+            }
+            
+            // --- CRITICAL STICKER PATH FIX (Run first to update buttons/preview based on frame size) ---
+            const updateStickerPaths = (targetFrameSize) => {
+                const stickerPathReplace = targetFrameSize === '4x6' ? '4x6' : '2x6';
+                const imagePathSegment = targetFrameSize === '4x6' ? '4 x 6 in' : '2 x 6 in';
+                
+                document.querySelectorAll('.sticker-button img').forEach(img => {
+                    const basePath = img.dataset.baseSrc;
+                    if (basePath) {
+                        // Update the visible image source in the button grid
+                        img.src = basePath.replace('(X in)', `(${imagePathSegment})`).replace(/X/g, stickerPathReplace);
+                    }
+                });
+                return { stickerPathReplace, imagePathSegment };
+            };
+            
+            // Update all sticker preview images
+            const { stickerPathReplace, imagePathSegment } = updateStickerPaths(frameSize);
 
-        .modal-content::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 237, 249, 0.7) 0%, rgba(248, 255, 232, 0.7) 100%);
-            opacity: 0.8;
-            z-index: 1;
-            pointer-events: none;
-        }
+            // --- Initial Sticker Load based on Frame Size ---
+            const storedStickerBase = localStorage.getItem('activeStickerBase');
+            if (storedStickerBase && stickerOverlay) {
+                
+                const initialStickerSrc = storedStickerBase
+                    .replace('(X in)', `(${imagePathSegment})`)
+                    .replace(/X/g, stickerTag);
 
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #c32d6c; 
-            margin-bottom: 0.5rem;
-            text-align: center;
-        }
+                stickerOverlay.src = initialStickerSrc;
+                stickerOverlay.style.display = 'block';
+            }
+            // ------------------------------------------------
 
-        .modal-label {
-            display: block;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: #c32d6c;
-            margin-top: 1rem;
-            margin-bottom: 0.25rem;
-            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-fill-color: transparent;
-            filter: drop-shadow(0 1px 1px rgba(195, 45, 108, 0.2));
-        }
 
-        .modal-input, .modal-textarea {
-            width: 100%;
-            padding: 0.65rem 0.75rem;
-            border-radius: 0.5rem; 
-            border: 2px solid #ffdeea;
-            background-color: rgba(255, 255, 255, 0.95);
-            outline: none;
-            transition: all 0.2s ease;
-            color: #374151; 
-        }
-        .modal-input:focus, .modal-textarea:focus {
-            border-color: #dd3d93;
-            box-shadow: 0 0 0 2px rgba(221, 61, 147, 0.3);
-        }
+            // --- 3. Apply Number of Shots (Dynamic Loop) ---
+            
+            // Remove existing shots before re-rendering (must leave sticker and text layers)
+            photoStrip.querySelectorAll('.photo-strip-image').forEach(photo => photo.remove());
 
-        .custom-toggle {
-            display: inline-flex;
-            align-items: center;
-            margin-top: 1.5rem;
-        }
+            // Find the index of the first non-image element (like sticker layer or footer) to insert before
+            const firstNonImageIndex = Array.from(photoStrip.children).findIndex(el => 
+                el.id === 'sticker-overlay' || el.id === 'text-overlay-layer' || el.classList.contains('template-footer')
+            );
+            const insertBeforeElement = firstNonImageIndex !== -1 ? photoStrip.children[firstNonImageIndex] : templateFooter;
 
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 48px;
-            height: 24px;
-            margin-right: 0.75rem;
-        }
+            for (let i = 0; i < shotCount; i++) {
+                const photoDiv = document.createElement('div');
+                photoDiv.classList.add('photo-strip-image');
+                
+                // Set the calculated aspect ratio for the shot
+                photoDiv.style.aspectRatio = shotAspectRatio;
 
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+                const imageDataUrl = capturedImages[i];
 
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
+                if (imageDataUrl) {
+                    const img = createStripImage(imageDataUrl, activeFilter); 
+                    photoDiv.appendChild(img);
+                } else {
+                    // Fallback for missing shot data
+                    photoDiv.textContent = `Photo ${i + 1}`;
+                }
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
+                // Insert the shot div before the sticker layer, text layer, or footer (whichever is first)
+                photoStrip.insertBefore(photoDiv, insertBeforeElement);
+            }
 
-        .toggle-switch input:checked + .slider {
-            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
-        }
+            
+            // Button Functionality
+            const sendBtn = document.getElementById('send-btn');
+            const downloadBtn = document.getElementById('download-btn');
 
-        .toggle-switch input:focus + .slider {
-            box-shadow: 0 0 1px #f645b1;
-        }
 
-        .toggle-switch input:checked + .slider:before {
-            transform: translateX(24px);
-        }
+            // --------------------------------------------------------------------------------
+            // --- DOWNLOAD LOGIC (Unchanged) ---
+            
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', () => {
+                    const draggableTexts = photostripElement.querySelectorAll('.draggable-text');
+                    const photoContainers = photostripElement.querySelectorAll('.photo-strip-image');
+                    
+                    const originalData = [];
+                    
+                    // Use a promise queue to ensure all images are filtered/reloaded before capture
+                    const filterPromises = Array.from(photoContainers).map((container, index) => {
+                        return new Promise(resolve => {
+                            const img = container.querySelector('img');
+                            const originalImageDataUrl = capturedImages[index]; // Use the original source from storage
+                            const filterClass = activeFilter;
+                            
+                            if (img && originalImageDataUrl && filterClass !== 'filter-none') {
+                                
+                                // Store original state and remove CSS filter class
+                                originalData.push({ element: img, originalSrc: img.src, originalClasses: img.className });
+                                img.classList.remove(filterClass);
 
-        .modal-button-cancel {
-            background-color: #f3f4f6;
-            color: #4b5563;
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            transition: all 0.2s ease;
-            border: 1px solid #e5e7eb;
-        }
-        .modal-button-cancel:hover {
-            background-color: #e5e7eb;
-            border-color: #d1d5db;
-        }
+                                // Apply the filter via canvas and update the img.src
+                                window.applyFilterToCanvas(originalImageDataUrl, filterClass, (filteredDataUrl) => {
+                                    img.src = filteredDataUrl;
+                                    resolve();
+                                });
+                            } else {
+                                // No image, no filter, or filter-none. Just save the state.
+                                if (img) {
+                                    originalData.push({ element: img, originalSrc: img.src, originalClasses: img.className });
+                                    img.classList.remove(filterClass);
+                                }
+                                resolve();
+                            }
+                        });
+                    });
 
-        .modal-button-post {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem; 
-            font-size: 1rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s ease, transform 0.1s ease;
-            border: none; 
-        }
-        .modal-button-post:hover {
-            background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);
-        }
-        .modal-button-post:active {
-            transform: scale(0.98);
-        }
-        /* --- END ADDED MODAL CSS --- */
+                    // Wait for all images to be processed before running html2canvas
+                    Promise.all(filterPromises).then(() => {
 
-    </style>
+                        // Hide drag/resize handles
+                        draggableTexts.forEach(el => {
+                            el.style.border = '1px dashed transparent'; 
+                            el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                                handle.style.display = 'none';
+                            });
+                        });
+
+                        setTimeout(() => {
+                            html2canvas(photostripElement, {
+                                scale: 3, 
+                                useCORS: true, 
+                                allowTaint: true, 
+                            }).then(canvas => {
+                                
+                                // Revert all changes immediately after capture
+                                originalData.forEach(data => {
+                                    data.element.src = data.originalSrc;
+                                    data.element.className = data.originalClasses; // Re-apply all original classes
+                                });
+
+                                draggableTexts.forEach(el => {
+                                    el.style.border = ''; 
+                                    el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                                        handle.style.display = ''; 
+                                    });
+                                });
+
+                                // Trigger Download
+                                const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+                                const link = document.createElement('a');
+                                link.download = 'webooth-photo-strip.png';
+                                link.href = image;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+
+                            }).catch(error => {
+                                console.error("Error during photo strip capture:", error);
+                                
+                                // Ensure cleanup happens even on error
+                                originalData.forEach(data => {
+                                    data.element.src = data.originalSrc;
+                                    data.element.className = data.originalClasses; 
+                                });
+                                draggableTexts.forEach(el => {
+                                    el.style.border = '';
+                                    el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                                        handle.style.display = '';
+                                    });
+                                });
+                                alert('An error occurred during download. Check the console for details.');
+                            });
+                        }, 50); 
+                    }).catch(err => {
+                        console.error("Error processing filters:", err);
+                        alert('A filter error occurred. Check console.');
+                    });
+                });
+            }
+            // --- END DOWNLOAD LOGIC ---
+
+
+            // Background Functionality (Original logic preserved)
+            const bgColorPicker = document.getElementById('bg-color');
+            const bgImages = document.querySelectorAll('.bg-selection-item');
+
+            if (photoStrip && bgColorPicker) {
+                bgColorPicker.addEventListener('input', (e) => {
+                    photoStrip.style.backgroundImage = 'none';
+                    photoStrip.style.backgroundColor = e.target.value;
+                    checkTemplateStatus(); // Check and update button on background change
+                });
+            }
+
+            if (photoStrip && bgImages.length > 0) {
+                bgImages.forEach(img => {
+                    img.addEventListener('click', () => {
+                        photoStrip.style.backgroundImage = `url(${img.src})`;
+                        photoStrip.style.backgroundColor = 'transparent'; 
+                        checkTemplateStatus(); // Check and update button on background change
+                    });
+                });
+            }
+
+            // Footer Checkbox Functionality
+            const footerLogo = document.getElementById('footer-brand-logo');
+            const footerDate = document.getElementById('footer-date-dynamic');
+            const footerTime = document.getElementById('footer-time-dynamic');
+            const footerWeBoothText = document.getElementById('footer-brand-text'); 
+            
+            // date/time generation
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const year = String(now.getFullYear()).slice(-2);
+            const formattedDate = `${month}/${day}/${year}`;
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const formattedTime = `${hours}:${minutes} ${ampm}`;
+
+            if (logoCheckbox && footerLogo && footerWeBoothText) {
+                footerDate.textContent = formattedDate; 
+                footerTime.textContent = formattedTime; 
+
+                logoCheckbox.addEventListener('change', (e) => {
+                    footerLogo.classList.toggle('hidden', !e.target.checked);
+                    footerWeBoothText.classList.toggle('hidden', !e.target.checked);
+                    checkTemplateStatus(); // Check and update button on footer change
+                });
+
+                dateCheckbox.addEventListener('change', (e) => {
+                    footerDate.classList.toggle('hidden', !e.target.checked);
+                    checkTemplateStatus(); // Check and update button on footer change
+                });
+
+                timeCheckbox.addEventListener('change', (e) => {
+                    footerTime.classList.toggle('hidden', !e.target.checked);
+                    checkTemplateStatus(); // Check and update button on footer change
+                });
+            }
+            
+            
+            // --- CONTENT HASH GENERATION ---
+            const getTemplateContentString = (templateState) => {
+                const dataToHash = {
+                    sticker: templateState.sticker,
+                    background: templateState.background,
+                    show_logo: templateState.show_logo,
+                    show_date: templateState.show_date,
+                    show_time: templateState.show_time,
+                    frame_size: templateState.frame_size,
+                    shot_count: templateState.shot_count,
+                    effects: templateState.effects,
+                    font: templateState.font,
+                    text_color: templateState.text_color,
+                    // Sorting is CRITICAL for predictable hashing
+                    text: JSON.stringify(templateState.text.sort((a, b) => {
+                        if (a.text > b.text) return 1;
+                        if (a.text < b.text) return -1;
+                        return 0;
+                    }))
+                };
+                return JSON.stringify(dataToHash);
+            };
+            
+            const generateTemplateHashId = (templateState) => {
+                const contentString = getTemplateContentString(templateState);
+                // Use SHA-256 and truncate for a shorter ID (16 chars)
+                return CryptoJS.SHA256(contentString).toString(CryptoJS.enc.Hex).substring(0, 16); 
+            };
+
+            let lastSavedHash = null; 
+
+            // --- Function to Collect Template State ---
+            const collectTemplateState = (templateImgUrl, userId) => {
+                
+                // Get all draggable text data
+                const draggableTexts = Array.from(textOverlayLayer.querySelectorAll('.draggable-text')).map(el => {
+                    return {
+                        text: el.textContent,
+                        fontFamily: el.style.fontFamily,
+                        color: el.style.color,
+                        left: el.style.left,
+                        top: el.style.top,
+                        width: el.style.width,
+                        fontSize: el.style.fontSize
+                    };
+                });
+
+                // Determine background value (color or URL)
+                let backgroundValue;
+                if (photoStrip.style.backgroundImage && photoStrip.style.backgroundImage !== 'none') {
+                    backgroundValue = photoStrip.style.backgroundImage.replace(/^url\(['"]?(.+)['"]?\)$/, '$1');
+                } else {
+                    backgroundValue = photoStrip.style.backgroundColor || '#ffffff'; 
+                }
+            
+                const templateState = {
+                    sticker: localStorage.getItem('activeStickerBase') || null,
+                    text: draggableTexts,
+                    font: fontSelect.value,
+                    text_color: textColorPicker.value,
+                    background: backgroundValue, 
+                    show_logo: String(logoCheckbox.checked),
+                    show_date: String(dateCheckbox.checked),
+                    show_time: String(timeCheckbox.checked),
+                    frame_size: frameSize,
+                    shot_count: shotCount,
+                    share: 'false', 
+                    effects: activeFilter,
+                    template_img: templateImgUrl, 
+                    name: 'Custom Template', 
+                };
+
+                const hashId = generateTemplateHashId(templateState);
+                
+                return {
+                    action: 'saveTemplateState',
+                    user_id: userId,
+                    template_id: hashId, // Use the predictable ID
+                    template_state: templateState
+                };
+            };
+
+            // --- SAVE BUTTON VISUAL LOGIC ---
+            const setSaveButtonState = (isSaved) => {
+                if (isSaved) {
+                    saveBtn.innerHTML = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>'; // Checkmark icon
+                    saveBtn.classList.add('saved-state'); 
+                    saveBtn.classList.remove('unsaved-state');
+                    saveBtn.title = "Template Saved";
+                } else {
+                    saveBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z"></path></svg>'; // Bookmark icon
+                    saveBtn.classList.remove('saved-state');
+                    saveBtn.classList.add('unsaved-state');
+                    saveBtn.title = "Save Template";
+                }
+            };
+
+            const checkTemplateStatus = () => {
+                if (!window.currentUserId || lastSavedHash === null) {
+                    setSaveButtonState(false);
+                    return;
+                }
+                
+                const currentState = collectTemplateState(null, window.currentUserId);
+                const currentHash = currentState.template_id;
+                
+                setSaveButtonState(currentHash === lastSavedHash);
+            };
+            
+            // --- JAVASCRIPT FOR DRAGGABLE TEXT (Modified to call checkTemplateStatus) ---
+            
+            const addTextBtn = document.getElementById('add-text-btn');
+            const customTextInput = document.getElementById('custom-text'); 
+            
+            const updateTextStyles = () => {
+                const newColor = textColorPicker.value;
+                const newFontFamily = fontSelect.value;
+                const activeTextElements = photoStrip.querySelectorAll('.draggable-text, .footer-display:not(.hidden)'); 
+                activeTextElements.forEach(el => {
+                    el.style.fontFamily = `'${newFontFamily}', sans-serif`;
+                    el.style.color = newColor;
+                });
+                checkTemplateStatus(); 
+            };
+            fontSelect.addEventListener('change', updateTextStyles);
+            textColorPicker.addEventListener('input', updateTextStyles);
+
+
+            if (addTextBtn && photoStrip) {
+                addTextBtn.addEventListener('click', () => {
+                    const text = customTextInput.value; 
+                    if (text.trim() === '') {
+                        alert('Please type some text first!');
+                        return;
+                    }
+                    
+                    const color = textColorPicker.value;
+                    const font = fontSelect.value;
+                    
+                    const newTextElement = document.createElement('div');
+                    newTextElement.textContent = text;
+                    newTextElement.style.color = color;
+                    newTextElement.style.fontFamily = `'${font}', sans-serif`;
+                    newTextElement.classList.add('draggable-text');
+                    newTextElement.style.left = '20px'; 
+                    newTextElement.style.top = '20px'; 
+                    newTextElement.style.pointerEvents = 'auto'; 
+
+                    const resizeHandleFont = document.createElement('div');
+                    resizeHandleFont.classList.add('resize-handle', 'resize-handle-font');
+                    newTextElement.appendChild(resizeHandleFont);
+
+                    const resizeHandleWidth = document.createElement('div');
+                    resizeHandleWidth.classList.add('resize-handle', 'resize-handle-width');
+                    newTextElement.appendChild(resizeHandleWidth);
+
+                    const removeHandle = document.createElement('div');
+                    removeHandle.classList.add('remove-handle');
+                    removeHandle.innerHTML = '&#x2715;'; 
+                    newTextElement.appendChild(removeHandle);
+
+                    textOverlayLayer.appendChild(newTextElement);
+
+                    makeDraggableAndResizable(newTextElement, resizeHandleFont, resizeHandleWidth, removeHandle);
+                    checkTemplateStatus(); 
+                });
+            }
+            
+            function makeDraggableAndResizable(element, fontHandle, widthHandle, removeHandle) {
+                let isDragging = false;
+                let isResizingFont = false;
+                let isResizingWidth = false;
+
+                let initialFontSize = 16; 
+                let initialWidth = element.clientWidth;
+                let startMouseX, startMouseY;
+                let offsetX, offsetY;
+                
+                element.style.fontSize = `${initialFontSize}px`;
+                
+                const observer = new MutationObserver(checkTemplateStatus);
+                observer.observe(element, { attributes: true, attributeFilter: ['style'] });
+
+
+                element.addEventListener('mousedown', (e) => {
+                    if (e.target === element) {
+                        isDragging = true;
+                        offsetX = e.clientX - element.getBoundingClientRect().left;
+                        offsetY = e.clientY - element.getBoundingClientRect().top;
+                        element.style.opacity = '0.7'; 
+                        e.preventDefault();
+                    }
+                });
+                
+                fontHandle.addEventListener('mousedown', (e) => {
+                    isResizingFont = true;
+                    startMouseX = e.clientX;
+                    startMouseY = e.clientY;
+                    initialFontSize = parseFloat(window.getComputedStyle(element).fontSize);
+                    element.style.opacity = '0.7';
+                    e.preventDefault();
+                    e.stopPropagation(); 
+                });
+
+                widthHandle.addEventListener('mousedown', (e) => {
+                    isResizingWidth = true;
+                    startMouseX = e.clientX;
+                    initialWidth = element.clientWidth;
+                    element.style.opacity = '0.7';
+                    e.preventDefault();
+                    e.stopPropagation(); 
+                });
+
+                removeHandle.addEventListener('click', (e) => {
+                    e.stopPropagation(); 
+                    element.remove();
+                    checkTemplateStatus(); 
+                });
+                
+                element.addEventListener('dblclick', (e) => {
+                    if (e.target.classList.contains('resize-handle') || e.target.classList.contains('remove-handle')) return;
+                    
+                    element.contentEditable = true;
+                    element.focus();
+                    element.classList.add('is-editing');
+                });
+                
+                element.addEventListener('blur', () => {
+                    element.contentEditable = false;
+                    element.classList.remove('is-editing');
+                    if (element.textContent.trim() === '') {
+                        element.remove();
+                        checkTemplateStatus(); 
+                    } else {
+                        checkTemplateStatus(); 
+                    }
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    const overlayRect = textOverlayLayer.getBoundingClientRect();
+
+                    if (isDragging) {
+                        let newX = e.clientX - overlayRect.left - offsetX;
+                        let newY = e.clientY - overlayRect.top - offsetY;
+                        
+                        newX = Math.max(0, Math.min(newX, overlayRect.width - element.offsetWidth));
+                        newY = Math.max(0, Math.min(newY, overlayRect.height - element.offsetHeight));
+
+                        element.style.left = `${newX}px`;
+                        element.style.top = `${newY}px`;
+                    } else if (isResizingFont) {
+                        const dx = e.clientX - startMouseX;
+                        const dy = e.clientY - startMouseY;
+                        const distance = Math.max(dx, dy); 
+                        
+                        const newFontSize = Math.max(8, initialFontSize + (distance * 0.5)); 
+                        element.style.fontSize = `${newFontSize}px`;
+                    
+                    } else if (isResizingWidth) {
+                        const dx = e.clientX - startMouseX;
+                        const newWidth = Math.max(50, initialWidth + dx); 
+                        
+                        const currentX = parseFloat(element.style.left);
+                        const maxWidth = overlayRect.width - currentX;
+                        
+                        element.style.width = `${Math.min(newWidth, maxWidth)}px`;
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    isResizingFont = false;
+                    isResizingWidth = false;
+                    element.style.opacity = '1'; 
+                });
+            }
+
+            // --- STICKER SELECTION LOGIC (Modified to call checkTemplateStatus) ---
+            const stickerButtons = document.querySelectorAll('.sticker-button');
+            const noStickerButton = document.querySelector('.pack-button[data-pack-name="No Stickers"]');
+
+
+            stickerButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const imgElement = button.querySelector('img');
+                    const basePath = imgElement.dataset.baseSrc; 
+
+                    const currentFrameSize = localStorage.getItem('frameSize') || '2x6';
+                    const sizeTag = currentFrameSize === '4x6' ? '4 x 6 in' : '2 x 6 in';
+                    const stickerTag = currentFrameSize === '4x6' ? '4x6' : '2x6';
+
+                    if (basePath) {
+                        const finalStickerSrc = basePath
+                            .replace('(X in)', `(${sizeTag})`) 
+                            .replace(/X/g, stickerTag); 
+                            
+                        if (stickerOverlay) {
+                            stickerOverlay.src = finalStickerSrc;
+                            stickerOverlay.style.display = 'block';
+                        }
+                        
+                        localStorage.setItem('activeStickerBase', basePath);
+                    }
+                    checkTemplateStatus(); 
+                });
+            });
+            
+            if (noStickerButton && stickerOverlay && photoStrip) {
+                noStickerButton.addEventListener('click', () => {
+                    stickerOverlay.style.display = 'none';
+                    localStorage.removeItem('activeStickerBase');
+                    checkTemplateStatus(); 
+                });
+            }
+
+            // --- MODAL JAVASCRIPT LOGIC (Original logic preserved) ---
+            const mainPostBtn = document.getElementById('main-post-btn');
+            const modalOverlay = document.getElementById('post-modal-overlay');
+            const modalCancelBtn = document.getElementById('modal-cancel-btn');
+            const modalPostBtn = document.getElementById('modal-post-btn');
+            const photoTitleInput = document.getElementById('photo-title-input');
+            const photoDescriptionTextarea = document.getElementById('photo-description-textarea');
+            const shareToggle = document.getElementById('share-to-community-toggle');
+
+            const showModal = () => {
+                if (modalOverlay) {
+                    modalOverlay.style.display = 'flex';
+                    photoTitleInput.value = '';
+                    photoDescriptionTextarea.value = '';
+                    shareToggle.checked = true;
+                }
+            };
+
+            const hideModal = () => {
+                if (modalOverlay) {
+                    modalOverlay.style.display = 'none';
+                }
+            };
+
+            if (mainPostBtn) {
+                mainPostBtn.addEventListener('click', showModal);
+            }
+
+            if (modalCancelBtn) {
+                modalCancelBtn.addEventListener('click', hideModal);
+            }
+
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', (e) => {
+                    if (e.target === modalOverlay) {
+                        hideModal();
+                    }
+                });
+            }
+
+            if (modalPostBtn) {
+                modalPostBtn.addEventListener('click', () => {
+                    const title = photoTitleInput.value;
+                    const description = photoDescriptionTextarea.value;
+                    const share = shareToggle.checked;
+                    
+                    alert(`
+                        Photo Post Initiated!
+                        Title: ${title || '(No Title)'}
+                        Description: ${description || '(No Description)'}
+                        Shared to Community: ${share ? 'Yes' : 'No'}
+                    `);
+                    
+                    hideModal();
+                });
+            }
+            
+            // --- SAVE BUTTON IMPLEMENTATION (Modified for Hash ID and Status Update) ---
+            if (saveBtn) {
+                
+                // Recheck status when the user becomes authenticated (Moved this outside DOMContentLoaded for proper module scope)
+                // We'll rely on the initial onAuthStateChanged block to set window.currentUserId
+
+                saveBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    
+                    // 1. Get User ID 
+                    const userId = window.checkAuthAndGetUid();
+                    if (!userId) return;
+
+                    // Disable button and show loading state
+                    saveBtn.disabled = true;
+
+                    try {
+                        // 2. Create the off-screen template image (placeholder shots)
+                        const imageBlob = await createOffScreenTemplate(photostripElement);
+                        
+                        // 3. Upload the placeholder image using the real Firebase Storage function
+                        const templateImgUrl = await window.uploadTemplateImage(imageBlob, userId);
+
+                        // 4. Collect state and get the Hash ID
+                        const postData = collectTemplateState(templateImgUrl, userId);
+                        const currentHash = postData.template_id;
+
+                        // 5. Send to PHP backend for UPSERT (Supabase/PostgreSQL)
+                        console.log("Saving template state to Supabase with ID:", currentHash);
+                        
+                        const response = await fetch('http://localhost:80/api.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(postData)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // On successful save (or if already existed)
+                            lastSavedHash = currentHash;
+                            setSaveButtonState(true); 
+                            
+                            let message = 'Template saved successfully!';
+                            if (result.message.includes('already exists')) {
+                                message = 'Template already saved!';
+                            }
+                            console.log(message, 'ID:', currentHash);
+                            
+                        } else {
+                            console.error("API Error posting template:", result.error);
+                            setSaveButtonState(false);
+                        }
+                    } catch (error) {
+                        console.error("Unexpected error in template Save:", error);
+                        setSaveButtonState(false);
+                    } finally {
+                        saveBtn.disabled = false;
+                    }
+                });
+            }
+
+            // Add event listeners to detect changes and unset the 'saved' state
+            document.querySelectorAll('.item-placeholder, .bg-selection-item').forEach(el => {
+                el.addEventListener('click', checkTemplateStatus);
+            });
+            
+            document.getElementById('custom-text').addEventListener('input', checkTemplateStatus);
+            
+            // Initial button state (unsaved)
+            setSaveButtonState(false);
+
+            // --- Function to Create Off-Screen Template Image (Unchanged) ---
+            const createOffScreenTemplate = async (originalElement) => {
+                
+                // 1. Create off-screen working area
+                const offScreenContainer = document.createElement('div');
+                offScreenContainer.style.position = 'absolute';
+                offScreenContainer.style.left = '-9999px'; // Hide off-screen
+                // Clone the styles needed for sizing and layout
+                offScreenContainer.style.width = originalElement.offsetWidth + 'px'; 
+                offScreenContainer.style.height = originalElement.offsetHeight + 'px';
+                document.body.appendChild(offScreenContainer);
+
+                // 2. Clone the original element
+                const clonedStrip = originalElement.cloneNode(true);
+                offScreenContainer.appendChild(clonedStrip);
+                
+                // 3. Locate and modify the shot containers in the CLONE
+                const photoContainers = clonedStrip.querySelectorAll('.photo-strip-image');
+                
+                photoContainers.forEach(container => {
+                    // a. Remove the actual captured image element if it exists
+                    const existingImg = container.querySelector('img');
+                    if (existingImg) {
+                        existingImg.remove();
+                    }
+                    
+                    // b. Set the placeholder background/text for the template image
+                    container.textContent = 'Photo Placeholder';
+                    container.style.backgroundColor = '#d1d5db'; 
+                    container.style.display = 'flex'; 
+                    container.style.alignItems = 'center';
+                    container.style.justifyContent = 'center';
+                    container.style.color = '#4b5563';
+                });
+                
+                // 4. Temporarily hide drag/resize handles on the cloned text elements
+                clonedStrip.querySelectorAll('.draggable-text').forEach(el => {
+                    el.style.border = '1px dashed transparent'; 
+                    el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
+                        handle.style.display = 'none';
+                    });
+                });
+
+                // 5. Capture the off-screen clone
+                const canvas = await html2canvas(clonedStrip, {
+                    scale: 3, 
+                    useCORS: true, 
+                    allowTaint: true, 
+                    backgroundColor: null 
+                });
+                
+                // 6. Cleanup: Remove the off-screen container immediately
+                offScreenContainer.remove();
+
+                // 7. Convert canvas to Blob
+                return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            };
+            
+        });
+        // END OF CONSOLIDATED MODULE SCRIPT
+    </script>
 </head>
 <body class="text-gray-800 min-h-screen flex flex-col">
 
@@ -835,9 +954,7 @@
                                 <span class="sr-only">No Stickers</span>
                             </button>
 
-                            <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
-                                <img src="sticker pack (2 x 6 in)/clover2x6.png" alt="Sticker 1" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/cloverX.png">
-                            </button>
+                            
                             <button class="item-placeholder sticker-button" style="padding: 0.25rem;">
                                 <img src="sticker pack (2 x 6 in)/birthday2x6.png" alt="Sticker 2" class="w-full h-full object-cover rounded-lg" data-base-src="sticker pack (X in)/birthdayX.png">
                             </button>
@@ -1019,6 +1136,8 @@
                 
                 <style>
                     /* Custom CSS for 2x2 Grid Layout (used for 4x6, 4 shots) */
+                    /* NOTE: This block is kept in the HTML as a remnant of the original structure. 
+                       For true separation, it should also be in customizationphoto-style.css. */
                     .photobooth-template-container.layout-grid-2x2 {
                         display: grid;
                         grid-template-columns: 1fr 1fr;
@@ -1111,7 +1230,7 @@
                 </div>
 
                 <div class="social-icons-vertical">
-                    <button class="social-icon-button" id="save-btn" title="Save">
+                    <button class="social-icon-button unsaved-state" id="save-btn" title="Save Template">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z"></path></svg>
                     </button>
                     <button class="social-icon-button" id="send-btn" title="Send / Share">
@@ -1154,611 +1273,5 @@
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        
-        // 1. Get saved settings and data from Storage
-        const frameSize = localStorage.getItem('frameSize') || '2x6';
-        const activeFilter = localStorage.getItem('activeFilter') || 'filter-none';
-        
-        let capturedImages = [];
-        try {
-            const imagesJson = sessionStorage.getItem('capturedImagesArray');
-            if (imagesJson) {
-                capturedImages = JSON.parse(imagesJson);
-            }
-        } catch (e) {
-            console.error("Error parsing captured images array:", e);
-        }
-        
-        const storedShotCount = parseInt(localStorage.getItem('numShots'));
-        const shotCount = capturedImages.length > 0 ? capturedImages.length : (storedShotCount || 3);
-        
-        const photoStrip = document.getElementById('photostrip-preview');
-        const templateFooter = photoStrip.querySelector('.template-footer');
-        const textOverlayLayer = document.getElementById('text-overlay-layer'); 
-        const stickerOverlay = document.getElementById('sticker-overlay'); 
-        
-        // --- Helper to Create Image Element with Filter ---
-        const createStripImage = (imageDataUrl, filterClass) => {
-            const img = document.createElement('img');
-            img.src = imageDataUrl;
-            img.classList.add('w-full', 'h-full', 'object-cover', filterClass); 
-            return img;
-        };
-        
-        // --- 2. Apply Frame Size & Layout ---
-        
-        let shotAspectRatio = '4/3'; 
-        
-        if (frameSize === '2x6') {
-            photoStrip.classList.remove('layout-4x6');
-            shotAspectRatio = '4/3'; 
-            photoStrip.classList.remove('layout-grid-2x2');
-        } else if (frameSize === '4x6') {
-            photoStrip.classList.add('layout-4x6');
-            
-            if (shotCount === 4) {
-                photoStrip.classList.add('layout-grid-2x2', 'layout-4shots');
-                shotAspectRatio = '4/3'; 
-            } else {
-                photoStrip.classList.remove('layout-grid-2x2', 'layout-4shots');
-                shotAspectRatio = '3/2'; 
-            }
-        }
-        
-        // --- CRITICAL STICKER PATH FIX (Run first to update buttons/preview based on frame size) ---
-        const updateStickerPaths = (targetFrameSize) => {
-            const stickerPathReplace = targetFrameSize === '4x6' ? '4x6' : '2x6';
-            const imagePathSegment = targetFrameSize === '4x6' ? '4 x 6 in' : '2 x 6 in';
-            
-            document.querySelectorAll('.sticker-button img').forEach(img => {
-                const basePath = img.dataset.baseSrc;
-                if (basePath) {
-                    // Update the visible image source in the button grid
-                    img.src = basePath.replace('(X in)', `(${imagePathSegment})`).replace(/X/g, stickerPathReplace);
-                }
-            });
-            return { stickerPathReplace, imagePathSegment };
-        };
-        
-        // Update all sticker preview images
-        const { stickerPathReplace, imagePathSegment } = updateStickerPaths(frameSize);
-
-        // --- Initial Sticker Load based on Frame Size ---
-        const storedStickerBase = localStorage.getItem('activeStickerBase');
-        if (storedStickerBase && stickerOverlay) {
-            
-            const initialStickerSrc = storedStickerBase
-                .replace('(X in)', `(${imagePathSegment})`)
-                .replace(/X/g, stickerPathReplace);
-
-            stickerOverlay.src = initialStickerSrc;
-            stickerOverlay.style.display = 'block';
-        }
-        // ------------------------------------------------
-
-
-        // --- 3. Apply Number of Shots (Dynamic Loop) ---
-        
-        // Remove existing shots before re-rendering (must leave sticker and text layers)
-        photoStrip.querySelectorAll('.photo-strip-image').forEach(photo => photo.remove());
-
-        // Find the index of the first non-image element (like sticker layer or footer) to insert before
-        const firstNonImageIndex = Array.from(photoStrip.children).findIndex(el => 
-            el.id === 'sticker-overlay' || el.id === 'text-overlay-layer' || el.classList.contains('template-footer')
-        );
-        const insertBeforeElement = firstNonImageIndex !== -1 ? photoStrip.children[firstNonImageIndex] : templateFooter;
-
-        for (let i = 0; i < shotCount; i++) {
-            const photoDiv = document.createElement('div');
-            photoDiv.classList.add('photo-strip-image');
-            
-            // Set the calculated aspect ratio for the shot
-            photoDiv.style.aspectRatio = shotAspectRatio;
-
-            const imageDataUrl = capturedImages[i];
-
-            if (imageDataUrl) {
-                const img = createStripImage(imageDataUrl, activeFilter); 
-                photoDiv.appendChild(img);
-            } else {
-                // Fallback for missing shot data
-                photoDiv.textContent = `Photo ${i + 1}`;
-            }
-
-            // Insert the shot div before the sticker layer, text layer, or footer (whichever is first)
-            photoStrip.insertBefore(photoDiv, insertBeforeElement);
-        }
-
-        
-        // Button Functionality (omitted for brevity, assume original logic is fine)
-        const saveBtn = document.getElementById('save-btn');
-        const sendBtn = document.getElementById('send-btn');
-        const downloadBtn = document.getElementById('download-btn');
-
-
-        // --------------------------------------------------------------------------------
-        // --- FIX: UPDATED FILTER APPLICATION LOGIC FOR DOWNLOAD ---
-        
-        // Helper function to map your CSS classes to the Canvas filter string
-        const getCanvasFilterString = (filterClass) => {
-            switch (filterClass) {
-                case 'filter-bw':
-                    return 'grayscale(100%)';
-                case 'filter-warm':
-                    return 'sepia(70%)'; 
-                case 'filter-cool':
-                    return 'contrast(1.1) brightness(1.1) saturate(1.3) hue-rotate(-15deg)';
-                case 'filter-retro':
-                    return 'sepia(100%) brightness(0.9) contrast(1.1)';
-                case 'filter-noir':
-                    return 'grayscale(100%) contrast(1.2) brightness(0.8)';
-                case 'filter-none':
-                default:
-                    return 'none';
-            }
-        };
-
-        // Helper function to draw an image onto a canvas with a filter applied
-        const applyFilterToCanvas = (imageDataUrl, filterClass, callback) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                canvas.width = img.naturalWidth;
-                canvas.height = img.naturalHeight;
-                
-                // Apply the filter using the Canvas API filter property
-                ctx.filter = getCanvasFilterString(filterClass);
-                
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                callback(canvas.toDataURL('image/png'));
-            };
-            img.src = imageDataUrl;
-            img.crossOrigin = 'Anonymous'; 
-        };
-
-
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', () => {
-                const photostripElement = document.getElementById('photostrip-preview');
-                const draggableTexts = photostripElement.querySelectorAll('.draggable-text');
-                const photoContainers = photostripElement.querySelectorAll('.photo-strip-image');
-                
-                const originalData = [];
-                
-                // Use a promise queue to ensure all images are filtered/reloaded before capture
-                const filterPromises = Array.from(photoContainers).map((container, index) => {
-                    return new Promise(resolve => {
-                        const img = container.querySelector('img');
-                        const originalImageDataUrl = capturedImages[index]; // Use the original source from storage
-                        const filterClass = activeFilter;
-                        
-                        if (img && originalImageDataUrl && filterClass !== 'filter-none') {
-                            
-                            // Store original state and remove CSS filter class
-                            originalData.push({ element: img, originalSrc: img.src, originalClasses: img.className });
-                            img.classList.remove(filterClass);
-
-                            // Apply the filter via canvas and update the img.src
-                            applyFilterToCanvas(originalImageDataUrl, filterClass, (filteredDataUrl) => {
-                                img.src = filteredDataUrl;
-                                resolve();
-                            });
-                        } else {
-                            // No image, no filter, or filter-none. Just save the state.
-                            if (img) {
-                                originalData.push({ element: img, originalSrc: img.src, originalClasses: img.className });
-                                img.classList.remove(filterClass);
-                            }
-                            resolve();
-                        }
-                    });
-                });
-
-                // Wait for all images to be processed before running html2canvas
-                Promise.all(filterPromises).then(() => {
-
-                    // Hide drag/resize handles
-                    draggableTexts.forEach(el => {
-                        el.style.border = '1px dashed transparent'; 
-                        el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
-                            handle.style.display = 'none';
-                        });
-                    });
-
-                    setTimeout(() => {
-                        html2canvas(photostripElement, {
-                            scale: 3, 
-                            useCORS: true, 
-                            allowTaint: true, 
-                        }).then(canvas => {
-                            
-                            // Revert all changes immediately after capture
-                            originalData.forEach(data => {
-                                data.element.src = data.originalSrc;
-                                data.element.className = data.originalClasses; // Re-apply all original classes
-                            });
-
-                            draggableTexts.forEach(el => {
-                                el.style.border = ''; 
-                                el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
-                                    handle.style.display = ''; 
-                                });
-                            });
-
-                            // Trigger Download
-                            const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-                            const link = document.createElement('a');
-                            link.download = 'webooth-photo-strip.png';
-                            link.href = image;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-
-                        }).catch(error => {
-                            console.error("Error during photo strip capture:", error);
-                            
-                            // Ensure cleanup happens even on error
-                            originalData.forEach(data => {
-                                data.element.src = data.originalSrc;
-                                data.element.className = data.originalClasses; 
-                            });
-                            draggableTexts.forEach(el => {
-                                el.style.border = '';
-                                el.querySelectorAll('.resize-handle, .remove-handle').forEach(handle => {
-                                    handle.style.display = '';
-                                });
-                            });
-                            alert('An error occurred during download. Check the console for details.');
-                        });
-                    }, 50); 
-                }).catch(err => {
-                    console.error("Error processing filters:", err);
-                    alert('A filter error occurred. Check console.');
-                });
-            });
-        }
-        // --- END DOWNLOAD FILTER FIX ---
-
-
-        // Background Functionality (Original logic preserved)
-        const bgColorPicker = document.getElementById('bg-color');
-        const bgImages = document.querySelectorAll('.bg-selection-item');
-
-        if (photoStrip && bgColorPicker) {
-            bgColorPicker.addEventListener('input', (e) => {
-                photoStrip.style.backgroundImage = 'none';
-                photoStrip.style.backgroundColor = e.target.value;
-            });
-        }
-
-        if (photoStrip && bgImages.length > 0) {
-            bgImages.forEach(img => {
-                img.addEventListener('click', () => {
-                    photoStrip.style.backgroundImage = `url(${img.src})`;
-                    photoStrip.style.backgroundColor = 'transparent'; 
-                });
-            });
-        }
-
-        // Footer Checkbox Functionality
-        const logoCheckbox = document.getElementById('logo-checkbox');
-        const dateCheckbox = document.getElementById('date-checkbox');
-        const timeCheckbox = document.getElementById('time-checkbox');
-
-        const footerLogo = document.getElementById('footer-brand-logo');
-        const footerDate = document.getElementById('footer-date-dynamic');
-        const footerTime = document.getElementById('footer-time-dynamic');
-        const footerWeBoothText = document.getElementById('footer-brand-text'); 
-        
-        // date/time generation
-        const now = new Date();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const year = String(now.getFullYear()).slice(-2);
-        const formattedDate = `${month}/${day}/${year}`;
-        let hours = now.getHours();
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        const formattedTime = `${hours}:${minutes} ${ampm}`;
-
-        if (logoCheckbox && footerLogo && footerWeBoothText) {
-            logoCheckbox.addEventListener('change', (e) => {
-                footerLogo.classList.toggle('hidden', !e.target.checked);
-                footerWeBoothText.classList.toggle('hidden', !e.target.checked);
-            });
-        }
-
-        if (dateCheckbox && footerDate) {
-            // Directly setting textContent and toggling visibility
-            footerDate.textContent = formattedDate; 
-            dateCheckbox.addEventListener('change', (e) => {
-                footerDate.classList.toggle('hidden', !e.target.checked);
-            });
-        }
-
-        if (timeCheckbox && footerTime) {
-            // Directly setting textContent and toggling visibility
-            footerTime.textContent = formattedTime; 
-            timeCheckbox.addEventListener('change', (e) => {
-                footerTime.classList.toggle('hidden', !e.target.checked);
-            });
-        }
-        
-        // --- JAVASCRIPT FOR DRAGGABLE TEXT (Original logic preserved) ---
-        
-        const addTextBtn = document.getElementById('add-text-btn');
-        const customTextInput = document.getElementById('custom-text'); 
-        const fontSelect = document.getElementById('font-select');
-        const textColorPicker = document.getElementById('text-color');
-        
-        // Simplified event handlers for font and color
-        const updateTextStyles = () => {
-            const newColor = textColorPicker.value;
-            const newFontFamily = fontSelect.value;
-            // Queries .draggable-text and the static .footer-display spans
-            const activeTextElements = photoStrip.querySelectorAll('.draggable-text, .footer-display:not(.hidden)'); 
-            activeTextElements.forEach(el => {
-                el.style.fontFamily = `'${newFontFamily}', sans-serif`;
-                el.style.color = newColor;
-            });
-        };
-        fontSelect.addEventListener('change', updateTextStyles);
-        textColorPicker.addEventListener('input', updateTextStyles);
-
-
-        if (addTextBtn && photoStrip) {
-            addTextBtn.addEventListener('click', () => {
-                const text = customTextInput.value; 
-                if (text.trim() === '') {
-                    alert('Please type some text first!');
-                    return;
-                }
-                
-                const color = textColorPicker.value;
-                const font = fontSelect.value;
-                
-                const newTextElement = document.createElement('div');
-                newTextElement.textContent = text;
-                newTextElement.style.color = color;
-                newTextElement.style.fontFamily = `'${font}', sans-serif`;
-                newTextElement.classList.add('draggable-text');
-                newTextElement.style.left = '20px'; 
-                newTextElement.style.top = '20px'; 
-                newTextElement.style.pointerEvents = 'auto'; 
-
-                const resizeHandleFont = document.createElement('div');
-                resizeHandleFont.classList.add('resize-handle', 'resize-handle-font');
-                newTextElement.appendChild(resizeHandleFont);
-
-                const resizeHandleWidth = document.createElement('div');
-                resizeHandleWidth.classList.add('resize-handle', 'resize-handle-width');
-                newTextElement.appendChild(resizeHandleWidth);
-
-                const removeHandle = document.createElement('div');
-                removeHandle.classList.add('remove-handle');
-                removeHandle.innerHTML = '&#x2715;'; 
-                newTextElement.appendChild(removeHandle);
-
-                // Append text element to the dedicated text overlay layer
-                textOverlayLayer.appendChild(newTextElement);
-
-                makeDraggableAndResizable(newTextElement, resizeHandleFont, resizeHandleWidth, removeHandle);
-            });
-        }
-        
-        function makeDraggableAndResizable(element, fontHandle, widthHandle, removeHandle) {
-            let isDragging = false;
-            let isResizingFont = false;
-            let isResizingWidth = false;
-
-            let initialFontSize = 16; 
-            let initialWidth = element.clientWidth;
-            let startMouseX, startMouseY;
-            let offsetX, offsetY;
-            
-            element.style.fontSize = `${initialFontSize}px`;
-
-            element.addEventListener('mousedown', (e) => {
-                if (e.target === element) {
-                    isDragging = true;
-                    // Calculate offset relative to the element's top/left (which is relative to textOverlayLayer)
-                    offsetX = e.clientX - element.getBoundingClientRect().left;
-                    offsetY = e.clientY - element.getBoundingClientRect().top;
-                    element.style.opacity = '0.7'; 
-                    e.preventDefault();
-                }
-            });
-            
-            fontHandle.addEventListener('mousedown', (e) => {
-                isResizingFont = true;
-                startMouseX = e.clientX;
-                startMouseY = e.clientY;
-                initialFontSize = parseFloat(window.getComputedStyle(element).fontSize);
-                element.style.opacity = '0.7';
-                e.preventDefault();
-                e.stopPropagation(); 
-            });
-
-            widthHandle.addEventListener('mousedown', (e) => {
-                isResizingWidth = true;
-                startMouseX = e.clientX;
-                initialWidth = element.clientWidth;
-                element.style.opacity = '0.7';
-                e.preventDefault();
-                e.stopPropagation(); 
-            });
-
-            removeHandle.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                element.remove();
-            });
-            
-            element.addEventListener('dblclick', (e) => {
-                if (e.target.classList.contains('resize-handle') || e.target.classList.contains('remove-handle')) return;
-                
-                element.contentEditable = true;
-                element.focus();
-                element.classList.add('is-editing');
-            });
-            
-            element.addEventListener('blur', () => {
-                element.contentEditable = false;
-                element.classList.remove('is-editing');
-                if (element.textContent.trim() === '') {
-                    element.remove();
-                }
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                const overlayRect = textOverlayLayer.getBoundingClientRect();
-
-                if (isDragging) {
-                    let newX = e.clientX - overlayRect.left - offsetX;
-                    let newY = e.clientY - overlayRect.top - offsetY;
-                    
-                    newX = Math.max(0, Math.min(newX, overlayRect.width - element.offsetWidth));
-                    newY = Math.max(0, Math.min(newY, overlayRect.height - element.offsetHeight));
-
-                    element.style.left = `${newX}px`;
-                    element.style.top = `${newY}px`;
-                } else if (isResizingFont) {
-                    const dx = e.clientX - startMouseX;
-                    const dy = e.clientY - startMouseY;
-                    const distance = Math.max(dx, dy); 
-                    
-                    const newFontSize = Math.max(8, initialFontSize + (distance * 0.5)); 
-                    element.style.fontSize = `${newFontSize}px`;
-                
-                } else if (isResizingWidth) {
-                    const dx = e.clientX - startMouseX;
-                    const newWidth = Math.max(50, initialWidth + dx); 
-                    
-                    const currentX = parseFloat(element.style.left);
-                    const maxWidth = overlayRect.width - currentX;
-                    
-                    element.style.width = `${Math.min(newWidth, maxWidth)}px`;
-                }
-            });
-
-            document.addEventListener('mouseup', () => {
-                isDragging = false;
-                isResizingFont = false;
-                isResizingWidth = false;
-                element.style.opacity = '1'; 
-            });
-        }
-
-        // --- STICKER SELECTION LOGIC (Correctly uses current frame size) ---
-        const stickerButtons = document.querySelectorAll('.sticker-button');
-        const noStickerButton = document.querySelector('.pack-button[data-pack-name="No Stickers"]');
-
-
-        stickerButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const imgElement = button.querySelector('img');
-                const basePath = imgElement.dataset.baseSrc; 
-
-                const currentFrameSize = localStorage.getItem('frameSize') || '2x6';
-                const sizeTag = currentFrameSize === '4x6' ? '4 x 6 in' : '2 x 6 in';
-                const stickerTag = currentFrameSize === '4x6' ? '4x6' : '2x6';
-
-                if (basePath) {
-                    const finalStickerSrc = basePath
-                        .replace('(X in)', `(${sizeTag})`) 
-                        .replace(/X/g, stickerTag); 
-                        
-                    if (stickerOverlay) {
-                        stickerOverlay.src = finalStickerSrc;
-                        stickerOverlay.style.display = 'block';
-                    }
-                    
-                    localStorage.setItem('activeStickerBase', basePath);
-                }
-            });
-        });
-        
-        if (noStickerButton && stickerOverlay && photoStrip) {
-            noStickerButton.addEventListener('click', () => {
-                stickerOverlay.style.display = 'none';
-                localStorage.removeItem('activeStickerBase');
-            });
-        }
-
-        // --- MODAL JAVASCRIPT LOGIC (New) ---
-        const mainPostBtn = document.getElementById('main-post-btn');
-        const modalOverlay = document.getElementById('post-modal-overlay');
-        const modalCancelBtn = document.getElementById('modal-cancel-btn');
-        const modalPostBtn = document.getElementById('modal-post-btn');
-        const photoTitleInput = document.getElementById('photo-title-input');
-        const photoDescriptionTextarea = document.getElementById('photo-description-textarea');
-        const shareToggle = document.getElementById('share-to-community-toggle');
-
-        // Function to show the modal
-        const showModal = () => {
-            if (modalOverlay) {
-                modalOverlay.style.display = 'flex';
-                // Reset form fields on show
-                photoTitleInput.value = '';
-                photoDescriptionTextarea.value = '';
-                shareToggle.checked = true;
-            }
-        };
-
-        // Function to hide the modal
-        const hideModal = () => {
-            if (modalOverlay) {
-                modalOverlay.style.display = 'none';
-            }
-        };
-
-        // Event listener for the main POST button
-        if (mainPostBtn) {
-            mainPostBtn.addEventListener('click', showModal);
-        }
-
-        // Event listener for the modal Cancel button
-        if (modalCancelBtn) {
-            modalCancelBtn.addEventListener('click', hideModal);
-        }
-
-        // Event listener for clicking the backdrop
-        if (modalOverlay) {
-            modalOverlay.addEventListener('click', (e) => {
-                if (e.target === modalOverlay) {
-                    hideModal();
-                }
-            });
-        }
-
-        // Event listener for the modal Post button (simulated post)
-        if (modalPostBtn) {
-            modalPostBtn.addEventListener('click', () => {
-                const title = photoTitleInput.value;
-                const description = photoDescriptionTextarea.value;
-                const share = shareToggle.checked;
-                
-                // *** In a real application, you would perform image rendering and upload here ***
-                
-                alert(`
-                    Photo Post Initiated!
-                    Title: ${title || '(No Title)'}
-                    Description: ${description || '(No Description)'}
-                    Shared to Community: ${share ? 'Yes' : 'No'}
-                `);
-                
-                // Close the modal after submission
-                hideModal();
-            });
-        }
-    });
-        
-    </script>
 </body>
 </html>

@@ -2,7 +2,21 @@
 
 header('Content-Type: application/json');
 
+// --- START CORS FIX ---
+// 1. Allow access from the specific origin where your front-end is running.
+//    (Change http://localhost:5173 if your front-end port is different)
+header('Access-Control-Allow-Origin: http://localhost:5173');
 
+// 2. Allow the necessary methods and headers for complex requests (POST).
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// 3. Handle the OPTIONS request (the preflight check)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit(); // Stop script execution after sending the headers
+}
+// --- END CORS FIX ---
 
 $host = 'aws-1-ap-southeast-2.pooler.supabase.com';
 $port = "5432"; 
@@ -52,8 +66,84 @@ switch ($action) {
         echo json_encode(['success' => true, 'message' => 'API is working']);
         break;
 
+    case 'fetchPhotoLibrary':
+        try {
+            
+            $sql = "SELECT post_id AS id, image_url AS photo_url, created_at FROM post WHERE user_id = ? ORDER BY created_at DESC";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$user_id]);
+            $posts = $stmt->fetchAll();
+
+            echo json_encode(['success' => true, 'data' => $posts]);
+            
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            error_log("Database SELECT error for photo library: " . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => 'Database error in fetchPhotoLibrary: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'createPost':
+        // Required fields: user_id is already checked before the switch
+        $image_url = $data['image_url'] ?? null;
+        $title = $data['title'] ?? null; // Optional: can be null
+        $description = $data['description'] ?? null; // Optional: can be null
+        $share_to_community = $data['share_to_community'] ?? false; // Optional: defaults to false
+        $template_hash_id = $data['template_hash_id'] ?? null; // Optional
+
+        if (!$image_url) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Missing required image_url for post.']);
+            exit();
+        }
+
+        try {
+            // NOTE: The 'share_to_community' and 'template_hash_id' fields 
+            // are not in your provided 'post' table schema, but I'll 
+            // include them in the query as placeholders for future extension, 
+            // assuming you might add them or adjust the schema.
+            // For now, only the fields in your schema are strictly inserted.
+
+            $sql = "INSERT INTO post (user_id, image_url, created_at) VALUES (?, ?, NOW()) RETURNING post_id";
+                    
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $user_id, 
+                $image_url
+            ]);
+            
+            $newPostId = $stmt->fetchColumn(); // Get the newly created post_id
+
+            // Optional: If you want to store title/description/share/template_hash_id, 
+            // the 'post' table schema needs to be updated in Supabase. 
+            // The logic above fulfills the schema provided in your request.
+
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Post created successfully', 
+                'post_id' => $newPostId,
+                'image_url' => $image_url,
+                'title' => $title,
+                'description' => $description,
+                'share_to_community' => $share_to_community,
+            ]);
+            
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            error_log("Database INSERT error for post: " . $e->getMessage());
+            echo json_encode(["success"=> false, "error" => "Database error in createPost: " . $e->getMessage()]);
+        }
+        break;
+
     case 'saveTemplateState':
         $templateData = $data['template_state'] ?? [];
+        $template_id = $data['template_id'] ?? null; // <<< NEW: Expect the hash ID from JS
+        
+        if (!$template_id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => "Missing required template ID."]);
+            exit();
+        }
         
         // Validate required fields
         $requiredFields = ['frame_size', 'shot_count', 'effects']; 
@@ -81,29 +171,43 @@ switch ($action) {
         $template_img = $templateData['template_img'] ?? null;
 
         try {
+            // Check if a template with this ID already exists for the user
+            $stmt_check = $pdo->prepare("SELECT template_id FROM saved_templates WHERE user_id = ? AND template_id = ?");
+            $stmt_check->execute([$user_id, $template_id]);
+            
+            if ($stmt_check->fetch()) {
+                // Template already exists, no need to insert
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Template already exists and was not saved again.', 
+                    'template_id' => $template_id
+                ]);
+                break; // Exit the switch case after sending response
+            }
+
+            // Template does not exist, perform INSERT
+            // NOTE: The saved_templates table must have 'template_id' set as PRIMARY KEY.
             $sql = "INSERT INTO saved_templates (
-                        user_id, sticker, text, font, text_color, background, 
+                        template_id, user_id, sticker, text, font, text_color, background, 
                         show_logo, show_date, show_time, 
                         frame_size, shot_count, share, effects, template_img
                     ) VALUES (
-                        ?, ?, ?, ?, ?, ?, 
+                        ?, ?, ?, ?, ?, ?, ?, 
                         ?, ?, ?,
                         ?, ?, ?, ?, ?
-                    ) RETURNING template_id";
+                    )";
                     
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
-                $user_id, $sticker, json_encode($text), $font, $text_color, $background,
+                $template_id, $user_id, $sticker, json_encode($text), $font, $text_color, $background,
                 $show_logo, $show_date, $show_time,
                 $frame_size, $shot_count, $share, $effects, $template_img
             ]);
 
-            $newTemplate = $stmt->fetch();
-
             echo json_encode([
                 'success' => true, 
                 'message' => 'Template saved successfully', 
-                'template_id' => $newTemplate['template_id']
+                'template_id' => $template_id
             ]);
             
         } catch (\PDOException $e) {
@@ -221,5 +325,3 @@ switch ($action) {
         break;
 }
 ?>
-
-

@@ -144,18 +144,151 @@
     #edit-cancel-btn:hover {background-color:  #c4c4c4;;}
     #edit-save-btn {border: none;padding: 8px 22px;border-radius: 18px;font-weight: 700;color: white;background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);cursor: pointer;user-select: none;font-size: 0.95rem;transition: background 0.4s;}
     #edit-save-btn:hover {background: linear-gradient(90deg, #f4b744  0%, #ff3c7d 100%);}
-    .photo-library-grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));gap: 12px 20px;margin-top: 12px;user-select: none;max-width: 100%;}
-    .photo-card {width: 140px;border-radius: 12px;background-color: #fdca8c;box-shadow: none;padding: 8px 6px;cursor: pointer;border: 2px solid transparent;display: flex;flex-direction: column;gap: 8px;transition: border-color 0.3s ease;}
+
+    /* --- PHOTO LIBRARY GRID STYLES (NEW/MODIFIED) --- */
+    .photo-library-grid {
+      display: grid;
+      /* Default to 3 equal columns */
+      grid-template-columns: repeat(5, 1fr); 
+      gap: 10px; /* Minimal gap like Instagram */
+      margin-top: 15px;
+      user-select: none;
+      max-width: 100%;
+    }
+
+    .photo-card {
+      /* Remove fixed width to allow grid columns to control size */
+      width: 100%; 
+      min-height: 150px;
+      /* Use padding-bottom trick to enforce 1:1 aspect ratio */
+      padding-bottom: 100%; 
+      position: relative;
+      border-radius: 0; /* No rounded corners for a seamless grid */
+      background-color: #f7f3f5;
+      box-shadow: none;
+      padding: 0;
+      cursor: pointer;
+      border: 1px solid #f29dcc; /* Light border to separate cards */
+      display: flex; /* Change display to block */
+      transition: opacity 0.3s ease;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    /* Ensure the content (image) fills the 1:1 square */
+    .photo-card img {
+      position: relative;
+      top: initial;
+      left: initial;
+      width: 100%;
+      height: auto;
+      object-fit: contain; /* Crucial for filling the 1:1 square without distortion */
+      border-radius: 0;
+      box-shadow: none;
+      border: none;
+      transition: transform 0.2s;
+      margin: auto;
+      max-width: 100%;
+      max-height: 100%;
+
+    }
+
+    .photo-card:hover img {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+    @media (max-width: 900px) {
+    /* Keep 3 columns on medium screens */
+    .photo-library-grid {
+      grid-template-columns: repeat(3, 1fr); 
+    }
+}
+    
+    /* Responsive adjustment for smaller screens */
+    @media (max-width: 600px) {
+      .sidebar {width: 50px;}
+      .main-content {padding: 1rem;}
+      h1.greeting {font-size: 40px;}
+      .profile-img {width: 72px; height: 72px;}
+  
+  /* CHANGE: Increase to 3 columns on small screens (from original 2) */
+    .photo-library-grid {
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 10px;
+    }
+    }
+    /* END PHOTO LIBRARY GRID STYLES */
+
     .photo-card.even {background: #47a851;border-color: #2e7c18;}
-    .photo-card img {width: 100%;height: 300px;object-fit: cover;border-radius: 10px;user-select: none;display: block;box-shadow: 0 5px 10px rgb(0 0 0 / 0.05);border: 4px solid white;transition: border-color 0.2s ease;}
+    
     .photo-card:hover,
     .photo-card:focus-visible {border-color: #d72b7e;outline: none;}
     #section-favorites {user-select: none;display: none;}
     #section-favorites.active {display: block;}
     #section-favorites h2 {font-family: 'Fredoka One', cursive;font-size: 30px;margin-top: 0;color: #c32d6c;}
-    .favorites-grid {display: grid;gap: 14px;grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));padding-top: 30px;}
-    .favorite-photo-card {border-radius: 10px;border: 5px solid #f9d7a8;background: #f9d7a8;user-select: none;cursor: pointer;}
-    .favorite-photo-card img {width: 100%;height: 300px;object-fit: cover;}
+    
+    /* --- FAVORITES GRID STYLES FOR IMAGE LAYOUT --- */
+    .favorites-grid {
+      display: grid;
+      gap: 10px; /* Gap between cards */
+      /* Use fixed-width columns that wrap to fit the image */
+      grid-template-columns: repeat(auto-fill, 120px); 
+      justify-content: flex-start; /* Start cards from the left */
+      padding-top: 15px;
+    }
+    
+    .favorite-photo-card {
+      /* Fixed size for the photostrip look */
+      width: 110px; 
+      height: 330px; /* Adjusted height for a 2x6 aspect ratio */
+      border-radius: 4px;
+      /* Background color visible inside the strip (like the photo background) */
+      background: #f7f3f5; 
+      border: 4px solid #fff; /* Main white border/padding */
+      user-select: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 0;
+    }
+    
+    .favorite-photo-card img {
+      /* Image needs to fill the content area, creating the vertical strip */
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+      box-sizing: border-box;
+      /* Inner frame simulating the photo booth frame (alternating colors) */
+      border: 8px solid transparent; 
+    }
+    
+    /* Simulate alternating strip colors and frames from the image */
+    .favorite-photo-card:nth-child(odd) {
+      /* Light Pink Strip */
+      background: #fde8e8; /* Base color for the odd strip background */
+    }
+    
+    .favorite-photo-card:nth-child(odd) img {
+      /* Light Pink Strip with Green Border */
+      border-color: #A8E6CF; /* Light Green frame */
+    }
+    
+    .favorite-photo-card:nth-child(even) {
+      /* Light Green Strip */
+      background: #e9fde8; /* Base color for the even strip background */
+    }
+    
+    .favorite-photo-card:nth-child(even) img {
+      /* Light Green Strip with Pink/Cream Border */
+      border-color: #ffdeeb; /* Lighter pink/cream frame */
+    }
+    /* END FAVORITES GRID STYLES */
+
     .favorite-photo-card:focus {outline: 2px solid #a31a62;outline-offset: 2px;}
     .no-favorites-msg {font-style: italic;color: #f9acdb;user-select: none;text-align: center;padding: 20px;}
     #section-activity {user-select: none;display: none;}
@@ -167,10 +300,64 @@
     .modal-bg {position: fixed;inset: 0;background: rgba(0, 0, 0, 0.5);backdrop-filter: blur(3px);display: none;
       align-items: center;justify-content: center;z-index: 9999;padding: 12px;user-select: none;}
     .modal-bg.active {display: flex;}
-    .modal {background: #fef9fb;border-radius: 14px;width: 760px;max-width: 95vw;max-height: 90vh;display: flex;user-select: none;box-shadow: 0 8px 30px rgba(211, 35, 129, 0.3);overflow: hidden;}
-    .modal-left {width: 180px;background: #f9d7e7;padding: 12px 8px;overflow-y: auto;display: flex;flex-direction: column;align-items: center;justify-content: center;border-top-left-radius: 14px;border-bottom-left-radius: 14px;}
-    .modal-left img {width: 140px;height: 500px;object-fit: cover;border-radius: 10px;border: 4px solid white;box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);user-select: none;}
-    .modal-right {flex-grow: 1;display: flex;flex-direction: column;padding: 20px 24px 12px 24px;box-sizing: border-box;overflow-y: auto;border-top-right-radius: 14px;border-bottom-right-radius: 14px;max-height: 600px;}
+    
+    /* --- MODAL STYLES (MODIFIED) --- */
+    .modal {
+        background: #fef9fb;
+        border-radius: 14px;
+        max-width: 95vw;
+        max-height: 90vh;
+        display: flex;
+        user-select: none;
+        box-shadow: 0 8px 30px rgba(211, 35, 129, 0.3);
+        overflow: hidden;
+        width: max-content; /* Allow modal to shrink-wrap its contents */
+        align-items: stretch;
+    }
+
+    .modal-left {
+        width: auto; /* Let the image determine the content area's width */
+        background: #f9d7e7;
+        padding: 12px 8px;
+        overflow-y: hidden; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-top-left-radius: 14px;
+        border-bottom-left-radius: 14px;
+        max-height: 90vh;
+        box-sizing: border-box; 
+    }
+
+    .modal-left img {
+        /* Max out available space but retain ratio */
+        max-width: calc(95vw - 200px); 
+        max-height: calc(90vh - 24px); 
+        width: auto;
+        height: auto;
+        object-fit: contain; /* Ensure image fits inside its bounding box */
+        border-radius: 10px;
+        border: 4px solid white;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        user-select: none;
+        flex-shrink: 1; 
+    }
+
+    .modal-right {
+        min-width: 300px; /* Set a consistent minimum width for the comments panel */
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 24px 12px 24px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        border-top-right-radius: 14px;
+        border-bottom-right-radius: 14px;
+        max-height: 90vh; 
+    }
+    /* --- END MODAL STYLES --- */
+    
     .modal-header {display: flex;align-items: center;justify-content: space-between;border-bottom: 1px solid #f3c7d9;padding-bottom: 10px;user-select: none;}
     .modal-header .username {font-weight: 700;color: #d72b7e;font-size: 1.2rem;}
     .modal-close-btn {background: transparent;border: none;font-size: 26px;line-height: 1;cursor: pointer;color: #d72b7e;font-weight: 700;transition: color 0.3s ease;user-select: none;}
@@ -866,7 +1053,7 @@
         // PASS email and displayName for profile lookup/creation
         fetchOrCreateProfile(user.uid, user.email, user.displayName);
         // *** NEW: Fetch the photo library and activity log after the user is confirmed/loaded ***
-        //fetchPhotoLibrary(user.uid);
+        fetchPhotoLibrary(user.uid);
         fetchActivityLog(user.uid); 
       } else {
         // User is signed out. Redirect to login
@@ -996,11 +1183,11 @@
       `;
       
       if (shots === 1) {
-        previewHTML += `
-          <div class="template-photo-single frame-${frameSize} effect-${currentEffect}" 
-               style="background-color: rgba(255, 255, 255, 0.9);">
-          </div>
-        `;
+        const photoDiv = document.createElement('div');
+        photoDiv.className = `template-photo-single frame-${frameSize} effect-${currentEffect}`;
+        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        
+        previewHTML += photoDiv.outerHTML;
       } else {
         previewHTML += `
           <div class="template-photo-multiple ${shots}-shots frame-${frameSize}">
@@ -1272,7 +1459,7 @@
       state.photos.forEach(photo => {
         const div = document.createElement('div');
         div.classList.add('photo-card');
-        if (photo.id % 2 === 0) div.classList.add('even');
+        // The .even class is removed as the new grid style doesn't need it
         div.dataset.photoId = photo.id;
         div.tabIndex = 0;
         div.setAttribute('role', 'button');
@@ -2294,7 +2481,7 @@
     copyFirstTemplateToMyTemplates();
     renderSharedTemplates();
     renderMyTemplates();
-    // renderPhotoLibrary(); // Called after fetchPhotoLibrary
+    renderPhotoLibrary(); // Called after fetchPhotoLibrary
     renderFavorites();
   </script>
 </body>

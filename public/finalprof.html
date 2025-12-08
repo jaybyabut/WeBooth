@@ -148,9 +148,9 @@
     /* --- PHOTO LIBRARY GRID STYLES (NEW/MODIFIED) --- */
     .photo-library-grid {
       display: grid;
-      /* Default to 3 equal columns */
-      grid-template-columns: repeat(5, 1fr); 
-      gap: 10px; /* Minimal gap like Instagram */
+  /* CHANGE 1: Use a smaller, fixed-width column and let it wrap */
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); 
+      gap: 100px; 
       margin-top: 15px;
       user-select: none;
       max-width: 100%;
@@ -161,10 +161,9 @@
       width: 100%; 
       min-height: 150px;
       /* Use padding-bottom trick to enforce 1:1 aspect ratio */
-      padding-bottom: 100%; 
       position: relative;
       border-radius: 0; /* No rounded corners for a seamless grid */
-      background-color: #f7f3f5;
+      background-color: #ffe9f4;
       box-shadow: none;
       padding: 0;
       cursor: pointer;

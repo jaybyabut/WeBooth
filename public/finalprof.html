@@ -381,7 +381,7 @@
     .reaction-footer div.likes-text {font-weight: 900;margin-left: auto;color: #a41753;user-select: none;}
     .comment-form {display: flex; gap: 12px;}
     .comment-form textarea {flex-grow: 1;border-radius: 10px;border: 1px solid #f3c7d9;background: #fff0f8;padding: 10px 14px;font-size: 14px;resize: vertical;min-height: 48px;outline: none;color: #d72b7e;font-family: inherit;user-select: text;transition: border-color 0.3s ease;}
-    .comment-form textarea:focus {border-color: #d72b7e;}
+    .comment-form textarea:focus {border-color: #d23481;}
     .comment-form textarea::placeholder {color: #f9c5db;}
     .comment-form button {border: none;background: transparent;font-weight: 700;font-size: 14px;color: #d72b7e;cursor: pointer;opacity: 0.75;user-select: none;transition: opacity 0.3s ease;}
     .comment-form button:disabled {opacity: 0.3;cursor: default;}
@@ -517,7 +517,13 @@
             <img src="Icons/4.svg" alt="Profile icon" />
             Profile
           </button>
-        </div>
+          <div id="admin-button-container" style="display:none;">
+            <button onclick="window.location.href='admin.html'">
+              <img src="Icons/3.svg" alt="Admin icon" />
+              Admin
+            </button>
+          </div>
+          </div>
       </header>
       
       <div class="profile-header-container">
@@ -768,7 +774,9 @@
         username: 'Loading...', // Initial state set to Loading
         bio: 'bio',
         photoCount: 0,
-        profileImg: '' // This will now hold the Firebase Storage URL
+        profileImg: '', // This will now hold the Firebase Storage URL
+        // --- MODIFIED: Added isAdmin status ---
+        isAdmin: false,
       },
       photos: [
         {
@@ -887,13 +895,17 @@
         });
 
         const result = await response.json();
+        console.log(result);
 
         if (result.success) {
           const profileData = result.data;
           state.user.username = profileData.username || `User_${userId.substring(0, 4)}`;
           state.user.bio = profileData.bio || 'Set your bio here.';
           state.user.profileImg = profileData.profile_img_url || '';
-          console.log("Profile process successful. Username:", state.user.username);
+          // --- MODIFIED: Store the admin status ---
+          state.user.isAdmin = profileData.admin; 
+          
+          console.log("Profile process successful. Username:", state.user.isAdmin);
           
           if (result.created) {
             // Log the creation activity if a new profile was created
@@ -907,6 +919,7 @@
           const defaultUsername = displayName || (email ? email.split('@')[0] : `User_${userId.substring(0, 4)}`);
           state.user.username = defaultUsername; 
           state.user.bio = 'Profile could not be loaded.';
+          state.user.isAdmin = false; // Fallback default
         }
       } catch (error) {
         console.error("Unexpected fetch error in fetchOrCreateProfile:", error);
@@ -1053,7 +1066,11 @@
         fetchOrCreateProfile(user.uid, user.email, user.displayName);
         // *** NEW: Fetch the photo library and activity log after the user is confirmed/loaded ***
         fetchPhotoLibrary(user.uid);
-        fetchActivityLog(user.uid); 
+        fetchActivityLog(user.uid);
+        
+        // --- NEW: Check for URL parameters after auth is ready ---
+        checkUrlParametersForNavigation();
+        
       } else {
         // User is signed out. Redirect to login
         currentUserId = null;
@@ -1447,6 +1464,15 @@
       const imgUrl = state.user.profileImg || '';
       document.getElementById('profile-img').style.backgroundImage = `url('${imgUrl}')`;
       document.getElementById('edit-profile-pic').src = imgUrl; // Update modal preview
+      
+      // --- MODIFIED: Show/hide Admin button based on user status ---
+      const adminButtonContainer = document.getElementById('admin-button-container');
+      if (state.user.isAdmin == 't' || state.user.isAdmin == true) {
+          adminButtonContainer.style.display = 'block';
+      } else {
+          adminButtonContainer.style.display = 'none';
+      }
+      // --- END MODIFIED ---
     }
     // updateUserUI(); // Initial call moved to onAuthStateChanged completion
 
@@ -1983,6 +2009,86 @@
     const sidebarButtons = document.querySelectorAll('.left-buttons button');
     const photoLibrarySubnav = document.getElementById('photo-library-subnav');
     
+    // Function to activate a specific sidebar button and section
+    function activateSidebarSection(target) {
+        // 1. Determine which element/tab to select
+        const targetButton = document.querySelector(`.left-buttons button[data-target="${target}"]`);
+        
+        // Fallback to "templates" (Feed) if the target is invalid or missing
+        if (!targetButton) {
+            target = 'templates';
+            // Find the actual button again
+            const defaultButton = document.querySelector(`.left-buttons button[data-target="templates"]`);
+            if (defaultButton) {
+                targetButton = defaultButton;
+            }
+        }
+        
+        if (targetButton) {
+            // 2. Hide ALL content sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            // Hide Photo Library subnav
+            photoLibrarySubnav.style.display = 'none';
+            
+            // 3. Deactivate all sidebar buttons and activate the target button
+            sidebarButtons.forEach(b => b.classList.remove('active'));
+            targetButton.classList.add('active');
+            
+            // 4. Show the selected section and re-render if necessary
+            if (target === 'favorites') {
+                document.getElementById('section-favorites').style.display = 'block';
+                renderFavorites();
+            } else if (target === 'activity') {
+                document.getElementById('section-activity').style.display = 'block';
+                renderActivity(); 
+            } else if (target === 'templates') {
+                document.getElementById('section-templates').style.display = 'block';
+                renderSharedTemplates(); // Render the default tab (Shared to Community)
+            } else {
+                // Default to photo library
+                document.getElementById('section-photolib').style.display = 'block';
+                photoLibrarySubnav.style.display = 'flex';
+                renderPhotoLibrary();
+            }
+            
+            console.log(`Navigation target set to: ${target}`);
+        }
+    }
+
+
+    // --- NEW FUNCTION TO CHECK URL PARAMS ---
+    function checkUrlParametersForNavigation() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const target = urlParams.get('target');
+        const action = urlParams.get('action');
+
+        if (action === 'logout') {
+            // Handle explicit logout action from Admin panel link
+            signOut(auth).then(() => {
+                console.log("User logged out successfully via URL action.");
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error("Logout failed:", error);
+            });
+            return;
+        }
+
+        if (target) {
+            // Activate the section specified by the 'target' parameter
+            activateSidebarSection(target);
+        } else {
+             // If no target is specified, ensure the default section is active
+             activateSidebarSection('photolib');
+        }
+        
+        // Clear URL parameters to prevent re-triggering navigation on refresh
+        history.replaceState(null, '', window.location.pathname);
+    }
+    // --- END NEW FUNCTION ---
+
+    // Update the existing click listener for local navigation to use the new function
     sidebarButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.dataset.target === 'logout') {
@@ -1994,36 +2100,8 @@
           });
           return;
         }
-        
-        // Hide ALL sections
-        document.querySelectorAll('.section').forEach(section => {
-          section.style.display = 'none';
-        });
-        
-        // Hide photo library subnav by default
-        photoLibrarySubnav.style.display = 'none';
-        
-        // Show the selected section and conditionally show subnav
-        if (btn.dataset.target === 'favorites') {
-          document.getElementById('section-favorites').style.display = 'block';
-          renderFavorites();
-        } else if (btn.dataset.target === 'activity') {
-          document.getElementById('section-activity').style.display = 'block';
-          // Since fetchActivityLog is called on auth state change, render from local state
-          // Re-fetch is unnecessary unless we want to guarantee the latest data
-          renderActivity(); 
-        } else if (btn.dataset.target === 'templates') {
-          document.getElementById('section-templates').style.display = 'block';
-          renderSharedTemplates();
-        } else {
-          // Default to photo library
-          document.getElementById('section-photolib').style.display = 'block';
-          photoLibrarySubnav.style.display = 'flex';
-        }
-        
-        // Update active button
-        sidebarButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        // Use the new activation function for local navigation
+        activateSidebarSection(btn.dataset.target);
       });
     });
 

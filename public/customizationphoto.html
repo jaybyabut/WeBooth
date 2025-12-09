@@ -38,13 +38,71 @@
 
         // Define a global variable to store the current user's UID
         window.currentUserId = null;
+        
+        // --- NEW: APPLICATION STATE FOR ADMIN STATUS ---
+        const state = {
+          user: {
+            isAdmin: false,
+          }
+        };
+        // --- END NEW STATE ---
+
+        /**
+         * Fetches the user's profile from the DB for admin status check.
+         */
+        async function fetchAdminStatus(userId) {
+          if (!userId) return;
+
+          try {
+            const response = await fetch('http://localhost:80/api.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                action: 'fetchOrCreateProfile',
+                user_id: userId,
+              })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              const isAdminValue = result.data.admin;
+              // Check for 't' (PostgreSQL TRUE), true (JavaScript boolean), or 1
+              state.user.isAdmin = (isAdminValue === true || isAdminValue === 't' || isAdminValue === 1); 
+            } else {
+              console.error("API Error fetching profile for admin check:", result.error);
+              state.user.isAdmin = false;
+            }
+          } catch (error) {
+            console.error("Unexpected fetch error in admin check:", error);
+          }
+          updateUserUI();
+        }
+
+        // --- NEW: UI Update Function to handle Admin Button visibility ---
+        function updateUserUI() {
+            const adminButtonContainer = document.getElementById('admin-button-container');
+            if (adminButtonContainer) {
+                if (state.user.isAdmin) {
+                    adminButtonContainer.style.display = 'block';
+                } else {
+                    adminButtonContainer.style.display = 'none';
+                }
+            }
+        }
+        // --- END NEW UI UPDATE ---
+
 
         // AUTH CHECK - RUNS INSIDE MODULE SCOPE
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 window.currentUserId = user.uid;
+                fetchAdminStatus(user.uid); // Fetch status after auth
             } else {
                 window.currentUserId = null;
+                updateUserUI(); // Hide admin button if logged out
             }
         });
 
@@ -200,7 +258,7 @@
                 
                 const initialStickerSrc = storedStickerBase
                     .replace('(X in)', `(${imagePathSegment})`)
-                    .replace(/X/g, stickerTag);
+                    .replace(/X/g, stickerPathReplace);
 
                 stickerOverlay.src = initialStickerSrc;
                 stickerOverlay.style.display = 'block';
@@ -1008,7 +1066,13 @@
                 <img src="Icons/4.svg" alt="Profile icon" />
                 Profile
             </button>
-        </div>
+            <div id="admin-button-container" style="display:none;">
+                <button onclick="window.location.href='admin.html'">
+                    <img src="Icons/3.svg" alt="Admin icon" />
+                    Admin
+                </button>
+            </div>
+            </div>
       </header>
 
             </div>

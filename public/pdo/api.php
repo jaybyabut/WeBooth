@@ -223,21 +223,26 @@ switch ($action) {
         $display_name = $data['display_name'] ?? null;
         
         try {
-            // 1. Try to fetch the existing profile
-            $stmt = $pdo->prepare("SELECT username, bio, profile_img_url FROM users WHERE user_id = ?");
+            // 1. Try to fetch the existing profile, including the 'admin' column
+            // --- MODIFICATION HERE ---
+            $stmt = $pdo->prepare("SELECT username, bio, profile_img_url, admin FROM users WHERE user_id = ?");
             $stmt->execute([$user_id]);
             $profile = $stmt->fetch();
 
             if ($profile) {
                 // Profile exists
+                // --- MODIFICATION HERE ---
                 echo json_encode(['success' => true, 'data' => $profile, 'created' => false]);
             } else {
                 // Profile does not exist: create a new record
                 $defaultUsername = $display_name ?: ($email ? explode('@', $email)[0] : "User_" . substr($user_id, 0, 4));
                 $defaultBio = 'Welcome to your new profile!';
+                // Default admin status to FALSE for new users
+                $defaultAdmin = false; // <<< Assuming new users are not admins
                 
-                $stmt = $pdo->prepare("INSERT INTO users (user_id, username, bio, profile_img_url) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$user_id, $defaultUsername, $defaultBio, '']);
+                // --- MODIFICATION HERE ---
+                $stmt = $pdo->prepare("INSERT INTO users (user_id, username, bio, profile_img_url, admin) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$user_id, $defaultUsername, $defaultBio, '', $defaultAdmin]);
                 
                 // Return the newly created default profile
                 echo json_encode([
@@ -245,7 +250,8 @@ switch ($action) {
                     'data' => [
                         'username' => $defaultUsername, 
                         'bio' => $defaultBio, 
-                        'profile_img_url' => ''
+                        'profile_img_url' => '',
+                        'admin' => $defaultAdmin // <<< Including default admin status
                     ],
                     'created' => true
                 ]);

@@ -329,7 +329,6 @@
         <button role="tab" aria-selected="false" onclick="showTab(3)">Audit Trail</button>
       </div>
       <div id="tab-panels">
-        <!-- Usage Stats tab -->
         <section class="tab-panel" style="display:block;">
           <section class="stats">
             <div class="stat-card">
@@ -358,7 +357,6 @@
             </div>
           </section>
         </section>
-        <!-- Template Management tab -->
         <section class="tab-panel" style="display:none;">
           <div class="template">
             <button class="upload-btn" onclick="openModal()">
@@ -438,7 +436,6 @@
             </tbody>
           </table>
         </section>
-        <!-- User Management tab -->
         <section class="tab-panel" style="display:none;">
           <div class="user">
             <div class="user-controls">
@@ -489,7 +486,6 @@
             </tbody>
           </table>
         </section>
-        <!-- Audit Trail tab -->
         <section class="tab-panel" style="display:none;">
           <div class="user">
             <div class="user-controls">
@@ -536,24 +532,18 @@
           </table>
         </section>
       </div>
-      <!-- FEED SECTION -->
       <section id="section-feed" class="section" role="region" aria-label="Feed Section" style="display:none;">
         <h2>Feed</h2>
-        <!-- Tab navigation -->
         <nav class="tabnav" role="tablist" aria-label="Templates Tabs">
           <button role="tab" aria-selected="true" class="active" id="tab-shared-btn">Shared to Community</button>
           <button role="tab" aria-selected="false" id="tab-mytemplates-btn">My Templates</button>
         </nav>
-        <!-- Shared Templates Grid - NOW VERTICAL DESIGN -->
         <section id="tab-shared" role="tabpanel" aria-labelledby="tab-shared-btn" style="display:block;">
           <div class="vertical-templates-container" aria-live="polite" aria-label="Shared templates grid">
-            <!-- Template cards will be generated here by JS -->
-          </div>
+            </div>
         </section>
-        <!-- My Templates Grid - VERTICAL DESIGN -->
         <section id="tab-mytemplates" role="tabpanel" aria-labelledby="tab-mytemplates-btn" style="display:none;">
           <div class="vertical-templates-container" aria-live="polite" aria-label="My templates grid">
-            <!-- Upload Your Template Card -->
             <div class="template-upload-card" tabindex="0" role="button" aria-label="Upload your template" 
               id="open-upload-modal-btn"
               onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); alert('Upload template modal would open here'); }">
@@ -563,21 +553,17 @@
           </div>
         </section>
       </section>
-      <!-- UPDATED Favorites Section -->
       <section id="section-favorites" class="section" role="region" aria-label="Favorites Section" style="display:none;">
         <h2>Favorites</h2>
         <div class="favorites-vertical-container" id="favoritesContainer" aria-live="polite">
-          <!-- Favorites will be generated here by JavaScript -->
-        </div>
+          </div>
       </section>
-      <!-- Activity Section -->
       <section id="section-activity" class="section" role="region" aria-label="Activity Log Section" style="display:none;">
         <h2>Activity</h2>
         <div class="activity-container" aria-live="polite"></div>
       </section>
     </main>
   </div>
-  <!-- Upload Modal -->
   <div class="modal-overlay" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="display:none;">
     <div class="modal">
       <h2 id="modalTitle">Upload New Template</h2>
@@ -599,7 +585,6 @@
             <input type="text" id="tags" name="tags" placeholder="e.g., soft, blur, light" />
           </div>
         </div>
-        <!-- Dual upload container for all types -->
         <div id="dualUploadContainer" style="display:none;">
           <p class="upload-instruction">Dual Size Assets (Requires 2x6 and 4x6 PNGs)</p>
           <div class="dual-upload-group">
@@ -615,7 +600,6 @@
             </div>
           </div>
         </div>
-        <!-- Single upload container -->
         <div id="singleUploadContainer">
           <p class="upload-instruction" id="uploadInstruction">Upload Asset File (Filter Config or Single PNG)</p>
           <div class="single-upload-box">
@@ -623,13 +607,11 @@
             <input type="file" id="singleUpload" name="singleUpload" accept=".png,.json" required />
           </div>
         </div>
-        <!-- Initial Status -->
         <div class="status-group">
           <label>Initial Status</label>
           <label><input type="radio" name="status" value="Draft" checked /> Draft</label>
           <label><input type="radio" name="status" value="Active" /> Active</label>
         </div>
-        <!-- Buttons -->
         <div class="modal-footer">
           <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
           <button type="submit" class="btn-submit">Upload & Submit</button>
@@ -637,7 +619,6 @@
       </form>
     </div>
   </div>
-  <!-- Delete Confirmation Modal -->
   <div class="modal-overlay" id="deleteModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
     <div class="modal">
       <h2 class="modal-title" id="deleteModalTitle">
@@ -652,7 +633,6 @@
       </div>
     </div>
   </div>
-    <!-- View Template Modal -->
     <div class="view-modal-overlay" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
       <div class="view-modal" role="document">
         <div class="title" id="viewModalTitle">Template Details</div>
@@ -685,12 +665,10 @@
           </div>
           <div class="view-right">
             <div class="asset-title">Asset Files</div>
-            <!-- Single config file (for Filter) -->
             <div class="asset-config" id="viewConfigContainer">
               <label class="view-label">Configuration File:</label>
               <input type="text" id="viewConfigFile" readonly />
             </div>
-            <!-- Dual assets (for Background / Sticker Pack) -->
             <div id="viewDualAssets" style="display:none;">
               <div style="margin-block-end:0.6rem;font-weight:700;color:#d23481;">Dual Assets:</div>
               <div class="view-field">
@@ -710,7 +688,6 @@
                 </div>
               </div>
             </div>
-            <!-- fallback single preview area -->
             <div class="asset-preview" id="viewAssetPreview"></div>
           </div>
         </div>
@@ -720,8 +697,7 @@
         </div>
       </div>
     </div>
-    <!-- Edit Template Modal -->
-  <div class="modal-overlay" id="editModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-overlay" id="editModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
     <div class="modal">
       <h2 class="modal-title" id="editModalTitle">Edit Template</h2>
       <form id="editForm" onsubmit="event.preventDefault(); saveChanges();">
@@ -750,7 +726,6 @@
           <div class="edit-right">
             <div class="preview-title">Current Asset Preview</div>
             <div id="assetPreviewContainer"></div>
-            <!-- Upload inputs: shown based on template type -->
             <div id="editFilterUploadContainer" style="margin-top: 1rem; display:none;">
               <label for="replaceFilterFile" class="file-upload-label" tabindex="0">Replace Main Asset File</label>
               <input type="file" id="replaceFilterFile" name="replaceFilterFile" accept=".png,.json" />
@@ -779,19 +754,15 @@
       </form>
     </div>
   </div>
-  <!-- Manage User Modal -->
   <div class="modal-overlay" id="manageUserModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="manageUserTitle">
     <div class="modal" style="width: 700px; max-height: 100vh; overflow-y: auto;">
       <h2 id="manageUserTitle" style="font-family: 'Fredoka One', cursive; font-size: 28px; color: #ea3b91; margin: 0 0 1.5rem 0;">Manage User</h2>
-      <!-- Tab Navigation -->
       <div style="display: flex; border-bottom: 2px solid #f4c1d9; margin-bottom: 1.5rem;">
         <button id="accountDetailsTab" class="tab-button active" onclick="switchTab('accountDetails')" style="flex: 1; padding: 0.5rem; background: none; border: none; border-bottom: 3px solid #ea3b91; color: #ea3b91; font-weight: 700; cursor: pointer;">Account Details</button>
         <button id="activityContentsTab" class="tab-button" onclick="switchTab('activityContents')" style="flex: 1; padding: 0.5rem; background: none; border: none; border-bottom: 3px solid transparent; color: #d23481; font-weight: 700; cursor: pointer;">Activity & Contents</button>
       </div>
-      <!-- Tab Content -->
       <div id="accountDetailsContent" class="tab-content" style="display: block; overflow-y: auto;">
         <div style="display: flex; gap: 2rem;">
-          <!-- Left Side: Account Details -->
           <div style="flex: 1;">
             <div style="display: flex; flex-direction: column; gap: 1rem;">
               <div>
@@ -812,7 +783,6 @@
               </div>
             </div>
           </div>
-          <!-- Right Side: Account Status and Role -->
           <div style="flex: 1;">
             <div style="margin-bottom: 2rem;">
               <label style="font-weight: 600; color: #ea3b91; display: block; margin-bottom: 0.5rem;">Account Status</label>
@@ -834,7 +804,6 @@
       </div>
       <div id="activityContentsContent" class="tab-content" style="display: none; overflow-y: auto; overflow-x: hidden;">
         <div style="display: flex; flex-direction: column; gap: 2rem;">
-          <!-- Top: Recent Activity Log (full width) -->
           <div>
             <h3 style="font-family: 'Fredoka One', cursive; font-size: 20px; color: #d23481; margin-bottom: 1rem;">Recent Activity Log</h3>
             <div style="padding: 1rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff6f9; min-height: 200px;">
@@ -846,7 +815,6 @@
               </ul>
             </div>
           </div>
-          <!-- Bottom: Capture Photos (full width) -->
           <div>
             <h3 style="font-family: 'Fredoka One', cursive; font-size: 20px; color: #d23481; margin-bottom: 1rem;">Capture Photos</h3>
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
@@ -858,14 +826,12 @@
           </div>
         </div>
       </div>
-      <!-- Bottom Right: Close Button -->
       <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
         <button onclick="saveChangesUser()" class="saveChangeBtn">Save Changes</button>
         <button onclick="closeManageUserModal()" class="closeManageBtn">Close</button>
       </div>
     </div>
   </div>
-  <!-- Delete User Confirmation Modal -->
   <div class="modal-overlay" id="deleteUserModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="deleteUserModalTitle">
     <div class="modal">
       <h2 class="modal-title" id="deleteUserModalTitle">
@@ -1615,56 +1581,20 @@
 
     sidebarButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        if (btn.dataset.target === 'logout') {
+        const target = btn.dataset.target;
+
+        if (target === 'logout') {
           alert('Logging out...');
+          // Redirect to finalprof.html with logout action (assuming finalprof handles the actual sign-out)
+          window.location.href = 'finalprof.html?action=logout';
           return;
         }
+
         
-        // Hide ALL sections first
-        document.querySelectorAll('.section').forEach(section => {
-          section.style.display = 'none';
-        });
+       
+        window.location.href = `finalprof.html?target=${target}`;
         
-        // Hide all tab panels
-        document.querySelectorAll('.tab-panel').forEach(panel => {
-          panel.style.display = 'none';
-        });
-        
-        // Hide the subnav 
-        subnav.style.display = 'none';
-        
-        // Reset subnav buttons
-        document.querySelectorAll('.subnav button').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        
-        // Show the selected section
-        if (btn.dataset.target === 'favorites') {
-          document.getElementById('section-favorites').style.display = 'block';
-          document.getElementById('section-activity').style.display = 'none';
-          document.getElementById('section-feed').style.display = 'none';
-          renderFavorites();
-        } else if (btn.dataset.target === 'activity') {
-          document.getElementById('section-activity').style.display = 'block';
-          document.getElementById('section-favorites').style.display = 'none';
-          document.getElementById('section-feed').style.display = 'none';
-          renderActivity();
-        } else if (btn.dataset.target === 'feed') {
-          document.getElementById('section-feed').style.display = 'block';
-          document.getElementById('section-favorites').style.display = 'none';
-          document.getElementById('section-activity').style.display = 'none';
-          // Feed section is already rendered on page load
-        } else {
-          // Default to template management (first tab)
-          document.getElementById('section-feed').style.display = 'none';
-          document.getElementById('section-favorites').style.display = 'none';
-          document.getElementById('section-activity').style.display = 'none';
-          showTab(1); // Template Management tab
-        }
-        
-        // Update active button in sidebar only
-        sidebarButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+
       });
     });
 

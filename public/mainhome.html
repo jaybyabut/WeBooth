@@ -333,7 +333,13 @@ body {
             <img src="Icons/4.svg" alt="Profile icon" />
             Profile
           </button>
-        </div>
+          <div id="admin-button-container" style="display:none;">
+            <button onclick="window.location.href='admin.html'">
+              <img src="Icons/3.svg" alt="Admin icon" />
+              Admin
+            </button>
+          </div>
+          </div>
       </header>
 
         </header>
@@ -467,7 +473,94 @@ body {
     </div>
 
 
-<script>
+<script type="module">
+    // --- FIREBASE IMPORTS ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    // --- FIREBASE SETUP ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
+      authDomain: "photobooth-c42a9.firebaseapp.com",
+      projectId: "photobooth-c42a9",
+      storageBucket: "photobooth-c42a9.firebasestorage.app",
+      messagingSenderId: "994496567051",
+      appId: "1:994496567051:web:81d507ace1fbd2db77b40e",
+      measurementId: "G-4FHWWBR2BJ"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    let currentUserId = null;
+
+    // --- APPLICATION STATE ---
+    const state = {
+      user: {
+        isAdmin: false,
+      }
+    };
+    
+    /**
+     * Fetches the user's profile from the DB or creates a default one via PHP API.
+     * @param {string} userId - The Firebase Auth UID.
+     * @param {string} email - The user's email.
+     * @param {string | null} displayName - The user's display name from Firebase.
+     */
+    async function fetchOrCreateProfile(userId, email, displayName) {
+      if (!userId) return;
+
+      try {
+        const response = await fetch('http://localhost:80/api.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'fetchOrCreateProfile',
+            user_id: userId,
+            email: email,
+            display_name: displayName
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Check for 't' (PostgreSQL TRUE), true (JavaScript boolean), or 1
+          const isAdminValue = result.data.admin;
+          state.user.isAdmin = (isAdminValue === true || isAdminValue === 't' || isAdminValue === 1); 
+        } else {
+          console.error("API Error fetching/creating profile:", result.error);
+          state.user.isAdmin = false;
+        }
+      } catch (error) {
+        console.error("Unexpected fetch error in fetchOrCreateProfile:", error);
+      }
+      updateUserUI();
+    }
+
+    // --- UI Update Function ---
+    function updateUserUI() {
+        const adminButtonContainer = document.getElementById('admin-button-container');
+        if (state.user.isAdmin) {
+            adminButtonContainer.style.display = 'block';
+        } else {
+            adminButtonContainer.style.display = 'none';
+        }
+    }
+    
+    // --- Auth Listener ---
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUserId = user.uid;
+        fetchOrCreateProfile(user.uid, user.email, user.displayName);
+      } else {
+        currentUserId = null;
+        // Optionally redirect if not logged in: window.location.href = 'login.html';
+      }
+    });
+
+
 document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------
     // INITIAL SETUP & RETAKE CHECK

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirm New Password</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Roboto&display=swap" rel="stylesheet" />
+  
+  <script type="module">
+    // --- FIREBASE IMPORTS ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { 
+        getAuth, 
+        confirmPasswordReset 
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+    // --- CONFIGURATION ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
+      authDomain: "photobooth-c42a9.firebaseapp.com",
+      projectId: "photobooth-c42a9",
+      storageBucket: "photobooth-c42a9.firebasestorage.app",
+      messagingSenderId: "994496567051",
+      appId: "1:994496567051:web:81d507ace1fbd2db77b40e",
+      measurementId: "G-4FHWWBR2BJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+
+    // --- PASSWORD CONFIRMATION HANDLER ---
+    const resetForm = document.getElementById('confirmResetForm');
+    const passwordInput = document.getElementById('password');
+    const messageElement = document.getElementById('status-message'); 
+
+    // Get the verification code from the URL (oobCode)
+    const urlParams = new URLSearchParams(window.location.search);
+    const oobCode = urlParams.get('oobCode');
+
+    // Helper function to display status/error messages
+    function displayMessage(message, isError = false) {
+        messageElement.textContent = message;
+        messageElement.style.background = isError ? '#ffe3e3' : '#e3ffe3';
+        messageElement.style.color = isError ? '#721c24' : '#155724';
+        messageElement.style.opacity = '1';
+    }
+
+    if (!oobCode) {
+        displayMessage('Error: Missing password reset code. Please use the link provided in your email.', true);
+        resetForm.querySelector('button').disabled = true;
+    }
+
+    resetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!oobCode) return; // Prevent submission if code is missing
+
+      const newPassword = passwordInput.value;
+
+      // Clear previous messages
+      messageElement.style.opacity = '0'; 
+
+      try {
+        // 1. Firebase Confirm Password Reset
+        await confirmPasswordReset(auth, oobCode, newPassword);
+        
+        console.log('Password successfully reset.');
+        
+        // Success message
+        displayMessage('Success! Your password has been updated. You can now log in.', false);
+        
+        // Optionally redirect after a delay
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 3000);
+
+      } catch (error) {
+        console.error('Error resetting password:', error);
+        
+        let userMessage = 'Failed to reset password. The link may have expired or been used. Please try sending a new reset request.';
+        
+        if (error.code === 'auth/weak-password') {
+            userMessage = 'Password is too weak. Please choose a stronger password.';
+        } else if (error.code === 'auth/invalid-action-code') {
+            userMessage = 'The link is invalid or has expired. Please request a new password reset.';
+        }
+
+        displayMessage(userMessage, true); 
+      }
+    });
+  </script>
+
+  <style>
+    /* --------------------------------------
+       GENERAL LAYOUT AND BACKGROUND STYLES 
+       (Copied from login.html/forgot_password.html)
+       -------------------------------------- */
+    * {
+    box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family:Arial, sans-serif;
+      background: linear-gradient(to bottom, #ffdeea 0%, #d4e893 100%);
+      display: flex;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 900px;
+      background: transparent;
+      flex-wrap: wrap;
+      gap: 30px;
+      display: flex;
+      align-items: center;
+    }
+    .reset-form { 
+        flex: 1;
+        background-color: #f297c2;
+        border-radius: 25px;
+        padding: 65px 0.5px;
+        color: #b0417a;
+        box-shadow: 0 8px 16px rgb(207 77 120 / 30%);
+        max-width: 450px; 
+        margin: auto;
+    }
+    .reset-form h2 {
+        font-family: 'Fredoka One', cursive;
+        color:  #cc3a77;
+        font-weight: 600;
+        margin-bottom: 5px;
+        margin-left: 40px;
+    }
+    .reset-form p.instructions {
+        font-size: 0.9rem;
+        color: white;
+        margin-bottom: 25px;
+        margin-left: 40px;
+        width: 80%;
+    }
+
+    /* --------------------------------------
+       INPUT AND FORM STYLES 
+       -------------------------------------- */
+    .input-text {
+      position: relative;
+      width: 80%;
+      margin-bottom: 15px;
+      margin-left: 40px;
+    }
+    .input-text input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1.5px solid #f7f7f7;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #FFFFFF; 
+      background: transparent;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    .input-text input:focus {
+      border-color: #f7f5f6;
+      box-shadow: 0 0 5px rgba(216, 135, 175, 0.5);
+    }
+    .input-text label {
+      position: absolute;
+      top: 30%;
+      left: 15px;
+      font-size: 0.9rem;
+      color: #fff;
+      pointer-events: none;
+      background: #f297c2; 
+      padding: 0 5px;
+      transition: all 0.3s ease;
+    }
+    .input-text input:focus + label,
+    .input-text input:valid + label {
+      top: -6px;
+      left: 8px;
+      font-size: 12px;
+      color: #FFFFFF; 
+    }
+
+    .reset-form button {
+      width: 80%;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 25px;
+      border: none;
+      background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+      color: white;
+      cursor: pointer;
+      margin-bottom: 15px;
+      margin-left: 40px;
+      transition: background 0.3s ease;
+    }
+
+    .reset-form button:hover {
+      background: linear-gradient(90deg, #f4b744 0%, #f645b1 100%);
+    }
+    
+    .form-links {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .form-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .form-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* --------------------------------------
+       MESSAGE AND RIGHT COLUMN STYLES 
+       -------------------------------------- */
+    #status-message {
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        text-align: center;
+        margin-bottom: 20px;
+        margin-left: 40px;
+        width: 80%;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+
+    .right {
+      flex: 1;
+      color: #cc3a77;
+    }
+
+    .right h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 70px;
+      margin-bottom: 10px;
+      margin-right: 100px;
+      line-height: 1.2;
+      text-align: right;
+    }
+
+    .right p {
+      font-size: 1.1rem;
+      color: #cc3a77;
+      margin-bottom: 60px;
+      margin-right:100px;
+      text-align: right;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: 'Fredoka One', cursive;
+      font-weight: 700;
+      font-size: 22px;
+      color: #bb2d7b;
+      position: absolute; 
+      bottom: 20px;
+      right: 20px;
+    }
+
+    .logo img {
+      width: 38px;
+      height: 38px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="reset-form">
+      <h2>Set New Password</h2>
+      <p class="instructions">Please enter your new password to complete the reset process.</p>
+
+      <form id="confirmResetForm">
+        <div class="input-text">
+          <input type="password" id="password" required /> 
+          <label>New Password</label>
+        </div>
+        
+        <div id="status-message"></div> 
+        
+        <button type="submit">Update Password</button>
+      </form>
+
+      <div class="form-links">
+        <a href="login.html">Return to Login</a>
+      </div>
+    </div>
+    <div class="right">
+      <h1>New password <br/> for your <br> security</h1>
+      <p>Confirm your new credentials.</p>
+      <div class="logo">
+        <img src="Icons/11.svg" alt="WeBooth Logo"/>
+        WeBooth
+      </div>
+    </div>
+  </div>
+</body>
+</html>

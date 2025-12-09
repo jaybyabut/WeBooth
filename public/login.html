@@ -15,9 +15,8 @@
         getAuth, 
         signInWithEmailAndPassword, 
         signInWithPopup, 
-        GoogleAuthProvider, 
-        FacebookAuthProvider 
-    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        GoogleAuthProvider 
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"; // Removed FacebookAuthProvider
 
     // --- CONFIGURATION ---
     const firebaseConfig = {
@@ -87,7 +86,7 @@
 
     /**
      * Handles the Firebase sign-in process for social providers (Google/Facebook).
-     * @param {GoogleAuthProvider | FacebookAuthProvider} provider - The Firebase provider object.
+     * @param {GoogleAuthProvider} provider - The Firebase provider object.
      */
     async function socialSignIn(provider) {
       // Clear any previous error
@@ -123,13 +122,8 @@
       const provider = new GoogleAuthProvider();
       await socialSignIn(provider);
     });
-
-    // Event Listener for Facebook Button
-    document.querySelector('.social-icons .facebook').addEventListener('click', async (e) => {
-      e.preventDefault();
-      const provider = new FacebookAuthProvider();
-      await socialSignIn(provider);
-    });
+    
+    // --- REMOVED FACEBOOK EVENT LISTENER ---
   </script>
 
   <style>
@@ -197,7 +191,7 @@
       border-radius: 10px;
       font-size: 0.9rem;
       /* FIX: Changed color from white to black for readability against the input background */
-      color: #00020a; 
+      color: #FFFFFF; 
       background: transparent;
       outline: none;
       transition: all 0.3s ease;
@@ -223,7 +217,7 @@
       left: 8px;
       font-size: 12px;
       /* FIX: Ensure label text is readable when moved outside the input */
-      color: #00020a; 
+      color: #FFFFFF; 
     }
 
     .login-form button {
@@ -272,7 +266,8 @@
     .social-icons {
       display: flex;
       justify-content: center;
-      gap: 40px;
+      /* Reduced gap slightly since only one icon remains */
+      gap: 10px; 
     }
 
     .social-icons img {
@@ -342,17 +337,14 @@
       </form>
       <div class="login-links">
         <a href="signin.html">Create an account</a>
-        <a href="#">Forgot Password?</a>
+        <a href="forgot_password.html">Forgot Password?</a>
       </div>
       <p class="or">- OR -</p>
       <div class="social-icons">
         <a href="#" class="google" aria-label="Google sign-in">
           <img src="https://imagepng.org/wp-content/uploads/2019/08/google-icon-1.png" alt="Google"/>
         </a>
-        <a href="#" class="facebook" aria-label="Facebook sign-in">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_(2019).png" alt="Facebook"/>
-        </a>
-      </div>
+        </div>
     </div>
     <div class="right">
       <h1>Log in to<br/>enter the <br>booth</h1>

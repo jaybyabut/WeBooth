@@ -443,6 +443,7 @@
     .layout-option label {font-size: 14px;color: #666;font-weight: 500;}
     .layout-option select {border: 1px solid #ddd;border-radius: 6px;padding: 8px 12px;font-size: 14px;color: #333;background: white;font-family: 'Poppins', sans-serif;min-width: 140px;}
     .layout-option select:focus {outline: none;border-color: #d23481;}
+    .layout-option select:focus {outline: none;border-color: #d23481;}
     .upload-section {display: flex;flex-direction: column;gap: 8px;margin-bottom: 0;}
     .upload-box {border: 2px dashed #ddd;border-radius: 8px;padding: 20px 16px;text-align: center;cursor: pointer;transition: border-color 0.3s;background: #fafafa;min-height: 60px;display: flex;flex-direction: column;justify-content: center;align-items: center;}
     .upload-box:hover {border-color: #d23481;background: #fff5f9;}
@@ -2010,18 +2011,16 @@
     const photoLibrarySubnav = document.getElementById('photo-library-subnav');
     
     // Function to activate a specific sidebar button and section
-    function activateSidebarSection(target) {
+    function activateSidebarSection(initialTarget) {
+        let target = initialTarget; // FIX: Assign parameter to a mutable local variable
         // 1. Determine which element/tab to select
-        const targetButton = document.querySelector(`.left-buttons button[data-target="${target}"]`);
+        let targetButton = document.querySelector(`.left-buttons button[data-target="${target}"]`); // FIX: Changed const to let
         
         // Fallback to "templates" (Feed) if the target is invalid or missing
         if (!targetButton) {
-            target = 'templates';
+            target = 'templates'; // FIX: Modifying local variable
             // Find the actual button again
-            const defaultButton = document.querySelector(`.left-buttons button[data-target="templates"]`);
-            if (defaultButton) {
-                targetButton = defaultButton;
-            }
+            targetButton = document.querySelector(`.left-buttons button[data-target="templates"]`); // FIX: Modifying local variable
         }
         
         if (targetButton) {
@@ -2160,13 +2159,13 @@
       }
     }
 
+    editBioInput.addEventListener('input', updateBioCharCount);
+
     // Close modal function for edit profile
     function closeEditProfileModal() {
       editProfileModal.classList.remove('active');
       releaseFocusTrap();
     }
-
-    editBioInput.addEventListener('input', updateBioCharCount);
 
     // Open modal on Edit Profile button click
     editProfileBtn.addEventListener('click', openEditProfileModal);

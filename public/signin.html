@@ -16,9 +16,8 @@
       import { 
             getAuth, 
             createUserWithEmailAndPassword,
-            signInWithPopup, // New for social sign-in
-            GoogleAuthProvider, // New for Google
-            FacebookAuthProvider // New for Facebook
+            signInWithPopup, 
+            GoogleAuthProvider // Removed FacebookAuthProvider
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
@@ -91,13 +90,13 @@
       });
 
       // ------------------------------------------------------------------
-      // --- 2. SOCIAL LOGIN LOGIC (NEW CODE ADDED HERE) 🚀 ---
+      // --- 2. SOCIAL LOGIN LOGIC (MODIFIED: FACEBOOK REMOVED) ---
       // ------------------------------------------------------------------
 
       /**
-       * Handles the Firebase sign-in process for social providers (Google/Facebook)
+       * Handles the Firebase sign-in process for social providers (Google)
        * and syncs the new user to Supabase.
-       * @param {GoogleAuthProvider | FacebookAuthProvider} provider - The Firebase provider object.
+       * @param {GoogleAuthProvider} provider - The Firebase provider object.
        */
       async function socialSignIn(provider) {
         try {
@@ -138,12 +137,7 @@
         await socialSignIn(provider);
       });
 
-      // Event Listener for Facebook Button
-      document.querySelector('.social-icons .facebook').addEventListener('click', async (e) => {
-        e.preventDefault();
-        const provider = new FacebookAuthProvider();
-        await socialSignIn(provider);
-      });
+      // --- REMOVED Event Listener for Facebook Button ---
     </script>
     
     <style>
@@ -287,7 +281,8 @@
         .social-icons {
             display: flex;
             justify-content: center;
-            gap: 40px;
+            /* Adjusted gap since only one icon remains */
+            gap: 10px; 
         }
 
         .social-icons img {
@@ -365,10 +360,7 @@
                     <a href="#" class="google" aria-label="Google sign-in">
                         <img src="https://imagepng.org/wp-content/uploads/2019/08/google-icon-1.png" alt="Google"/>
                     </a>
-                    <a href="#" class="facebook" aria-label="Facebook sign-in">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_(2019).png" alt="Facebook"/>
-                    </a>
-                </div>
+                    </div>
             </form>
         </div>
         <div class="right">

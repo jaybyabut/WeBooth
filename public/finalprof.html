@@ -1,40 +1,3 @@
-// --- AUTO-CLEANUP: REMOVE EXPIRED BLOB URLS FROM OLD TEMPLATES ---
-function cleanOldBlobUrlsInTemplates(templates) {
-  if (!Array.isArray(templates)) return templates;
-  return templates.map(t => {
-    // Clean background
-    if (t.template_img && typeof t.template_img === 'string' && t.template_img.startsWith('blob:')) {
-      t.template_img = '';
-    }
-    // Clean stickers
-    if (Array.isArray(t.stickerPositions)) {
-      t.stickerPositions = t.stickerPositions.map(s => {
-        if (s.src && typeof s.src === 'string' && s.src.startsWith('blob:')) {
-          return { ...s, src: '' };
-        }
-        return s;
-      });
-    }
-    // Clean photos array if present
-    if (Array.isArray(t.photos)) {
-      t.photos = t.photos.map(p => (typeof p === 'string' && p.startsWith('blob:') ? '' : p));
-    }
-    return t;
-  });
-}
-
-// Patch all template lists on load (myTemplates, sharedTemplates, favoriteTemplates)
-if (window.state) {
-  if (Array.isArray(window.state.myTemplates)) {
-    window.state.myTemplates = cleanOldBlobUrlsInTemplates(window.state.myTemplates);
-  }
-  if (Array.isArray(window.state.sharedTemplates)) {
-    window.state.sharedTemplates = cleanOldBlobUrlsInTemplates(window.state.sharedTemplates);
-  }
-  if (Array.isArray(window.state.favoriteTemplates)) {
-    window.state.favoriteTemplates = cleanOldBlobUrlsInTemplates(window.state.favoriteTemplates);
-  }
-}
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -263,12 +226,18 @@ if (window.state) {
     
     /* --- FAVORITES GRID STYLES FOR IMAGE LAYOUT --- */
     .favorites-grid {
-      display: grid;
-      gap: 10px; /* Gap between cards */
-      /* Use fixed-width columns that wrap to fit the image */
-      grid-template-columns: repeat(auto-fill, 120px); 
-      justify-content: flex-start; /* Start cards from the left */
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: flex-start;
       padding-top: 15px;
+    }
+    
+    /* Center the no-favorites message when grid is empty */
+    .favorites-grid:has(.no-favorites-msg) {
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     
     .favorite-photo-card {
@@ -389,6 +358,11 @@ if (window.state) {
         border-bottom-right-radius: 14px;
         max-height: 90vh; 
     }
+
+    .modal-details {padding: 14px 0; color: #4a1942; line-height: 1.5;}
+    .modal-photo-title {margin: 0 0 8px; font-size: 18px; color: #d72b7e; font-weight: 700;}
+    .modal-photo-description {margin: 0 0 10px; font-size: 14px; color: #3b2d39; white-space: pre-line;}
+    .modal-photo-date {font-size: 12px; color: #a66c92;}
     /* --- END MODAL STYLES --- */
     
     .modal-header {display: flex;align-items: center;justify-content: space-between;border-bottom: 1px solid #f3c7d9;padding-bottom: 10px;user-select: none;}
@@ -485,7 +459,7 @@ if (window.state) {
     .sticker {position: absolute;width: 40px;height: 40px;background-size: contain;background-repeat: no-repeat;background-position: center;cursor: grab;transition: transform 0.2s ease, box-shadow 0.2s ease;z-index: 3;}
     .sticker.dragging {cursor: grabbing;box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);transform: scale(1.1);z-index: 10;}
     .sticker:hover {transform: scale(1.05);}
-    .template-tags {margin-top: 8px;font-size: 0.75rem;padding: 20px;color: #f4cade;text-align: center;max-height: 40px;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;line-clamp: 2;-webkit-box-orient: vertical;z-index: 3;position: relative;}
+    .template-tags {margin-top: 8px;font-size: 0.75rem;padding: 20px;color: #c32d6c;text-align: center;max-height: 40px;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;line-clamp: 2;-webkit-box-orient: vertical;z-index: 3;position: relative;}
     .vertical-template-icons {position: absolute; top: 16px;right: 16px; display: flex;flex-direction: column;gap: 14px;user-select: none;opacity: 0;transition: opacity 0.3s ease;z-index: 5;}
     .vertical-template-card:hover .vertical-template-icons {opacity: 1;}
 
@@ -1076,13 +1050,11 @@ if (window.state) {
           <div class="username" id="modal-username"></div>
           <button class="modal-close-btn" id="post-modal-close-btn" aria-label="Close modal">&times;</button>
         </div>
-        <div id="comments-container" class="comments"></div>
-        <div id="no-comments-text" class="no-comments" style="display:none;">No comments yet.</div>
-        <form id="comment-form" class="comment-form">
-          <textarea id="comment-input" placeholder="Add a comment..." rows="2" aria-label="Add a comment"></textarea>
-          <button id="comment-post-btn" type="submit" disabled>Post</button>
-        </form>
-        <div id="reaction-footer" class="reaction-footer"></div>
+        <div class="modal-details">
+          <h3 id="modal-photo-title" class="modal-photo-title"></h3>
+          <p id="modal-photo-description" class="modal-photo-description"></p>
+          <div id="modal-photo-date" class="modal-photo-date"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1536,9 +1508,7 @@ if (window.state) {
         state.myTemplates = [];
       }
 
-      displaySavedTemplates(state.myTemplates);
-      await fetchFavoriteTemplates();
-      await fetchSharedTemplates();
+      // Favorites/shared fetched and rendering are coordinated at page load
     }
 
     /**
@@ -1581,8 +1551,6 @@ if (window.state) {
         console.error('Unexpected fetch error in fetchSharedTemplates:', error);
         sharedTemplates = [];
       }
-
-      renderSharedTemplates();
     }
 
     // (Existing displaySavedTemplates logic remains the same)
@@ -1696,17 +1664,29 @@ if (window.state) {
     }
 
     // Handle authentication state and profile loading
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       isAuthReady = true;
       if (user) {
         currentUserId = user.uid;
         fetchOrCreateProfile(user.uid, user.email, user.displayName);
         fetchPhotoLibrary(user.uid);
         fetchActivityLog(user.uid);
-        // Load saved templates from the PHP API
-        fetchSavedTemplates(user.uid);
-        
+
+        // Set initial section before data loads to avoid later overrides
         checkUrlParametersForNavigation();
+
+        // Load all template lists in parallel on page load
+        await Promise.all([
+          fetchSavedTemplates(user.uid),
+          fetchFavoriteTemplates(),
+          fetchSharedTemplates()
+        ]);
+
+        // Render after all lists are loaded
+        displaySavedTemplates(state.myTemplates);
+        renderMyTemplates();
+        renderSharedTemplates();
+        renderFavorites();
         
       } else {
         currentUserId = null;
@@ -2115,61 +2095,62 @@ if (window.state) {
      */
     async function handlePublishTemplate() {
       if (!uploadedBackground) {
-        alert("Please upload a background image before publishing.");
         return;
       }
       if (!currentUserId) {
-        alert("User not authenticated. Please log in.");
         return;
       }
-      
-      // 1. Collect sticker positions
-      const previewCard = templatePreview.querySelector('.photobooth-template-container');
-      const stickers = previewCard ? previewCard.querySelectorAll('.sticker') : [];
-      const stickerPositions = Array.from(stickers).map(sticker => ({
-        src: sticker.style.backgroundImage.replace('url("', '').replace('")', ''),
-        top: sticker.style.top,
-        left: sticker.style.left,
-        rotate: sticker.style.transform
-      }));
-      
-      const templateData = {
-        name: tagsInput.value.trim() || `Uploaded Template ${state.myTemplates.length + 1}`,
-        frameSize: frameSizeSelect.value,
-        shots: shotsSelect.value,
-        effect: currentEffect,
-        shareToCommunity: shareToggle.checked,
-        tags: tagsInput.value.trim(),
-        template_img: uploadedBackground,
-      };
-
-      const editingTemplateId = uploadModal.dataset.editingTemplateId;
-      const templateId = editingTemplateId || generateUUID();
-      const action = editingTemplateId ? 'updated' : 'uploaded';
-
-      const payload = {
-        action: 'saveTemplateState',
-        user_id: currentUserId,
-        template_id: templateId,
-        template_state: {
-          sticker: stickerPositions.length ? JSON.stringify(stickerPositions) : null,
-          text: templateData.tags,
-          font: null,
-          text_color: null,
-          background: templateData.template_img,
-          show_logo: String(false),
-          show_date: String(false),
-          show_time: String(false),
-          frame_size: templateData.frameSize,
-          shot_count: templateData.shots,
-          share: String(templateData.shareToCommunity),
-          effects: templateData.effect,
-          template_img: templateData.template_img,
-          name: templateData.name,
-        }
-      };
+      const buttonLabel = uploadModal.dataset.editingTemplateId ? 'Update' : 'Publish';
+      publishBtn.disabled = true;
+      publishBtn.textContent = 'Publishing...';
 
       try {
+        // 1. Collect sticker positions
+        const previewCard = templatePreview.querySelector('.photobooth-template-container');
+        const stickers = previewCard ? previewCard.querySelectorAll('.sticker') : [];
+        const stickerPositions = Array.from(stickers).map(sticker => ({
+          src: sticker.style.backgroundImage.replace('url("', '').replace('")', ''),
+          top: sticker.style.top,
+          left: sticker.style.left,
+          rotate: sticker.style.transform
+        }));
+        
+        const templateData = {
+          name: tagsInput.value.trim() || `Uploaded Template ${state.myTemplates.length + 1}`,
+          frameSize: frameSizeSelect.value,
+          shots: shotsSelect.value,
+          effect: currentEffect,
+          shareToCommunity: shareToggle.checked,
+          tags: tagsInput.value.trim(),
+          template_img: uploadedBackground,
+        };
+
+        const editingTemplateId = uploadModal.dataset.editingTemplateId;
+        const templateId = editingTemplateId || generateUUID();
+        const action = editingTemplateId ? 'updated' : 'uploaded';
+
+        const payload = {
+          action: 'saveTemplateState',
+          user_id: currentUserId,
+          template_id: templateId,
+          template_state: {
+            sticker: stickerPositions.length ? JSON.stringify(stickerPositions) : null,
+            text: templateData.tags,
+            font: null,
+            text_color: null,
+            background: templateData.template_img,
+            show_logo: String(false),
+            show_date: String(false),
+            show_time: String(false),
+            frame_size: templateData.frameSize,
+            shot_count: templateData.shots,
+            share: String(templateData.shareToCommunity),
+            effects: templateData.effect,
+            template_img: templateData.template_img,
+            name: templateData.name,
+          }
+        };
+
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2179,45 +2160,43 @@ if (window.state) {
         const result = await response.json();
         if (!result.success) {
           console.error('API error saving template:', result.error);
-          alert(`Failed to ${action} template: ${result.error || 'Unknown error'}`);
           return;
         }
+
+        const newTemplateState = {
+          id: templateId,
+          photos: [templateData.template_img],
+          favorite: false,
+          name: templateData.name,
+          frameSize: templateData.frameSize,
+          shots: templateData.shots,
+          effect: templateData.effect,
+          shareToCommunity: templateData.shareToCommunity,
+          tags: templateData.tags,
+          stickerPositions: stickerPositions,
+          template_img: templateData.template_img,
+        };
+
+        if (editingTemplateId) {
+          const index = state.myTemplates.findIndex(t => t.id === newTemplateState.id);
+          if (index !== -1) {
+            state.myTemplates[index] = newTemplateState;
+          }
+          delete uploadModal.dataset.editingTemplateId;
+        } else {
+          state.myTemplates.push(newTemplateState);
+        }
+        addActivity(`Template "${newTemplateState.name}" ${action}`);
+        
+        closeUploadModal();
+        renderMyTemplates();
+        renderSharedTemplates();
       } catch (error) {
         console.error('Unexpected error saving template:', error);
-        alert('Failed to save template. Please try again.');
-        return;
+      } finally {
+        publishBtn.disabled = false;
+        publishBtn.textContent = uploadModal.dataset.editingTemplateId ? 'Update' : 'Publish';
       }
-
-      const newTemplateState = {
-        id: templateId,
-        photos: [templateData.template_img],
-        favorite: false,
-        name: templateData.name,
-        frameSize: templateData.frameSize,
-        shots: templateData.shots,
-        effect: templateData.effect,
-        shareToCommunity: templateData.shareToCommunity,
-        tags: templateData.tags,
-        stickerPositions: stickerPositions,
-        template_img: templateData.template_img,
-      };
-
-      if (editingTemplateId) {
-        const index = state.myTemplates.findIndex(t => t.id === newTemplateState.id);
-        if (index !== -1) {
-          state.myTemplates[index] = newTemplateState;
-        }
-        delete uploadModal.dataset.editingTemplateId;
-      } else {
-        state.myTemplates.push(newTemplateState);
-      }
-
-      alert(`Successfully ${action} template: ${newTemplateState.name}`);
-      addActivity(`Template "${newTemplateState.name}" ${action}`);
-      
-      closeUploadModal();
-      renderMyTemplates();
-      renderSharedTemplates();
     }
 
     // Update the publish button event listener
@@ -2620,7 +2599,6 @@ if (window.state) {
       tabSharedBtn.setAttribute('aria-selected', 'true');
       tabMyTemplatesBtn.classList.remove('active');
       tabMyTemplatesBtn.setAttribute('aria-selected', 'false');
-      renderSharedTemplates();
     });
 
     tabMyTemplatesBtn.addEventListener('click', () => {
@@ -2630,7 +2608,6 @@ if (window.state) {
       tabMyTemplatesBtn.setAttribute('aria-selected', 'true');
       tabSharedBtn.classList.remove('active');
       tabSharedBtn.setAttribute('aria-selected', 'false');
-      renderMyTemplates();
     });
 
     const sidebarButtons = document.querySelectorAll('.left-buttons button');
@@ -2658,7 +2635,6 @@ if (window.state) {
         renderActivity();
     } else if (target === 'templates') {
         document.getElementById('section-templates').style.display = 'block';
-        renderSharedTemplates();
     } else {
         document.getElementById('section-photolib').style.display = 'block';
         photoLibrarySubnav.style.display = 'flex';
@@ -2712,12 +2688,9 @@ if (window.state) {
     const postModal = document.getElementById('post-modal');
     const modalLeft = postModal.querySelector('.modal-left');
     const modalUsername = document.getElementById('modal-username');
-    const commentsContainer = document.getElementById('comments-container');
-    const noCommentsText = document.getElementById('no-comments-text');
-    const commentForm = document.getElementById('comment-form');
-    const commentInput = document.getElementById('comment-input');
-    const commentPostBtn = document.getElementById('comment-post-btn');
-    const reactionFooter = document.getElementById('reaction-footer');
+    const modalPhotoTitle = document.getElementById('modal-photo-title');
+    const modalPhotoDescription = document.getElementById('modal-photo-description');
+    const modalPhotoDate = document.getElementById('modal-photo-date');
     const modalCloseBtn = document.getElementById('post-modal-close-btn');
 
     let currentPhotoId = null;
@@ -2876,19 +2849,14 @@ if (window.state) {
       
       const img = document.createElement('img');
       img.src = photo.src;
-      img.alt = `Photo ${photo.id}`;
+      img.alt = photo.title ? photo.title : `Photo ${photo.id}`;
       modalLeft.appendChild(img);
 
-      renderComments(photo);
-      renderReactions(photo);
-
-      noCommentsText.style.display = photo.comments.length === 0 ? 'block' : 'none';
+      modalPhotoTitle.textContent = photo.title || 'Untitled';
+      modalPhotoDescription.textContent = photo.description || 'No description provided.';
+      modalPhotoDate.textContent = photo.date ? `Posted on ${photo.date}` : '';
 
       postModal.classList.add('active');
-      commentInput.value = '';
-      commentPostBtn.disabled = true;
-      commentInput.focus();
-
       trapFocus(postModal);
     }
 

@@ -793,6 +793,7 @@
             const photoTitleInput = document.getElementById('photo-title-input');
             const photoDescriptionTextarea = document.getElementById('photo-description-textarea');
             const shareToggle = document.getElementById('share-to-community-toggle');
+            const postErrorMsg = document.getElementById('post-error');
 
             const showModal = () => {
                 if (modalOverlay) {
@@ -800,6 +801,7 @@
                     photoTitleInput.value = '';
                     photoDescriptionTextarea.value = '';
                     shareToggle.checked = true;
+                    if (postErrorMsg) postErrorMsg.textContent = '';
                 }
             };
 
@@ -834,12 +836,22 @@
                         return;
                     }
                     
+                    const title = (photoTitleInput.value || '').trim();
+                    const description = (photoDescriptionTextarea.value || '').trim();
+                    const share = shareToggle.checked;
+
+                    // Basic validation: title and description must not be empty
+                    if (!title || !description) {
+                        if (postErrorMsg) {
+                            postErrorMsg.textContent = 'Please enter both a title and a description.';
+                        }
+                        return;
+                    }
+
+                    if (postErrorMsg) postErrorMsg.textContent = '';
+
                     modalPostBtn.disabled = true;
                     modalPostBtn.textContent = 'Posting...';
-
-                    const title = photoTitleInput.value;
-                    const description = photoDescriptionTextarea.value;
-                    const share = shareToggle.checked;
                     
                     try {
                         // 1. CAPTURE THE FINAL IMAGE
@@ -1325,6 +1337,12 @@
                     #text-overlay-layer .draggable-text {
                         pointer-events: auto; 
                     }
+                    .modal-error {
+                        color: #d23481;
+                        font-size: 0.9rem;
+                        margin-top: 6px;
+                        min-height: 18px;
+                    }
                 </style>
 
                 <div class="photobooth-template-container" id="photostrip-preview">
@@ -1396,6 +1414,7 @@
 
                 <label for="photo-description-textarea" class="modal-label">Description</label>
                 <textarea id="photo-description-textarea" placeholder="Describe your moment..." class="modal-textarea" rows="3"></textarea>
+                <p id="post-error" class="modal-error" aria-live="polite"></p>
 
                 <div class="custom-toggle">
                     <label class="toggle-switch">

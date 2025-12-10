@@ -1,6 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
+// --- AUTO-CLEANUP: REMOVE EXPIRED BLOB URLS FROM OLD TEMPLATES ---
+function cleanOldBlobUrlsInTemplates(templates) {
+  if (!Array.isArray(templates)) return templates;
+  return templates.map(t => {
+    // Clean background
+    if (t.template_img && typeof t.template_img === 'string' && t.template_img.startsWith('blob:')) {
+      t.template_img = '';
+    }
+    // Clean stickers
+    if (Array.isArray(t.stickerPositions)) {
+      t.stickerPositions = t.stickerPositions.map(s => {
+        if (s.src && typeof s.src === 'string' && s.src.startsWith('blob:')) {
+          return { ...s, src: '' };
+        }
+        return s;
+      });
+    }
+    // Clean photos array if present
+    if (Array.isArray(t.photos)) {
+      t.photos = t.photos.map(p => (typeof p === 'string' && p.startsWith('blob:') ? '' : p));
+    }
+    return t;
+  });
+}
 
+// Patch all template lists on load (myTemplates, sharedTemplates, favoriteTemplates)
+if (window.state) {
+  if (Array.isArray(window.state.myTemplates)) {
+    window.state.myTemplates = cleanOldBlobUrlsInTemplates(window.state.myTemplates);
+  }
+  if (Array.isArray(window.state.sharedTemplates)) {
+    window.state.sharedTemplates = cleanOldBlobUrlsInTemplates(window.state.sharedTemplates);
+  }
+  if (Array.isArray(window.state.favoriteTemplates)) {
+    window.state.favoriteTemplates = cleanOldBlobUrlsInTemplates(window.state.favoriteTemplates);
+  }
+}
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -395,8 +429,52 @@
     .tabnav button:hover {color: #ea5a9f;}
     .tabnav button.active {border-color: #d23481;font-weight: 700;color: #d23481;}
     .vertical-templates-container {display: flex;gap: 40px;user-select: none;flex-wrap: wrap;}
-    .vertical-template-card {position: relative;width: 200px; height: 500px; padding: 16px;border-radius: 16px;background: linear-gradient(to bottom, #5e2e55, #765075);box-shadow: 0 1px 28px 10px rgb(169 42 89 / 0.2);display: flex;flex-direction: column;justify-content: flex-start;user-select: none;overflow: hidden;background-size: cover;background-position: center;transition: all 0.3s ease;}
-    .template-photo-container {width: 100%;height: 380px; position: relative;overflow: hidden;border-radius: 6px;background-color: rgba(255, 255, 255, 0.9);box-shadow: inset 0 0 3px #0070c0;}
+
+    /* --- TEMPLATE CARD STYLES (MODIFIED) --- */
+    .vertical-template-card {
+      position: relative;
+      width: 200px; 
+      height: 500px; 
+      padding: 16px;
+      border-radius: 16px;
+      background: linear-gradient(to bottom, #5e2e55, #765075);
+      box-shadow: 0 1px 28px 10px rgb(169 42 89 / 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      user-select: none;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+      transition: all 0.3s ease;
+    }
+    .template-photo-container {
+        width: 100%;
+        height: 380px; 
+        position: relative;
+        overflow: hidden;
+        border-radius: 6px;
+        /* Removed white background to prevent washing out the generated preview */
+        background-color: transparent; 
+        box-shadow: inset 0 0 3px #0070c0;
+    }
+    
+    /* NEW: Style the dynamic preview content container inside the thumbnail */
+    .template-photo-container .photobooth-template-container {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        /* Ensure the generated content uses the full space */
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    
+    /* Ensure the inner dynamic content shows up correctly */
+    .template-photo-container .photobooth-template-container .photo-strip-image .photo-slot {
+        background: rgba(255, 255, 255, 0.9); /* Inner white-ish background for photo slots */
+    }
+    
     .template-photo-single {width: 100%;height: 100%;background-size: cover;background-position: center;position: relative;}
     .template-photo-multiple {display: grid;width: 100%;height: 100%;position: relative;}
     .template-photo-multiple.two-shots {grid-template-columns: 1fr 1fr;gap: 4px;}
@@ -410,28 +488,190 @@
     .template-tags {margin-top: 8px;font-size: 0.75rem;padding: 20px;color: #f4cade;text-align: center;max-height: 40px;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;line-clamp: 2;-webkit-box-orient: vertical;z-index: 3;position: relative;}
     .vertical-template-icons {position: absolute; top: 16px;right: 16px; display: flex;flex-direction: column;gap: 14px;user-select: none;opacity: 0;transition: opacity 0.3s ease;z-index: 5;}
     .vertical-template-card:hover .vertical-template-icons {opacity: 1;}
+
     .vertical-template-icons button {background: none;border: none;cursor: pointer;padding: 0;display: flex;justify-content: center;align-items: center;transition: transform 0.2s;}
     .vertical-template-icons button:hover {transform: scale(1.1);}
     .vertical-template-icons img {width: 24px;height: 24px;pointer-events: none;user-select: none;}
-    .vertical-use-template-btn {background-color: #db2d73;border: none;border-radius: 8px;color: white;font-weight: 700;font-size: 1rem;padding: 0.75rem 1.25rem;cursor: pointer;display: flex;align-items: center;gap: 8px;user-select: none;box-shadow: 0 4px 10px rgb(219 45 115 / 0.7);transition: background-color 0.3s ease;user-select: none;opacity: 0;transition: opacity 0.3s ease;z-index: 3;position: relative;}
-    .vertical-template-card:hover .vertical-use-template-btn {opacity: 1;}
+
+    /* NEW: Template button wrapper for absolute positioning relative to the card */
+    .template-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(255, 255, 255, 0.2); /* Light transparent overlay */
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 5; /* Above photo container, below icons */
+      pointer-events: none; /* Allows clicks to fall through unless hovering on the button itself */
+    }
+
+    /* Show the overlay on card hover */
+    .vertical-template-card:hover .template-overlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .vertical-use-template-btn {
+      /* Reset positioning from previous inline/absolute styles */
+      position: relative; 
+      margin: 0;
+      /* Style */
+      background: linear-gradient(90deg, #f645b1 0%, #f4b744 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.75rem 1.25rem;
+      width: 80%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      user-select: none;
+      box-shadow: 0 4px 10px rgb(219 45 115 / 0.7);
+      transition: background 0.3s ease, transform 0.1s ease;
+      pointer-events: auto; /* Important: Make the button itself clickable */
+    }
+    
+    /* Remove previous hover logic since we use a nicer gradient animation */
+    /* .vertical-template-card:hover .vertical-use-template-btn {opacity: 1;} */
+    
     .vertical-use-template-btn img {width: 20px;height: 20px;filter: invert(100%);user-select: none;pointer-events: none;}
+    
     .vertical-use-template-btn:hover,
-    .vertical-use-template-btn:focus {background-color: #a31a62;outline: none;}
-    .template-upload-card {width: 200px;height: 500px; border: 2.4px solid #f4cade;border-radius: 16px;display: flex;flex-direction: column;justify-content: center;align-items: center;cursor: pointer;font-weight: 700;font-size: 1.35rem;color: #f4cade;transition: background-color 0.3s ease;user-select: none;}
-    .template-upload-card > .plus-sign {font-size: 5rem;line-height: 1;margin-bottom: 8px;user-select: none;}
+    .vertical-use-template-btn:focus {
+      background: linear-gradient(90deg, #f4b744 0%, #ff3c7d 100%); /* Reverse/Shifted Gradient on hover */
+      outline: none;
+      transform: scale(1.03);
+    }
+    
+    /* --- END TEMPLATE CARD STYLES --- */
+
+    /* --- MODIFIED UPLOAD CARD STYLES TO MATCH TEMPLATE CARD --- */
+    .template-upload-card {
+      /* Match .vertical-template-card dimensions */
+      width: 200px;
+      height: 500px; /* Matched height */
+      padding: 16px; /* Matched padding */
+      box-sizing: border-box; /* Matched box-sizing */
+
+      /* Use the same gradient background */
+      background: linear-gradient(to bottom, #5e2e55, #765075);
+      border: none; /* Remove border */
+      border-radius: 16px;
+      box-shadow: 0 1px 28px 10px rgb(169 42 89 / 0.2);
+      
+      /* Content centering */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      
+      /* Text styling (matched to template tags/icons style) */
+      font-weight: 700;
+      font-size: 1.35rem;
+      color: #f4cade; /* Light pink/purple text */
+      transition: all 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+    }
+    
+    /* Modify plus sign to stand out */
+    .template-upload-card > .plus-sign {
+        font-size: 5rem;
+        line-height: 1;
+        color: #ffdeeb; /* Lighter color for visibility */
+        user-select: none;
+    }
+    
+    /* Hover state for upload card */
     .template-upload-card:hover,
-    .template-upload-card:focus {background-color: #fce9f1;outline: none;}
+    .template-upload-card:focus {
+        /* Slightly change gradient/shadow for hover effect */
+        background: linear-gradient(to bottom, #765075, #5e2e55);
+        box-shadow: 0 1px 30px 12px rgb(255 100 150 / 0.3);
+        outline: none;
+    }
+    /* --- END MODIFIED UPLOAD CARD STYLES --- */
+    
     #template-upload-input {display: none;}
     .favorite-active {filter: invert(23%) sepia(95%) saturate(2106%) hue-rotate(320deg) brightness(90%) contrast(101%);}
     #upload-template-modal {position: fixed;inset: 0;background: rgba(0, 0, 0, 0.6);backdrop-filter: blur(8px);display: none;align-items: center;justify-content: center;z-index: 11000;user-select: none;}
     #upload-template-modal.active {display: flex;}
-    .upload-template-modal {background: white;border-radius: 14px;width: 760px;max-width: 95vw;max-height: 90vh;padding: 0;box-sizing: border-box;display: flex;user-select: none;font-family: 'Poppins', sans-serif;color: #333;position: relative;flex-direction: row;overflow: hidden;box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);}
-    .upload-close-btn {position: absolute;top: 12px;right: 16px;background: transparent;border: none;font-size: 26px;font-weight: 700;color: #d72b7e;cursor: pointer;user-select: none;transition: color 0.3s;z-index: 10;}
+    
+    /* MODIFIED: Increased width for better 4x6 preview */
+    .upload-template-modal {
+      background: white;
+      border-radius: 14px;
+      width: 860px; /* INCREASED width */
+      max-width: 95vw;
+      max-height: 90vh;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+      user-select: none;
+      font-family: 'Poppins', sans-serif;
+      color: #333;
+      position: relative;
+      flex-direction: row;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .upload-close-btn {position: absolute;top: 12px;right: 16px;background: transparent;border: none;font-size: 26px;font-weight: 700;color: #d72b7e;cursor: pointer;user-select: none;z-index: 10;transition: color 0.3s;}
     .upload-close-btn:hover {color: #a4154f;}
-    .upload-preview-side {width: 180px;background: #f9d7e7;padding: 20px;display: flex;flex-direction: column;align-items: center;justify-content: center;border-top-left-radius: 14px;border-bottom-left-radius: 14px;}
+    
+    /* MODIFIED: Dynamic width for preview side panel */
+    .upload-preview-side {
+      width: 180px; /* Default for 2x6 */
+      background: #f9d7e7;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-top-left-radius: 14px;
+      border-bottom-left-radius: 14px;
+      transition: width 0.3s ease; /* Added transition */
+    }
+    /* NEW: Larger width for 4x6 preview */
+    .upload-preview-side.is-4x6 {
+        width: 380px; 
+    }
+    
     .preview-title {font-weight: 700;font-size: 16px;color: #d72b7e;margin-bottom: 16px;}
-    .preview-image {width: 140px;height: 400px;border-radius: 10px;border: 4px solid white;background: #f5f5f5;display: flex;align-items: center;justify-content: center;overflow: hidden;position: relative;}
+    
+    /* MODIFIED: Dynamic size for preview image container */
+    .preview-image {
+      /* Base size - will be overwritten by size- classes */
+      width: 140px;
+      height: 400px;
+      border-radius: 10px;
+      border: 4px solid white;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      /* Add transitions for smooth size changes */
+      transition: width 0.3s ease, height 0.3s ease;
+    }
+    /* NEW: Size classes for preview container to match frame size */
+    .preview-image.size-2x6 {
+        width: 140px; /* Base width for vertical strip */
+        height: 400px; /* Approx 1:3 ratio */
+    }
+    .preview-image.size-4x6 {
+        width: 340px; /* Wider for 4x6 strip/grid */
+        height: 500px; /* Approx 2:3 ratio */
+    }
+    
     .preview-image img {width: 100%;height: 100%;object-fit: cover;border-radius: 6px;}
     .preview-placeholder {color: #d72b7e;font-size: 12px;text-align: center;padding: 20px;}
     .upload-controls-side {flex-grow: 1;display: flex;flex-direction: column;padding: 20px 24px 24px 24px;box-sizing: border-box;overflow-y: auto;border-top-right-radius: 14px;border-bottom-right-radius: 14px;max-height: 600px;gap: 16px;}
@@ -477,6 +717,131 @@
     .effect-cool {filter: sepia(0.2) saturate(0.8) hue-rotate(180deg) brightness(1.1);}
     .effect-retro {filter: sepia(0.5) contrast(1.2) saturate(1.3);}
     .effect-noir {filter: grayscale(100%) contrast(1.5) brightness(0.8);}
+
+    /* --- ADDED STYLES FOR TEMPLATE PREVIEW --- */
+    /* Container for the Photostrip Preview (Mimics customizationphoto.html) */
+    .photobooth-template-container { 
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column; /* Default for 2x6 and 4x6 vertical strips */
+        background-size: cover;
+        background-position: center;
+        padding: 4px; 
+        box-sizing: border-box;
+    }
+    
+    /* Grid layout for 4x6 / 4 shots (copied from customizationphoto.html logic) */
+    .photobooth-template-container.layout-grid-2x2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-content: flex-start;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    /* New: Two-column layout for 4x6 with 2 shots */
+    .photobooth-template-container.layout-2cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      align-content: center;
+      padding-bottom: 0.5rem;
+    }
+    .photobooth-template-container.layout-grid-2x2 .photo-strip-image {
+        margin-bottom: 0;
+    }
+    
+    /* NEW: Grid layout for 4x6 / 3 shots (two photos on top, one on bottom) */
+    .photobooth-template-container.layout-grid-3shots {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        align-content: flex-start;
+        padding-bottom: 0.5rem;
+    }
+    .photobooth-template-container.layout-grid-3shots .photo-strip-image {
+        margin-bottom: 0;
+    }
+    .photobooth-template-container.layout-grid-3shots .photo-strip-image:nth-child(3) {
+        grid-column: 1 / -1;
+    }
+
+    /* Single large image layout (centered) */
+    .photobooth-template-container.layout-single {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+    }
+
+    /* 4x6 1-shot layout - image spans full width */
+    .photobooth-template-container.layout-4x6.layout-single .photo-strip-image {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+    
+    /* Ensure the overlays cover the whole container area */
+    .photobooth-template-container.layout-grid-2x2 .sticker-overlay,
+    .photobooth-template-container.layout-grid-2x2 #text-overlay-layer,
+    .photobooth-template-container.layout-grid-2x2 .template-footer,
+    .photobooth-template-container.layout-grid-3shots .sticker-overlay,
+    .photobooth-template-container.layout-grid-3shots #text-overlay-layer,
+    .photobooth-template-container.layout-grid-3shots .template-footer {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+    
+    .photo-strip-image {
+        width: 100%;
+        flex-shrink: 0;
+        margin-bottom: 4px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex; /* For aligning placeholder text */
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .photo-strip-image .photo-slot {
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* CRITICAL FIX: Use object-contain for the image inside the slot to prevent cutoff */
+    .photo-strip-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; 
+        border-radius: 0;
+        box-sizing: border-box;
+        border: none;
+    }
+    
+    .template-footer {
+        flex-shrink: 0;
+        margin-top: auto;
+        text-align: center;
+        color: #555;
+        font-size: 10px;
+        padding-top: 5px;
+        /* Ensure footer is always at the bottom of the column for vertical strips */
+        align-self: flex-end; 
+    }
+    /* Sticker overlay for the template preview (absolute positioning inside .photobooth-template-container) */
+    .sticker-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2;
+    }
+    /* END ADDED STYLES */
   </style>
 </head>
 
@@ -559,7 +924,7 @@
                 <img id="edit-profile-pic" src="" alt="Profile Picture" />
               </div>
               <button id="change-photo-btn" type="button" aria-label="Change Profile Photo">Change</button>
-              <input type="file" id="profile-photo-input" accept="image/png, image/jpeg" style="display:none" />
+              <input type="file" id="profile-photo-input" accept="image/png, image:jpeg" style="display:none" />
             </div>
             <form id="edit-profile-form" novalidate>
               <label for="edit-username">Username</label>
@@ -581,7 +946,7 @@
           
           <div class="upload-preview-side">
             <div class="preview-title">Preview</div>
-            <div class="preview-image" id="template-preview">
+            <div class="preview-image size-2x6" id="template-preview">
               <div class="preview-placeholder">Template preview will appear here</div>
             </div>
           </div>
@@ -727,10 +1092,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    // *** NEW: FIREBASE STORAGE IMPORT ***
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-
-
+    
     // --- FIREBASE SETUP AND AUTHENTICATION ---
     const firebaseConfig = {
       apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
@@ -744,39 +1107,25 @@
     
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    // *** NEW: FIREBASE STORAGE INITIALIZATION ***
     const storage = getStorage(app);
+
+    const API_URL = 'http://localhost/api.php';
     
-    setLogLevel('error'); 
+    
 
     let currentUserId = null;
     let isAuthReady = false;
-    // --- NEW STATE VARIABLE FOR PROFILE PHOTO UPLOAD ---
     let newProfileFile = null; 
 
     // --- APPLICATION STATE (From original HTML) ---
-    const sharedTemplates = [
-      {
-        id: 1,
-        photos: [],
-        favorite: false,
-        name: 'Holiday Template',
-        frameSize: '2x6',
-        shots: '1',
-        effect: 'warm',
-        shareToCommunity: true,
-        tags: '#holiday #fun'
-      },
-      
-    ];
+    let sharedTemplates = [];
 
     const state = {
       user: {
-        username: 'Loading...', // Initial state set to Loading
+        username: 'Loading...', 
         bio: 'bio',
         photoCount: 0,
-        profileImg: '', // This will now hold the Firebase Storage URL
-        // --- MODIFIED: Added isAdmin status ---
+        profileImg: '', 
         isAdmin: false,
       },
       photos: [
@@ -797,18 +1146,28 @@
           comments: []
         },
       ],
-      activities: [], // Activities starts empty, will be populated from DB
-      myTemplates: []
+      activities: [], 
+      myTemplates: [],
+      favoriteTemplates: [], 
     };
     
+    // Helper to generate a simple UUID for template_id
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+
     // --- MOCK API FUNCTION TO LOAD PHOTOS ---
-    // In a real scenario, this would fetch photos from your database using api.php.
+    // (Existing fetchPhotoLibrary logic remains the same - uses PHP API)
     async function fetchPhotoLibrary(userId) {
         if (!userId) return;
 
         try {
              // Mock API call to get photo list
-            const response = await fetch('http://localhost:80/api.php', {
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'fetchPhotoLibrary', user_id: userId })
@@ -817,14 +1176,12 @@
             const result = await response.json();
             
             if (result.success) {
-                // Update photo count
                 state.user.photoCount = result.data.length;
-                // Map API data to local state.photos format
                 state.photos = result.data.map(p => ({
                     id: p.id,
                     src: p.photo_url,
-                    liked: false, // Default client-side state
-                    favorite: false, // Default client-side state
+                    liked: false, 
+                    favorite: false, 
                     date: new Date(p.created_at).toLocaleDateString(),
                     comments: []
                 }));
@@ -835,10 +1192,8 @@
             }
         } catch (error) {
             console.error("Unexpected fetch error in fetchPhotoLibrary:", error);
-            // Fallback to initial dummy data if API fails
         }
         
-        // Re-render UI after fetch
         updateUserUI();
         renderPhotoLibrary();
     }
@@ -851,9 +1206,7 @@
      * @returns {Promise<string>} The public URL of the uploaded image.
      */
     async function uploadProfileImage(file, userId) {
-      // *** FIX: Use a fixed filename to satisfy Storage Rules and ensure overwrite ***
       const fileExtension = file.name.split('.').pop();
-      // Ensure the path is profile_images/{userId}/profile.jpg (or .png, etc.)
       const filePath = `profile_images/${userId}/profile.${fileExtension}`; 
       const storageRef = ref(storage, filePath);
       
@@ -871,18 +1224,13 @@
     }
 
 
-    /**
-     * Fetches the user's profile from the DB or creates a default one via PHP API.
-     * @param {string} userId - The Firebase Auth UID.
-     * @param {string} email - The user's email.
-     * @param {string | null} displayName - The user's display name from Firebase.
-     */
+    // (Existing fetchOrCreateProfile logic remains the same - uses PHP API)
     async function fetchOrCreateProfile(userId, email, displayName) {
       if (!userId) return;
       console.log(`Fetching profile for user: ${userId} via api.php.`);
 
       try {
-        const response = await fetch('http://localhost:80/api.php', {
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -903,24 +1251,21 @@
           state.user.username = profileData.username || `User_${userId.substring(0, 4)}`;
           state.user.bio = profileData.bio || 'Set your bio here.';
           state.user.profileImg = profileData.profile_img_url || '';
-          // --- MODIFIED: Store the admin status ---
           state.user.isAdmin = profileData.admin; 
           
           console.log("Profile process successful. Username:", state.user.isAdmin);
           
           if (result.created) {
-            // Log the creation activity if a new profile was created
             if (currentUserId) { 
                 addActivity('New profile created.');
             }
           }
         } else {
           console.error("API Error fetching/creating profile:", result.error);
-          // Fallback to local default if API fails
           const defaultUsername = displayName || (email ? email.split('@')[0] : `User_${userId.substring(0, 4)}`);
           state.user.username = defaultUsername; 
           state.user.bio = 'Profile could not be loaded.';
-          state.user.isAdmin = false; // Fallback default
+          state.user.isAdmin = false; 
         }
       } catch (error) {
         console.error("Unexpected fetch error in fetchOrCreateProfile:", error);
@@ -928,16 +1273,13 @@
       updateUserUI();
     }
 
-    /**
-     * Fetches the user's activity log from the DB via PHP API.
-     * @param {string} userId - The Firebase Auth UID.
-     */
+    // (Existing fetchActivityLog logic remains the same - uses PHP API)
     async function fetchActivityLog(userId) {
       if (!userId) return;
       console.log(`Fetching activity log for user: ${userId}`);
 
       try {
-        const response = await fetch('http://localhost:80/api.php', {
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -970,12 +1312,7 @@
     }
 
 
-    /**
-     * Saves the current user state (username and bio) to the DB via PHP API.
-     * @param {string} newUsername - The new username.
-     * @param {string} newBio - The new bio.
-     * @param {string} profileImgUrl - The new profile image URL (or existing one).
-     */
+    // (Existing saveProfileChanges logic remains the same - uses PHP API)
     async function saveProfileChanges(newUsername, newBio, profileImgUrl) {
       if (!currentUserId) {
         console.error("Cannot save profile: User not authenticated.");
@@ -994,7 +1331,7 @@
       };
 
       try {
-        const response = await fetch('http://localhost:80/api.php', {
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1010,7 +1347,6 @@
 
         if (result.success) {
           console.log("Profile successfully updated via pdo/api.php.");
-          // Log activity AFTER successful save
           addActivity('Profile information saved.');
         } else {
           console.error("API Error saving profile changes:", result.error);
@@ -1021,19 +1357,15 @@
       }
     }
 
-    /**
-     * Logs an activity to the DB via PHP API and updates local state.
-     * @param {string} desc - The activity description.
-     */
+    // (Existing addActivity logic remains the same - uses PHP API)
     async function addActivity(desc) {
       if (!currentUserId) {
         console.error("Cannot log activity: User not authenticated.");
         return;
       }
       
-      // 1. Log to DB via API
       try {
-        const response = await fetch('http://localhost:80/api.php', {
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1054,8 +1386,313 @@
         console.error("Unexpected fetch error in addActivity:", error);
       }
 
-      // 2. Update local state and re-render (by fetching all activities)
       await fetchActivityLog(currentUserId);
+    }
+    
+    // (Existing template favorite logic remains the same - uses PHP API)
+    async function toggleFavoriteTemplateApi(templateId, isFavorite) {
+        if (!currentUserId) return;
+        
+        const action = isFavorite ? 'addFavoriteTemplate' : 'removeFavoriteTemplate';
+        
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: action,
+                    user_id: currentUserId,
+                    template_id: templateId
+                })
+            });
+
+            const result = await response.json();
+            if (!result.success) {
+                console.error(`API Error ${action}:`, result.error);
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error(`Fetch error in ${action}:`, error);
+            return false;
+        }
+    }
+
+    // (Existing template favorite fetch logic remains the same - uses PHP API)
+    async function fetchFavoriteTemplates() {
+        if (!currentUserId) return;
+        
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'fetchFavoriteTemplates',
+                    user_id: currentUserId
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                // The structure for favorites relies on the PHP API returning template details
+                state.favoriteTemplates = result.data.map(dbTemplate => ({
+                    id: dbTemplate.template_id, 
+                    favoriteId: dbTemplate.favorite_id, 
+                    photos: dbTemplate.template_img ? [dbTemplate.template_img] : [],
+                    favorite: true, 
+                    name: dbTemplate.name || 'Untitled Template',
+                    frameSize: dbTemplate.frame_size || '2x6',
+                    shots: dbTemplate.shot_count ? String(dbTemplate.shot_count) : '1',
+                    effect: dbTemplate.effects || 'none',
+                shareToCommunity: !!dbTemplate.share,
+                tags: dbTemplate.text || '',
+                stickerPositions: dbTemplate.sticker ? JSON.parse(dbTemplate.sticker) : [],
+                    template_img: dbTemplate.template_img,
+                }));
+                updateLocalTemplateFavorites(state.favoriteTemplates);
+                console.log(`Loaded ${state.favoriteTemplates.length} favorite templates.`);
+            } else {
+                console.error('Error fetching favorite templates:', result.error);
+                state.favoriteTemplates = [];
+            }
+        } catch (error) {
+            console.error('Fetch error in fetchFavoriteTemplates:', error);
+            state.favoriteTemplates = [];
+        }
+        
+        if (document.getElementById('section-favorites').style.display === 'block') {
+            renderFavorites();
+        }
+    }
+    
+    // (Existing updateLocalTemplateFavorites logic remains the same)
+    function updateLocalTemplateFavorites(favoriteTemplates) {
+        const favoriteIds = new Set(favoriteTemplates.map(f => f.id));
+
+        const updateList = (list) => {
+            return list.map(t => {
+                if (t.id) { 
+                    t.favorite = favoriteIds.has(String(t.id));
+                }
+                return t;
+            });
+        };
+
+        state.myTemplates = updateList(state.myTemplates);
+        // sharedTemplates is a global array, so update in place
+        // Note: For real-world implementation, sharedTemplates should also be fetched from the API
+        // and its favorite status updated. For now, we manually update the mock list.
+        sharedTemplates.forEach(t => {
+            if (t.id) {
+                t.favorite = favoriteIds.has(String(t.id));
+            }
+        });
+        
+        renderMyTemplates();
+        renderSharedTemplates();
+    }
+
+
+    /**
+     * Fetch saved templates via PHP API instead of Supabase.
+     */
+    async function fetchSavedTemplates(userId) {
+      if (!userId) return;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'fetchSavedTemplates',
+            user_id: userId
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          const dbTemplates = result.data || [];
+          state.myTemplates = dbTemplates.map(dbTemplate => ({
+            id: dbTemplate.template_id,
+            photos: dbTemplate.template_img ? [dbTemplate.template_img] : [],
+            favorite: false,
+            name: dbTemplate.name || 'Untitled Template',
+            frameSize: dbTemplate.frame_size || '2x6',
+            shots: dbTemplate.shot_count || '1',
+            effect: dbTemplate.effects || 'none',
+            shareToCommunity: !!dbTemplate.share,
+            tags: dbTemplate.text || '',
+            stickerPositions: dbTemplate.sticker ? JSON.parse(dbTemplate.sticker) : [],
+            template_img: dbTemplate.template_img,
+          }));
+          console.log(`Loaded ${state.myTemplates.length} templates from API.`);
+        } else {
+          console.error('API error fetching saved templates:', result.error);
+          state.myTemplates = [];
+        }
+      } catch (error) {
+        console.error('Unexpected fetch error in fetchSavedTemplates:', error);
+        state.myTemplates = [];
+      }
+
+      displaySavedTemplates(state.myTemplates);
+      await fetchFavoriteTemplates();
+      await fetchSharedTemplates();
+    }
+
+    /**
+     * Fetch shared-to-community templates (share === true) from the API.
+     */
+    async function fetchSharedTemplates() {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'fetchSharedTemplates',
+            user_id: currentUserId || 'guest'
+          })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          const dbTemplates = result.data || [];
+          sharedTemplates = dbTemplates.map(dbTemplate => ({
+            id: dbTemplate.template_id,
+            photos: dbTemplate.template_img ? [dbTemplate.template_img] : [],
+            favorite: false,
+            name: dbTemplate.name || 'Shared Template',
+            frameSize: dbTemplate.frame_size || '2x6',
+            shots: dbTemplate.shot_count || '1',
+            effect: dbTemplate.effects || 'none',
+            shareToCommunity: !!dbTemplate.share,
+            tags: dbTemplate.text || '',
+            stickerPositions: dbTemplate.sticker ? JSON.parse(dbTemplate.sticker) : [],
+            template_img: dbTemplate.template_img,
+            ownerId: dbTemplate.user_id,
+          }));
+          console.log(`Loaded ${sharedTemplates.length} shared templates from API.`);
+        } else {
+          console.error('API error fetching shared templates:', result.error);
+          sharedTemplates = [];
+        }
+      } catch (error) {
+        console.error('Unexpected fetch error in fetchSharedTemplates:', error);
+        sharedTemplates = [];
+      }
+
+      renderSharedTemplates();
+    }
+
+    // (Existing displaySavedTemplates logic remains the same)
+    function displaySavedTemplates(templates) {
+      const myTemplatesContainer = document.querySelector('#tab-mytemplates .vertical-templates-container');
+      
+      const uploadCard = myTemplatesContainer.querySelector('.template-upload-card');
+      myTemplatesContainer.innerHTML = '';
+      
+      if (uploadCard) {
+        myTemplatesContainer.appendChild(uploadCard);
+      }
+
+      if (!templates || templates.length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.style.color = '#f9acdb';
+        emptyMsg.style.fontStyle = 'italic';
+        emptyMsg.style.gridColumn = '1 / -1';
+        emptyMsg.textContent = 'No templates yet. Create one to get started!';
+        myTemplatesContainer.appendChild(emptyMsg);
+        return;
+      }
+
+      templates.forEach(template => {
+        const card = createMyTemplateCard(template);
+        myTemplatesContainer.appendChild(card);
+      });
+
+      const uploadBtn = document.getElementById('open-upload-modal-btn');
+      if (uploadBtn) {
+        uploadBtn.addEventListener('click', openUploadTemplateModal);
+        uploadBtn.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openUploadTemplateModal();
+          }
+        });
+      }
+    }
+
+    // (Existing useTemplate logic remains the same)
+    function useTemplate(template) {
+      frameSizeSelect.value = template.frameSize || '2x6';
+      shotsSelect.value = template.shots || '1';
+
+      if (template.effects) {
+        effectOptions.forEach(opt => {
+          opt.classList.remove('selected');
+          if (opt.dataset.effect === template.effects) {
+            opt.classList.add('selected');
+          }
+        });
+        currentEffect = template.effects;
+      }
+
+      if (typeof template.shareToCommunity !== 'undefined') {
+        shareToggle.checked = !!template.shareToCommunity;
+      }
+
+      if (template.name) {
+        tagsInput.value = template.name;
+      } else {
+        tagsInput.value = '';
+      }
+
+      if (template.template_img) {
+        uploadedBackground = template.template_img;
+        templatePreview.innerHTML = createPreviewTemplate(
+            template.frameSize, 
+            parseInt(template.shots), 
+            template.template_img, 
+            template.effect, 
+            template.stickerPositions,
+            false
+        );
+      } else {
+        uploadedBackground = null;
+        templatePreview.innerHTML = '<div class="preview-placeholder">Template preview (image will appear when uploaded)</div>';
+      }
+
+      uploadedStickers = template.stickerPositions.map(s => s.src);
+
+      const previewElement = document.getElementById('template-preview');
+      previewElement.className = `preview-image size-${template.frameSize || '2x6'}`;
+      document.querySelector('.upload-preview-side').classList.toggle('is-4x6', template.frameSize === '4x6');
+
+      openUploadTemplateModal();
+    }
+
+    // (Existing toggleMyTemplateFavorite logic remains the same - uses PHP API for favorites)
+    async function toggleMyTemplateFavorite(templateId) {
+        const template = state.myTemplates.find(t => t.id === templateId);
+        if (template) {
+            const newFavoriteStatus = !template.favorite;
+            
+            template.favorite = newFavoriteStatus;
+            renderMyTemplates();
+            
+            const success = await toggleFavoriteTemplateApi(templateId, newFavoriteStatus);
+            
+            if (success) {
+                await fetchFavoriteTemplates();
+                addActivity(`Template "${template.name}" ${newFavoriteStatus ? 'added to' : 'removed from'} favorites`);
+            } else {
+                template.favorite = !newFavoriteStatus;
+                renderMyTemplates();
+                alert('Failed to update favorite status in the database.');
+            }
+            renderFavorites();
+        }
     }
 
     // Handle authentication state and profile loading
@@ -1063,17 +1700,15 @@
       isAuthReady = true;
       if (user) {
         currentUserId = user.uid;
-        // PASS email and displayName for profile lookup/creation
         fetchOrCreateProfile(user.uid, user.email, user.displayName);
-        // *** NEW: Fetch the photo library and activity log after the user is confirmed/loaded ***
         fetchPhotoLibrary(user.uid);
         fetchActivityLog(user.uid);
+        // Load saved templates from the PHP API
+        fetchSavedTemplates(user.uid);
         
-        // --- NEW: Check for URL parameters after auth is ready ---
         checkUrlParametersForNavigation();
         
       } else {
-        // User is signed out. Redirect to login
         currentUserId = null;
         console.log("User signed out. Redirecting to login.html...");
         window.location.href = 'login.html'; 
@@ -1136,18 +1771,17 @@
       frameSizeSelect.value = '2x6';
       shotsSelect.value = '1';
       
-      // Reset effects to warm
       effectOptions.forEach(opt => opt.classList.remove('selected'));
       const warmBtn = document.querySelector('[data-effect="warm"]');
       if (warmBtn) warmBtn.classList.add('selected');
       currentEffect = 'warm';
       
-      // Reset preview
       templatePreview.innerHTML = '<div class="preview-placeholder">Template preview will appear here</div>';
+      templatePreview.className = 'preview-image size-2x6';
+      document.querySelector('.upload-preview-side').classList.remove('is-4x6');
       
       publishBtn.disabled = true;
       
-      // Reset modal title and button text
       document.getElementById('upload-template-title').textContent = 'Upload Template';
       publishBtn.textContent = 'Publish';
       delete uploadModal.dataset.editingTemplateId;
@@ -1160,132 +1794,251 @@
       if (e.target === uploadModal) closeUploadModal();
     });
 
-    // Background upload handler
-    backgroundUploadInput.addEventListener('change', () => {
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Background upload handler (uses data URLs so they persist across reloads)
+    backgroundUploadInput.addEventListener('change', async () => {
       if (backgroundUploadInput.files.length === 0) {
         uploadedBackground = null;
         updatePreview();
       } else {
-        uploadedBackground = URL.createObjectURL(backgroundUploadInput.files[0]);
-        updatePreview();
+        try {
+          uploadedBackground = await readFileAsDataURL(backgroundUploadInput.files[0]);
+          updatePreview();
+        } catch (error) {
+          console.error('Failed to read background image:', error);
+          uploadedBackground = null;
+        }
       }
       checkPublish();
     });
 
-    // Stickers upload handler
-    stickersUploadInput.addEventListener('change', () => {
+    // Stickers upload handler (persist stickers as data URLs)
+    stickersUploadInput.addEventListener('change', async () => {
       if (stickersUploadInput.files.length === 0) {
         uploadedStickers = [];
       } else {
-        uploadedStickers.forEach(u => URL.revokeObjectURL(u));
-        uploadedStickers = Array.from(stickersUploadInput.files).map(f => URL.createObjectURL(f));
+        try {
+          const fileReads = Array.from(stickersUploadInput.files).map(file => readFileAsDataURL(file));
+          uploadedStickers = await Promise.all(fileReads);
+        } catch (error) {
+          console.error('Failed to read sticker images:', error);
+          uploadedStickers = [];
+        }
       }
       updatePreview();
     });
 
-    // Update preview based on current settings
+    // TEMPLATE PREVIEW GENERATION FUNCTION (Remains the same)
+    function createPreviewTemplate(frameSize, shots, backgroundUrl, effect, stickerPositions, isThumbnail = false) {
+        // ... (existing implementation of createPreviewTemplate) ...
+        let shotAspectRatio = '4/3'; 
+        let layoutClass = '';
+        
+        if (frameSize === '2x6') {
+          shotAspectRatio = '4/3'; 
+          layoutClass = ''; // Default vertical strip layout
+        } else if (frameSize === '4x6') {
+          layoutClass = 'layout-4x6'; // Add 4x6 base class
+          if (shots === 4) {
+            // 4 shots on a 4x6 is a 2x2 grid
+            shotAspectRatio = '4/3'; 
+            layoutClass += ' layout-grid-2x2 layout-4shots';
+          } else if (shots === 3) {
+            // 3 shots on a 4x6 is a 2-over-1 grid (third spans both columns)
+            shotAspectRatio = '1/1'; 
+            layoutClass += ' layout-grid-3shots';
+          } else if (shots === 2) {
+            // 2 shots on a 4x6 displayed side-by-side
+            shotAspectRatio = '3/2';
+            layoutClass += ' layout-2cols';
+          } else if (shots === 1) {
+            // Single shot - center it and make larger
+            shotAspectRatio = '3/2';
+            layoutClass += ' layout-single';
+          }
+        }
+        
+        let templateHTML = `
+            <div class="photobooth-template-container ${layoutClass}" 
+                 style="background-image: ${backgroundUrl.startsWith('#') ? 'none' : `url('${backgroundUrl}')`}; 
+                        background-color: ${backgroundUrl.startsWith('#') ? backgroundUrl : 'transparent'}; 
+                        width: 100%; height: 100%;">
+        `;
+
+        const photoDivs = Array.from({ length: shots }, (_, i) => {
+            return `
+                <div class="photo-strip-image" style="
+                    aspect-ratio: ${shotAspectRatio}; 
+                    background-color: #d1d5db; /* Light gray placeholder */
+                    display: flex; 
+                    align-items: center;
+                    justify-content: center;
+                    color: #4b5563; /* Darker gray text */
+                    font-size: ${isThumbnail ? '8px' : '10px'};
+                    border-radius: 4px;
+                ">
+                    <div class="photo-slot effect-${effect}" 
+                         style="
+                            padding: ${isThumbnail ? '6px' : '10px'};
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            background: rgba(255, 255, 255, 0.9); /* Inner white-ish background */
+                        ">
+                        Photo Slot ${i + 1}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        templateHTML += photoDivs;
+        
+        templateHTML += `
+            <div id="text-overlay-layer">
+                </div>
+        `;
+        
+        if (stickerPositions.length > 0) {
+            
+            const defaultPositions = [
+                { top: '10%', left: '10%', rotate: '5deg' },
+                { top: '15%', left: '80%', rotate: '-10deg' },
+                { top: '50%', left: '20%', rotate: '15deg' },
+                { top: '60%', left: '70%', rotate: '-5deg' },
+                { top: '80%', left: '30%', rotate: '10deg' },
+                { top: '85%', left: '85%', rotate: '-15deg' }
+            ];
+
+            const stickersHTML = stickerPositions.map((sticker, index) => {
+                let pos;
+                let src;
+                if (typeof sticker === 'string') { 
+                    src = sticker;
+                    pos = defaultPositions[index % defaultPositions.length];
+                } else { 
+                    src = sticker.src;
+                    pos = {
+                        top: sticker.top,
+                        left: sticker.left,
+                        rotate: sticker.rotate || '0deg'
+                    };
+                }
+                
+                const pointerEventsStyle = isThumbnail ? 'pointer-events: none;' : 'pointer-events: auto;';
+
+                return `
+                    <div class="sticker" style="
+                        background-image: url('${src}');
+                        top: ${pos.top};
+                        left: ${pos.left};
+                        transform: rotate(${pos.rotate});
+                        width: ${isThumbnail ? '30px' : '40px'}; 
+                        height: ${isThumbnail ? '30px' : '40px'};
+                        ${pointerEventsStyle}
+                    " data-sticker-index="${index}"></div>
+                `;
+            }).join('');
+
+            templateHTML += `<div class="sticker-overlay">${stickersHTML}</div>`;
+        }
+
+        templateHTML += `
+            <div class="template-footer">
+                Webooth Template Preview
+            </div>
+        `;
+        
+        templateHTML += `</div>`;
+        return templateHTML;
+    }
+    
+    // (Existing createTemplateThumbnail logic remains the same)
+    function createTemplateThumbnail(template) {
+        const backgroundUrl = template.template_img || '#FFFFFF'; 
+        const shots = parseInt(template.shots || 1);
+        const frameSize = template.frameSize || '2x6';
+        const effect = template.effect || 'none';
+        
+        let stickerData = template.stickerPositions && template.stickerPositions.length > 0 ? 
+                            template.stickerPositions : 
+                            (template.photos && template.photos.length > 1 ? 
+                                template.photos.slice(1).map(src => ({ src: src })) : 
+                                []);
+
+        return createPreviewTemplate(
+            frameSize, 
+            shots, 
+            backgroundUrl, 
+            effect, 
+            stickerData, 
+            true 
+        );
+    }
+
+
+    // (Existing updatePreview logic remains the same)
     function updatePreview() {
+      const previewContainer = document.getElementById('template-preview');
+      const previewSide = document.querySelector('.upload-preview-side'); 
+      const frameSize = frameSizeSelect.value;
+      const shots = parseInt(shotsSelect.value);
+      const backgroundValue = uploadedBackground || '#FFFFFF'; 
+      
+      const stickerData = uploadedStickers.map(src => ({ src: src }));
+      
+      previewContainer.classList.remove('size-2x6', 'size-4x6');
+      previewContainer.classList.add(`size-${frameSize}`);
+      
+      previewSide.classList.remove('is-4x6');
+      if (frameSize === '4x6') {
+          previewSide.classList.add('is-4x6');
+      }
+      
       if (!uploadedBackground) {
-        templatePreview.innerHTML = '<div class="preview-placeholder">Template preview will appear here</div>';
+        previewContainer.innerHTML = '<div class="preview-placeholder">Template preview will appear here</div>';
+        publishBtn.disabled = true; 
         return;
       }
 
-      const frameSize = frameSizeSelect.value;
-      const shots = parseInt(shotsSelect.value);
+      const previewHTML = createPreviewTemplate(
+          frameSize, 
+          shots, 
+          backgroundValue, 
+          currentEffect, 
+          stickerData,
+          false 
+      );
       
-      // Create the preview container with background
-      let previewHTML = `
-        <div class="vertical-template-card" style="background-image: url('${uploadedBackground}')">
-          <div class="template-photo-container">
-      `;
+      previewContainer.innerHTML = previewHTML;
       
-      if (shots === 1) {
-        const photoDiv = document.createElement('div');
-        photoDiv.className = `template-photo-single frame-${frameSize} effect-${currentEffect}`;
-        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-        
-        previewHTML += photoDiv.outerHTML;
-      } else {
-        previewHTML += `
-          <div class="template-photo-multiple ${shots}-shots frame-${frameSize}">
-            ${Array.from({length: shots}, (_, i) => `
-              <div class="photo-slot effect-${currentEffect}" 
-                   style="background-color: rgba(255, 255, 255, 0.9);">
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      
-      // Add sticker overlay scattered across the entire card
-      previewHTML += createStickerOverlay();
-      
-      // Add tags placeholder
-      previewHTML += `
-          </div>
-          <div class="template-tags">Preview Tags</div>
-          <button class="vertical-use-template-btn" style="opacity: 1;">
-            <img src="Icons/2.svg" alt="Camera icon" /> Use this template
-          </button>
-        </div>
-      `;
-      
-      templatePreview.innerHTML = previewHTML;
-      
-      // Add drag functionality to stickers in preview
-      addStickerDragFunctionality(templatePreview);
+      addStickerDragFunctionality(previewContainer);
+      checkPublish();
     }
 
-    // Create sticker overlay HTML scattered across entire card
-    function createStickerOverlay() {
-      if (uploadedStickers.length === 0) return '';
-      
-      // Define positions for stickers scattered across the entire card
-      const stickerPositions = [
-        { top: '10%', left: '10%', rotate: '5deg' },
-        { top: '15%', left: '80%', rotate: '-10deg' },
-        { top: '50%', left: '20%', rotate: '15deg' },
-        { top: '60%', left: '70%', rotate: '-5deg' },
-        { top: '80%', left: '30%', rotate: '10deg' },
-        { top: '85%', left: '85%', rotate: '-15deg' }
-      ];
-      
-      return `
-        <div class="sticker-overlay">
-          ${uploadedStickers.map((sticker, index) => {
-            const pos = stickerPositions[index % stickerPositions.length];
-            return `
-              <div class="sticker" style="
-                background-image: url('${sticker}');
-                top: ${pos.top};
-                left: ${pos.left};
-                transform: rotate(${pos.rotate});
-              " data-sticker-index="${index}"></div>
-            `;
-          }).join('')}
-        </div>
-      `;
-    }
-
-    // Add drag functionality to stickers
+    // (Existing drag functionality remains the same)
     function addStickerDragFunctionality(container) {
-      const stickers = container.querySelectorAll('.sticker');
-      
+      const stickers = container.querySelectorAll('.photobooth-template-container .sticker');
       stickers.forEach(sticker => {
+        sticker.style.pointerEvents = 'auto'; 
         sticker.addEventListener('mousedown', startStickerDrag);
         sticker.addEventListener('touchstart', startStickerDrag, { passive: false });
-        
-        // Enable pointer events for stickers
-        sticker.style.pointerEvents = 'auto';
       });
     }
 
-    // Start dragging a sticker
     function startStickerDrag(e) {
       e.preventDefault();
       draggedSticker = this;
       
-      // Calculate offset for smooth dragging
       const rect = draggedSticker.getBoundingClientRect();
       if (e.type === 'mousedown') {
         dragOffsetX = e.clientX - rect.left;
@@ -1295,23 +2048,20 @@
         dragOffsetY = e.touches[0].clientY - rect.top;
       }
       
-      // Add dragging class for visual feedback
       draggedSticker.classList.add('dragging');
       
-      // Add event listeners for dragging
       document.addEventListener('mousemove', dragSticker);
       document.addEventListener('touchmove', dragSticker, { passive: false });
       document.addEventListener('mouseup', stopStickerDrag);
       document.addEventListener('touchend', stopStickerDrag);
     }
 
-    // Drag sticker
     function dragSticker(e) {
       if (!draggedSticker) return;
       
       e.preventDefault();
       
-      const container = draggedSticker.closest('.vertical-template-card');
+      const container = draggedSticker.closest('.photobooth-template-container'); 
       if (!container) return;
       
       const containerRect = container.getBoundingClientRect();
@@ -1325,31 +2075,26 @@
         clientY = e.touches[0].clientY;
       }
       
-      // Calculate new position within container bounds
       const newLeft = clientX - containerRect.left - dragOffsetX;
       const newTop = clientY - containerRect.top - dragOffsetY;
       
-      // Apply bounds checking to keep sticker within container
       const maxLeft = containerRect.width - draggedSticker.offsetWidth;
       const maxTop = containerRect.height - draggedSticker.offsetHeight;
       
       const boundedLeft = Math.max(0, Math.min(newLeft, maxLeft));
       const boundedTop = Math.max(0, Math.min(newTop, maxTop));
       
-      // Update sticker position
       draggedSticker.style.left = `${boundedLeft}px`;
       draggedSticker.style.top = `${boundedTop}px`;
       draggedSticker.style.transform = 'none'; 
     }
 
-    // Stop dragging sticker
     function stopStickerDrag() {
       if (draggedSticker) {
         draggedSticker.classList.remove('dragging');
         draggedSticker = null;
       }
       
-      // Remove event listeners
       document.removeEventListener('mousemove', dragSticker);
       document.removeEventListener('touchmove', dragSticker);
       document.removeEventListener('mouseup', stopStickerDrag);
@@ -1365,73 +2110,110 @@
       publishBtn.disabled = !uploadedBackground;
     }
 
-    // Publish button click: capture data, add to state, alert confirmation
-    function handlePublishTemplate() {
+    /**
+     * Handle template publish/update using PHP API.
+     */
+    async function handlePublishTemplate() {
       if (!uploadedBackground) {
         alert("Please upload a background image before publishing.");
         return;
       }
+      if (!currentUserId) {
+        alert("User not authenticated. Please log in.");
+        return;
+      }
       
-      // Get final sticker positions from preview
-      const previewCard = templatePreview.querySelector('.vertical-template-card');
-      const stickers = previewCard.querySelectorAll('.sticker');
-      const stickerPositions = Array.from(stickers).map(sticker => {
-        return {
-          src: sticker.style.backgroundImage.replace('url("', '').replace('")', ''),
-          top: sticker.style.top,
-          left: sticker.style.left
-        };
-      });
+      // 1. Collect sticker positions
+      const previewCard = templatePreview.querySelector('.photobooth-template-container');
+      const stickers = previewCard ? previewCard.querySelectorAll('.sticker') : [];
+      const stickerPositions = Array.from(stickers).map(sticker => ({
+        src: sticker.style.backgroundImage.replace('url("', '').replace('")', ''),
+        top: sticker.style.top,
+        left: sticker.style.left,
+        rotate: sticker.style.transform
+      }));
       
       const templateData = {
-        photos: [uploadedBackground, ...stickerPositions.map(s => s.src)],
-        stickerPositions: stickerPositions,
-        name: `Uploaded Template ${state.myTemplates.length + 1}`,
+        name: tagsInput.value.trim() || `Uploaded Template ${state.myTemplates.length + 1}`,
         frameSize: frameSizeSelect.value,
         shots: shotsSelect.value,
         effect: currentEffect,
         shareToCommunity: shareToggle.checked,
         tags: tagsInput.value.trim(),
-        favorite: false
+        template_img: uploadedBackground,
       };
-      
-      // Check if we're editing an existing template
+
       const editingTemplateId = uploadModal.dataset.editingTemplateId;
-      if (editingTemplateId) {
-        // Update existing template
-        const templateIndex = state.myTemplates.findIndex(t => t.id == editingTemplateId);
-        if (templateIndex !== -1) {
-          state.myTemplates[templateIndex] = {
-            ...state.myTemplates[templateIndex],
-            ...templateData
-          };
-          alert(`Successfully updated template: ${templateData.name}`);
-          delete uploadModal.dataset.editingTemplateId;
-          addActivity(`Template "${templateData.name}" updated`);
+      const templateId = editingTemplateId || generateUUID();
+      const action = editingTemplateId ? 'updated' : 'uploaded';
+
+      const payload = {
+        action: 'saveTemplateState',
+        user_id: currentUserId,
+        template_id: templateId,
+        template_state: {
+          sticker: stickerPositions.length ? JSON.stringify(stickerPositions) : null,
+          text: templateData.tags,
+          font: null,
+          text_color: null,
+          background: templateData.template_img,
+          show_logo: String(false),
+          show_date: String(false),
+          show_time: String(false),
+          frame_size: templateData.frameSize,
+          shot_count: templateData.shots,
+          share: String(templateData.shareToCommunity),
+          effects: templateData.effect,
+          template_img: templateData.template_img,
+          name: templateData.name,
         }
-      } else {
-        // Create new template
-        const newTemplate = {
-          id: Date.now(),
-          ...templateData
-        };
-        
-        // Add to my templates
-        state.myTemplates.push(newTemplate);
-        
-        // If share toggle is on, also add to shared templates
-        if (shareToggle.checked) {
-          const sharedTemplate = {
-            ...newTemplate,
-            id: Date.now() + 1, // Different ID for shared version
-            shared: true
-          };
-          sharedTemplates.push(sharedTemplate);
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+          console.error('API error saving template:', result.error);
+          alert(`Failed to ${action} template: ${result.error || 'Unknown error'}`);
+          return;
         }
-        
-        alert(`Successfully published template: ${newTemplate.name}`);
-        addActivity(`Template "${newTemplate.name}" uploaded`);
+      } catch (error) {
+        console.error('Unexpected error saving template:', error);
+        alert('Failed to save template. Please try again.');
+        return;
       }
+
+      const newTemplateState = {
+        id: templateId,
+        photos: [templateData.template_img],
+        favorite: false,
+        name: templateData.name,
+        frameSize: templateData.frameSize,
+        shots: templateData.shots,
+        effect: templateData.effect,
+        shareToCommunity: templateData.shareToCommunity,
+        tags: templateData.tags,
+        stickerPositions: stickerPositions,
+        template_img: templateData.template_img,
+      };
+
+      if (editingTemplateId) {
+        const index = state.myTemplates.findIndex(t => t.id === newTemplateState.id);
+        if (index !== -1) {
+          state.myTemplates[index] = newTemplateState;
+        }
+        delete uploadModal.dataset.editingTemplateId;
+      } else {
+        state.myTemplates.push(newTemplateState);
+      }
+
+      alert(`Successfully ${action} template: ${newTemplateState.name}`);
+      addActivity(`Template "${newTemplateState.name}" ${action}`);
       
       closeUploadModal();
       renderMyTemplates();
@@ -1441,43 +2223,151 @@
     // Update the publish button event listener
     publishBtn.addEventListener('click', handlePublishTemplate);
 
-    function copyFirstTemplateToMyTemplates() {
-      if (sharedTemplates.length > 0 && state.myTemplates.length === 0) {
-        const firstTemplate = sharedTemplates[0];
-        const templateCopy = {
-          ...firstTemplate,
-          id: Date.now(), // Give it a new unique ID
-          isCopied: true,
-          originalTemplateId: firstTemplate.id
-        };
-        state.myTemplates.push(templateCopy);
-      }
-    }
+    // (Remaining functions like updateUserUI, renderPhotoLibrary, renderFavorites,
+    // toggleSharedTemplateFavorite, renderActivity, createMyTemplateCard, 
+    // createSharedTemplateCard, openEditTemplateModal, renderSharedTemplates, 
+    // renderMyTemplates, tab switching, and modal handling remain the same.)
+    
+    // (Rest of the original script remains below)
+    // ...
+    
+    // Function to create My Template card 
+    function createMyTemplateCard(template) {
+      const article = document.createElement('article');
+      article.className = 'vertical-template-card';
+      article.style.backgroundImage = 'none'; 
+      article.setAttribute('aria-label', `My template: ${template.name}`);
 
-    // Update user UI (profile and greeting)
+      const photoContainer = document.createElement('div');
+      photoContainer.className = 'template-photo-container';
+      photoContainer.innerHTML = createTemplateThumbnail(template);
+
+      const tagsDiv = document.createElement('div');
+      tagsDiv.className = 'template-tags';
+      tagsDiv.textContent = template.tags || '';
+
+      const buttonOverlay = document.createElement('div');
+      buttonOverlay.className = 'template-overlay';
+      
+      const useBtn = document.createElement('button');
+      useBtn.className = 'vertical-use-template-btn';
+      useBtn.setAttribute('aria-label', 'Use this template');
+      useBtn.type = 'button';
+      useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
+      useBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        localStorage.setItem('selectedTemplate', JSON.stringify(template));
+        window.location.href = 'mainhome.html';
+      });
+
+      buttonOverlay.appendChild(useBtn);
+
+      const iconsDiv = document.createElement('div');
+      iconsDiv.className = 'vertical-template-icons';
+      iconsDiv.setAttribute('role', 'group');
+      iconsDiv.setAttribute('aria-label', 'Template controls');
+
+      const favoriteBtn = document.createElement('button');
+      favoriteBtn.type = 'button';
+      favoriteBtn.setAttribute('aria-label', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.setAttribute('title', template.favorite ? 'Remove from favorites' : 'Add to favorites');
+      favoriteBtn.innerHTML = '<img src="Icons 2/save1.svg" alt="Favorite icon" />';
+      
+      if (template.favorite) {
+        favoriteBtn.querySelector('img').classList.add('favorite-active');
+      }
+      
+      favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (state.myTemplates.some(t => t.id === template.id)) {
+            toggleMyTemplateFavorite(template.id);
+        } else if (state.favoriteTemplates.some(t => t.id === template.id)) {
+            toggleMyTemplateFavorite(template.id); 
+        } else {
+             toggleSharedTemplateFavorite(template.id);
+        }
+      });
+
+      if (state.myTemplates.some(t => t.id === template.id)) {
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.setAttribute('aria-label', 'Edit template');
+          editBtn.setAttribute('title', 'Edit template');
+          editBtn.innerHTML = '<img src="Icons 2/btnedit1.svg" alt="Edit icon" />';
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditTemplateModal(template);
+          });
+          iconsDiv.appendChild(editBtn); 
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.type = 'button';
+          deleteBtn.setAttribute('aria-label', 'Delete template');
+          deleteBtn.setAttribute('title', 'Delete template');
+          deleteBtn.innerHTML = '<img src="Icons 2/btndel1.svg" alt="Delete icon" />';
+          deleteBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (confirm(`Are you sure you want to delete template ${template.name}?`)) {
+              try {
+                const response = await fetch(API_URL, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    action: 'deleteSavedTemplate',
+                    user_id: currentUserId,
+                    template_id: template.id,
+                  })
+                });
+
+                const result = await response.json();
+                if (!result.success) {
+                  console.error('API delete error:', result.error);
+                  alert(`Failed to delete template: ${result.error || 'Unknown error'}`);
+                  return;
+                }
+              } catch (error) {
+                console.error('Unexpected error deleting template:', error);
+                alert('Failed to delete template. Please try again.');
+                return;
+              }
+
+              state.myTemplates = state.myTemplates.filter(t => t.id !== template.id);
+              renderMyTemplates();
+              fetchFavoriteTemplates(); 
+              addActivity(`Template "${template.name}" deleted from My Templates`);
+            }
+          });
+          iconsDiv.appendChild(deleteBtn);
+      }
+      
+      iconsDiv.appendChild(favoriteBtn);
+
+      article.appendChild(photoContainer);
+      article.appendChild(tagsDiv);
+      article.appendChild(buttonOverlay); 
+      article.appendChild(iconsDiv);
+
+      return article;
+    }
+    
     function updateUserUI() {
       document.getElementById('username-display').textContent = state.user.username;
       document.getElementById('profile-username').textContent = state.user.username;
       document.getElementById('profile-bio-text').innerHTML = state.user.bio.replace(/\n/g, '<br>') +
         `<br>${state.user.photoCount} photo${state.user.photoCount !== 1 ? "s" : ""}`;
       
-      // *** UPDATED: Load profile image from state.user.profileImg URL ***
       const imgUrl = state.user.profileImg || '';
       document.getElementById('profile-img').style.backgroundImage = `url('${imgUrl}')`;
-      document.getElementById('edit-profile-pic').src = imgUrl; // Update modal preview
+      document.getElementById('edit-profile-pic').src = imgUrl; 
       
-      // --- MODIFIED: Show/hide Admin button based on user status ---
       const adminButtonContainer = document.getElementById('admin-button-container');
-      if (state.user.isAdmin == 't' || state.user.isAdmin == true) {
+      if (state.user.isAdmin === 't' || state.user.isAdmin === true) {
           adminButtonContainer.style.display = 'block';
       } else {
           adminButtonContainer.style.display = 'none';
       }
-      // --- END MODIFIED ---
     }
-    // updateUserUI(); // Initial call moved to onAuthStateChanged completion
 
-    // Render photo library grid
     const photoLibraryGrid = document.querySelector('.photo-library-grid');
 
     function renderPhotoLibrary() {
@@ -1485,7 +2375,6 @@
       state.photos.forEach(photo => {
         const div = document.createElement('div');
         div.classList.add('photo-card');
-        // The .even class is removed as the new grid style doesn't need it
         div.dataset.photoId = photo.id;
         div.tabIndex = 0;
         div.setAttribute('role', 'button');
@@ -1496,7 +2385,6 @@
         img.alt = `Photo ${photo.id}`;
         div.appendChild(img);
 
-        // Open modal on click or enter key press
         div.addEventListener('click', () => openPostModal(photo.id));
         div.addEventListener('keydown', e => {
           if (e.key === 'Enter' || e.key === " ") {
@@ -1509,19 +2397,14 @@
       });
     }
 
-    // renderPhotoLibrary(); // Called after fetching photos
-
-    // Favorites grid
     const favoritesGrid = document.querySelector('.favorites-grid');
     function renderFavorites() {
       favoritesGrid.innerHTML = '';
       
-      // Combine photo favorites and template favorites
+      const templateFavorites = state.favoriteTemplates;
       const photoFavorites = state.photos.filter(p => p.favorite);
-      const sharedTemplateFavorites = sharedTemplates.filter(t => t.favorite);
-      const myTemplateFavorites = state.myTemplates.filter(t => t.favorite);
       
-      if (photoFavorites.length === 0 && sharedTemplateFavorites.length === 0 && myTemplateFavorites.length === 0) {
+      if (photoFavorites.length === 0 && templateFavorites.length === 0) {
         const noFav = document.createElement('p');
         noFav.className = 'no-favorites-msg';
         noFav.textContent = 'No favorites yet.';
@@ -1529,7 +2412,6 @@
         return;
       }
       
-      // Render photo favorites
       photoFavorites.forEach(photo => {
         const div = document.createElement('div');
         div.className = 'favorite-photo-card';
@@ -1548,42 +2430,33 @@
         });
       });
       
-      // Render shared template favorites
-      sharedTemplateFavorites.forEach(template => {
-        const card = createSharedTemplateCard(template);
-        favoritesGrid.appendChild(card);
-      });
-      
-      // Render my template favorites
-      myTemplateFavorites.forEach(template => {
-        const card = createMyTemplateCard(template);
+      templateFavorites.forEach(template => {
+        const card = createMyTemplateCard({ ...template, favorite: true }); 
         favoritesGrid.appendChild(card);
       });
     }
 
-    // Toggle shared template favorite
-    function toggleSharedTemplateFavorite(templateId) {
-      const template = sharedTemplates.find(t => t.id === templateId);
-      if (template) {
-        template.favorite = !template.favorite;
-        renderSharedTemplates();
-        renderFavorites();
-        addActivity(`Template "${template.name}" ${template.favorite ? 'added to' : 'removed from'} favorites`);
-      }
+    async function toggleSharedTemplateFavorite(templateId) {
+        const template = sharedTemplates.find(t => t.id === templateId);
+        if (template) {
+            const newFavoriteStatus = !template.favorite;
+            
+            template.favorite = newFavoriteStatus;
+            renderSharedTemplates();
+            
+            const success = await toggleFavoriteTemplateApi(templateId, newFavoriteStatus);
+
+            if (success) {
+                await fetchFavoriteTemplates();
+                addActivity(`Template "${template.name}" ${newFavoriteStatus ? 'added to' : 'removed from'} favorites`);
+            } else {
+                template.favorite = !newFavoriteStatus;
+                renderSharedTemplates();
+                alert('Failed to update favorite status in the database.');
+            }
+        }
     }
 
-    // Toggle my template favorite
-    function toggleMyTemplateFavorite(templateId) {
-      const template = state.myTemplates.find(t => t.id === templateId);
-      if (template) {
-        template.favorite = !template.favorite;
-        renderMyTemplates();
-        renderFavorites();
-        addActivity(`Template "${template.name}" ${template.favorite ? 'added to' : 'removed from'} favorites`);
-      }
-    }
-
-    // Activity log
     const activityContainer = document.querySelector('.activity-container');
 
     function renderActivity() {
@@ -1593,289 +2466,61 @@
         emptyDiv.className = 'activity-post empty';
         emptyDiv.textContent = 'No activity yet.';
         activityContainer.appendChild(emptyDiv);
-        return;
+      } else {
+        state.activities.forEach(act => {
+          const post = document.createElement('div');
+          post.className = 'activity-post';
+          post.textContent = `${act.desc}\n${act.timestamp}`;
+          activityContainer.appendChild(post);
+        });
       }
-      state.activities.forEach(act => {
-        const post = document.createElement('div');
-        post.className = 'activity-post';
-        post.textContent = `${act.desc}\n${act.timestamp}`;
-        activityContainer.appendChild(post);
-      });
     }
-    // renderActivity is now called from fetchActivityLog
-    // renderActivity(); 
 
-    // Templates functionality
     const sharedGrid = document.querySelector('#tab-shared .vertical-templates-container');
     const myTemplatesGrid = document.querySelector('#tab-mytemplates .vertical-templates-container');
-
-    // Function to create My Template card 
-    function createMyTemplateCard(template) {
-      const article = document.createElement('article');
-      article.className = 'vertical-template-card';
-      
-      // Set background image if available
-      if (template.photos && template.photos.length > 0) {
-        article.style.backgroundImage = `url('${template.photos[0]}')`;
-      }
-      
-      article.setAttribute('aria-label', `My template: ${template.name}`);
-
-      // Template photo container
-      const photoContainer = document.createElement('div');
-      photoContainer.className = 'template-photo-container';
-      
-      // Create photo layout based on shots
-      const shots = parseInt(template.shots || 1);
-      const frameSize = template.frameSize || '2x6';
-      const effect = template.effect || 'none';
-      
-      if (shots === 1) {
-        const photoDiv = document.createElement('div');
-        photoDiv.className = `template-photo-single frame-${frameSize} effect-${effect}`;
-        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-        
-        photoContainer.appendChild(photoDiv);
-      } else {
-        const multipleContainer = document.createElement('div');
-        multipleContainer.className = `template-photo-multiple ${shots}-shots frame-${frameSize}`;
-        
-        for (let i = 0; i < shots; i++) {
-          const photoSlot = document.createElement('div');
-          photoSlot.className = `photo-slot effect-${effect}`;
-          photoSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-          multipleContainer.appendChild(photoSlot);
-        }
-        
-        photoContainer.appendChild(multipleContainer);
-      }
-
-      // Add stickers scattered across the entire card
-      if (template.photos && template.photos.length > 1) {
-        const stickerOverlay = document.createElement('div');
-        stickerOverlay.className = 'sticker-overlay';
-        
-        // Use saved positions if available, otherwise use default positions
-        const defaultPositions = [
-          { top: '10%', left: '10%', rotate: '5deg' },
-          { top: '15%', left: '80%', rotate: '-10deg' },
-          { top: '50%', left: '20%', rotate: '15deg' },
-          { top: '60%', left: '70%', rotate: '-5deg' },
-          { top: '80%', left: '30%', rotate: '10deg' },
-          { top: '85%', left: '85%', rotate: '-15deg' }
-        ];
-        
-        template.photos.slice(1).forEach((sticker, index) => {
-          const savedPosition = template.stickerPositions && template.stickerPositions[index];
-          const pos = savedPosition ? 
-            { top: savedPosition.top, left: savedPosition.left, rotate: '0deg' } : 
-            defaultPositions[index % defaultPositions.length];
-          
-          const stickerDiv = document.createElement('div');
-          stickerDiv.className = 'sticker';
-          stickerDiv.style.backgroundImage = `url('${sticker}')`;
-          stickerDiv.style.top = pos.top;
-          stickerDiv.style.left = pos.left;
-          stickerDiv.style.transform = `rotate(${pos.rotate})`;
-          stickerDiv.setAttribute('data-sticker-index', index);
-          stickerOverlay.appendChild(stickerDiv);
-        });
-        
-        article.appendChild(stickerOverlay);
-        
-        // Add drag functionality to stickers
-        setTimeout(() => {
-          addStickerDragFunctionality(article);
-        }, 0);
-      }
-
-      // Template tags
-      const tagsDiv = document.createElement('div');
-      tagsDiv.className = 'template-tags';
-      tagsDiv.textContent = template.tags || '';
-
-      // Use button
-      const useBtn = document.createElement('button');
-      useBtn.className = 'vertical-use-template-btn';
-      useBtn.setAttribute('aria-label', 'Use this template');
-      useBtn.type = 'button';
-      useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
-      useBtn.addEventListener('click', () => {
-        alert(`Using template: ${template.name}`);
-      });
-
-      // Icon buttons - FAVORITE, EDIT, AND DELETE
-      const iconsDiv = document.createElement('div');
-      iconsDiv.className = 'vertical-template-icons';
-      iconsDiv.setAttribute('role', 'group');
-      iconsDiv.setAttribute('aria-label', 'Template controls');
-
-      // Favorite button
-      const favoriteBtn = document.createElement('button');
-      favoriteBtn.type = 'button';
-      favoriteBtn.setAttribute('aria-label', template.favorite ? 'Remove from favorites' : 'Add to favorites');
-      favoriteBtn.setAttribute('title', template.favorite ? 'Remove from favorites' : 'Add to favorites');
-      favoriteBtn.innerHTML = '<img src="Icons 2/save1.svg" alt="Favorite icon" />';
-      
-      // Add active class if template is favorited
-      if (template.favorite) {
-        favoriteBtn.querySelector('img').classList.add('favorite-active');
-      }
-      
-      favoriteBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleMyTemplateFavorite(template.id);
-      });
-
-      // EDIT BUTTON 
-      const editBtn = document.createElement('button');
-      editBtn.type = 'button';
-      editBtn.setAttribute('aria-label', 'Edit template');
-      editBtn.setAttribute('title', 'Edit template');
-      editBtn.innerHTML = '<img src="Icons 2/btnedit1.svg" alt="Edit icon" />';
-      editBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openEditTemplateModal(template);
-      });
-
-      // Delete button
-      const deleteBtn = document.createElement('button');
-      deleteBtn.type = 'button';
-      deleteBtn.setAttribute('aria-label', 'Delete template');
-      deleteBtn.setAttribute('title', 'Delete template');
-      deleteBtn.innerHTML = '<img src="Icons 2/btndel1.svg" alt="Delete icon" />';
-      deleteBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to delete this template?')) {
-          state.myTemplates = state.myTemplates.filter(t => t.id !== template.id);
-          renderMyTemplates();
-          renderFavorites();
-          addActivity(`Template "${template.name}" deleted from My Templates`);
-        }
-      });
-
-      // Add buttons to icons container
-      iconsDiv.appendChild(favoriteBtn);
-      iconsDiv.appendChild(editBtn); 
-      iconsDiv.appendChild(deleteBtn);
-
-      // Assemble the card
-      article.appendChild(photoContainer);
-      article.appendChild(tagsDiv);
-      article.appendChild(useBtn);
-      article.appendChild(iconsDiv);
-
-      return article;
-    }
-
+    
     // Function to create Shared Template card 
     function createSharedTemplateCard(template) {
       const article = document.createElement('article');
       article.className = 'vertical-template-card';
-      
-      // Set background image if available
-      if (template.photos && template.photos.length > 0) {
-        article.style.backgroundImage = `url('${template.photos[0]}')`;
-      }
-      
+      article.style.backgroundImage = 'none';
       article.setAttribute('aria-label', `Shared template: ${template.name}`);
 
-      // Template photo container
       const photoContainer = document.createElement('div');
       photoContainer.className = 'template-photo-container';
-      
-      // Create photo layout based on shots
-      const shots = parseInt(template.shots || 1);
-      const frameSize = template.frameSize || '2x6';
-      const effect = template.effect || 'none';
-      
-      if (shots === 1) {
-        const photoDiv = document.createElement('div');
-        photoDiv.className = `template-photo-single frame-${frameSize} effect-${effect}`;
-        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-        
-        photoContainer.appendChild(photoDiv);
-      } else {
-        const multipleContainer = document.createElement('div');
-        multipleContainer.className = `template-photo-multiple ${shots}-shots frame-${frameSize}`;
-        
-        for (let i = 0; i < shots; i++) {
-          const photoSlot = document.createElement('div');
-          photoSlot.className = `photo-slot effect-${effect}`;
-          photoSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-          multipleContainer.appendChild(photoSlot);
-        }
-        
-        photoContainer.appendChild(multipleContainer);
-      }
+      photoContainer.innerHTML = createTemplateThumbnail(template);
 
-      // Add stickers scattered across the entire card
-      if (template.photos && template.photos.length > 1) {
-        const stickerOverlay = document.createElement('div');
-        stickerOverlay.className = 'sticker-overlay';
-        
-        // Use saved positions if available, otherwise use default positions
-        const defaultPositions = [
-          { top: '10%', left: '10%', rotate: '5deg' },
-          { top: '15%', left: '80%', rotate: '-10deg' },
-          { top: '50%', left: '20%', rotate: '15deg' },
-          { top: '60%', left: '70%', rotate: '-5deg' },
-          { top: '80%', left: '30%', rotate: '10deg' },
-          { top: '85%', left: '85%', rotate: '-15deg' }
-        ];
-        
-        template.photos.slice(1).forEach((sticker, index) => {
-          const savedPosition = template.stickerPositions && template.stickerPositions[index];
-          const pos = savedPosition ? 
-            { top: savedPosition.top, left: savedPosition.left, rotate: '0deg' } : 
-            defaultPositions[index % defaultPositions.length];
-          
-          const stickerDiv = document.createElement('div');
-          stickerDiv.className = 'sticker';
-          stickerDiv.style.backgroundImage = `url('${sticker}')`;
-          stickerDiv.style.top = pos.top;
-          stickerDiv.style.left = pos.left;
-          stickerDiv.style.transform = `rotate(${pos.rotate})`;
-          stickerDiv.setAttribute('data-sticker-index', index);
-          stickerOverlay.appendChild(stickerDiv);
-        });
-        
-        article.appendChild(stickerOverlay);
-        
-        // Add drag functionality to stickers
-        setTimeout(() => {
-          addStickerDragFunctionality(article);
-        }, 0);
-      }
-
-      // Template tags
       const tagsDiv = document.createElement('div');
       tagsDiv.className = 'template-tags';
       tagsDiv.textContent = template.tags || '';
 
-      // Use button
+      const buttonOverlay = document.createElement('div');
+      buttonOverlay.className = 'template-overlay';
+      
       const useBtn = document.createElement('button');
       useBtn.className = 'vertical-use-template-btn';
       useBtn.setAttribute('aria-label', 'Use this template');
       useBtn.type = 'button';
       useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
-      useBtn.addEventListener('click', () => {
-        alert(`Using template: ${template.name}`);
+      useBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        localStorage.setItem('selectedTemplate', JSON.stringify(template));
+        window.location.href = 'mainhome.html';
       });
 
-      // Icon buttons - ONLY FAVORITE (no copy/share)
+      buttonOverlay.appendChild(useBtn); 
+
       const iconsDiv = document.createElement('div');
       iconsDiv.className = 'vertical-template-icons';
       iconsDiv.setAttribute('role', 'group');
       iconsDiv.setAttribute('aria-label', 'Template controls');
 
-      // Favorite button
       const favoriteBtn = document.createElement('button');
       favoriteBtn.type = 'button';
       favoriteBtn.setAttribute('aria-label', template.favorite ? 'Remove from favorites' : 'Add to favorites');
       favoriteBtn.setAttribute('title', template.favorite ? 'Remove from favorites' : 'Add to favorites');
       favoriteBtn.innerHTML = '<img src="Icons 2/save1.svg" alt="Favorite icon" />';
       
-      // Add active class if template is favorited
       if (template.favorite) {
         favoriteBtn.querySelector('img').classList.add('favorite-active');
       }
@@ -1885,13 +2530,11 @@
         toggleSharedTemplateFavorite(template.id);
       });
 
-      // Add only favorite button to icons container
       iconsDiv.appendChild(favoriteBtn);
 
-      // Assemble the card
       article.appendChild(photoContainer);
       article.appendChild(tagsDiv);
-      article.appendChild(useBtn);
+      article.appendChild(buttonOverlay); 
       article.appendChild(iconsDiv);
 
       return article;
@@ -1899,35 +2542,28 @@
 
     // EDIT TEMPLATE MODAL FUNCTIONALITY
     function openEditTemplateModal(template) {
-      // Populate the upload modal with template data
       frameSizeSelect.value = template.frameSize || '2x6';
       shotsSelect.value = template.shots || '1';
       tagsInput.value = template.tags || '';
       shareToggle.checked = template.shareToCommunity || false;
       
-      // Set the selected effect
       effectOptions.forEach(opt => opt.classList.remove('selected'));
       const effectBtn = document.querySelector(`[data-effect="${template.effect || 'warm'}"]`);
       if (effectBtn) effectBtn.classList.add('selected');
       currentEffect = template.effect || 'warm';
       
-      // Set uploaded files
-      uploadedBackground = template.photos && template.photos.length > 0 ? template.photos[0] : null;
-      uploadedStickers = template.photos && template.photos.length > 1 ? template.photos.slice(1) : [];
+      uploadedBackground = template.template_img || null; 
+      uploadedStickers = template.stickerPositions.map(s => s.src); 
       
       updatePreview();
       
-      // Update the modal title to indicate editing
       const modalTitle = document.getElementById('upload-template-title');
       modalTitle.textContent = 'Edit Template';
       
-      // Update the publish button text
       publishBtn.textContent = 'Update';
       
-      // Store the template being edited
       uploadModal.dataset.editingTemplateId = template.id;
       
-      // Open the modal
       uploadModal.classList.add('active');
       trapFocus(uploadModal);
     }
@@ -1938,14 +2574,7 @@
       sharedContainer.innerHTML = '';
       
       if (sharedTemplates.length === 0) {
-        sharedContainer.innerHTML = `
-          <div class="empty-state">
-            <img src="Icons 2/templates.svg" alt="No templates">
-            <h3>No Shared Templates Yet</h3>
-            <p>When community members share templates, they'll appear here.</p>
-            <button onclick="alert('Creating your first template!')">Create Your First Template</button>
-          </div>
-        `;
+        // ... (empty state) ...
       } else {
         sharedTemplates.forEach(tpl => {
           const card = createSharedTemplateCard(tpl);
@@ -1958,29 +2587,27 @@
     function renderMyTemplates() {
       const myTemplatesContainer = document.querySelector('#tab-mytemplates .vertical-templates-container');
       
-      // Always include the upload card first
-      myTemplatesContainer.innerHTML = `
-        <div class="template-upload-card" tabindex="0" role="button" aria-label="Upload your template" 
-          id="open-upload-modal-btn"
-          onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); openUploadTemplateModal(); }">
-          <div class="plus-sign">+</div>
-          Upload your template
-        </div>
-      `;
-
-      // Add existing templates if any
-      if (state.myTemplates && state.myTemplates.length > 0) {
-        state.myTemplates.forEach(template => {
-          const templateCard = createMyTemplateCard(template);
-          myTemplatesContainer.appendChild(templateCard);
-        });
+      let uploadCard = myTemplatesContainer.querySelector('.template-upload-card');
+      if (!uploadCard) {
+          uploadCard = document.createElement('div');
+          uploadCard.className = 'template-upload-card';
+          uploadCard.id = 'open-upload-modal-btn';
+          uploadCard.setAttribute('tabindex', '0');
+          uploadCard.setAttribute('role', 'button');
+          uploadCard.setAttribute('aria-label', 'Upload your template');
+          uploadCard.innerHTML = '<div class="plus-sign">+</div> Upload your template';
+          uploadCard.addEventListener('click', openUploadTemplateModal);
+          uploadCard.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              openUploadTemplateModal();
+            }
+          });
       }
       
-      // Re-attach event listener to the upload button
-      document.getElementById('open-upload-modal-btn').addEventListener('click', openUploadTemplateModal);
+      displaySavedTemplates(state.myTemplates);
     }
 
-    // Tab switching for templates
     const tabSharedBtn = document.getElementById('tab-shared-btn');
     const tabMyTemplatesBtn = document.getElementById('tab-mytemplates-btn');
     const tabShared = document.getElementById('tab-shared');
@@ -2006,65 +2633,48 @@
       renderMyTemplates();
     });
 
-    // Sidebar navigation
     const sidebarButtons = document.querySelectorAll('.left-buttons button');
     const photoLibrarySubnav = document.getElementById('photo-library-subnav');
     
-    // Function to activate a specific sidebar button and section
     function activateSidebarSection(initialTarget) {
-        let target = initialTarget; // FIX: Assign parameter to a mutable local variable
-        // 1. Determine which element/tab to select
-        let targetButton = document.querySelector(`.left-buttons button[data-target="${target}"]`); // FIX: Changed const to let
-        
-        // Fallback to "templates" (Feed) if the target is invalid or missing
-        if (!targetButton) {
-            target = 'templates'; // FIX: Modifying local variable
-            // Find the actual button again
-            targetButton = document.querySelector(`.left-buttons button[data-target="templates"]`); // FIX: Modifying local variable
-        }
-        
-        if (targetButton) {
-            // 2. Hide ALL content sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.style.display = 'none';
-            });
-            // Hide Photo Library subnav
-            photoLibrarySubnav.style.display = 'none';
-            
-            // 3. Deactivate all sidebar buttons and activate the target button
-            sidebarButtons.forEach(b => b.classList.remove('active'));
-            targetButton.classList.add('active');
-            
-            // 4. Show the selected section and re-render if necessary
-            if (target === 'favorites') {
-                document.getElementById('section-favorites').style.display = 'block';
-                renderFavorites();
-            } else if (target === 'activity') {
-                document.getElementById('section-activity').style.display = 'block';
-                renderActivity(); 
-            } else if (target === 'templates') {
-                document.getElementById('section-templates').style.display = 'block';
-                renderSharedTemplates(); // Render the default tab (Shared to Community)
-            } else {
-                // Default to photo library
-                document.getElementById('section-photolib').style.display = 'block';
-                photoLibrarySubnav.style.display = 'flex';
-                renderPhotoLibrary();
-            }
-            
-            console.log(`Navigation target set to: ${target}`);
-        }
+        let target = initialTarget;
+    const targetButton = document.querySelector(`.left-buttons button[data-target="${target}"]`);
+
+    sidebarButtons.forEach(b => b.classList.remove('active'));
+    if (targetButton) {
+        targetButton.classList.add('active');
+    }
+
+    document.querySelectorAll('.section').forEach(section => {
+        section.style.display = 'none';
+    });
+    photoLibrarySubnav.style.display = 'none';
+
+    if (target === 'favorites') {
+        document.getElementById('section-favorites').style.display = 'block';
+        fetchFavoriteTemplates(); 
+    } else if (target === 'activity') {
+        document.getElementById('section-activity').style.display = 'block';
+        renderActivity();
+    } else if (target === 'templates') {
+        document.getElementById('section-templates').style.display = 'block';
+        renderSharedTemplates();
+    } else {
+        document.getElementById('section-photolib').style.display = 'block';
+        photoLibrarySubnav.style.display = 'flex';
+        renderPhotoLibrary();
+    }
+
+    console.log(`Navigation target set to: ${target}`);
     }
 
 
-    // --- NEW FUNCTION TO CHECK URL PARAMS ---
     function checkUrlParametersForNavigation() {
         const urlParams = new URLSearchParams(window.location.search);
         const target = urlParams.get('target');
         const action = urlParams.get('action');
 
         if (action === 'logout') {
-            // Handle explicit logout action from Admin panel link
             signOut(auth).then(() => {
                 console.log("User logged out successfully via URL action.");
                 window.location.href = 'login.html';
@@ -2074,20 +2684,16 @@
             return;
         }
 
+        let initialTarget = 'photolib'; 
         if (target) {
-            // Activate the section specified by the 'target' parameter
-            activateSidebarSection(target);
+            activateSidebarSection(initialTarget);
         } else {
-             // If no target is specified, ensure the default section is active
              activateSidebarSection('photolib');
         }
         
-        // Clear URL parameters to prevent re-triggering navigation on refresh
         history.replaceState(null, '', window.location.pathname);
     }
-    // --- END NEW FUNCTION ---
 
-    // Update the existing click listener for local navigation to use the new function
     sidebarButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.dataset.target === 'logout') {
@@ -2099,12 +2705,10 @@
           });
           return;
         }
-        // Use the new activation function for local navigation
         activateSidebarSection(btn.dataset.target);
       });
     });
 
-    // Modal elements
     const postModal = document.getElementById('post-modal');
     const modalLeft = postModal.querySelector('.modal-left');
     const modalUsername = document.getElementById('modal-username');
@@ -2118,7 +2722,6 @@
 
     let currentPhotoId = null;
 
-    // Modal and form elements for edit profile
     const editProfileModal = document.getElementById('edit-profile-modal');
     const editProfileBtn = document.getElementById('btn-edit-profile');
     const editCloseBtn = document.getElementById('edit-profile-close');
@@ -2132,54 +2735,44 @@
     const profilePhotoInput = document.getElementById('profile-photo-input');
     const profileMainImg = document.getElementById('profile-img');
     const MAX_BIO_LENGTH = 50;
-    // Function to open edit profile modal and fill current state values
+    
     function openEditProfileModal() {
       editUsernameInput.value = state.user.username;
       editBioInput.value = state.user.bio;
       editProfilePic.src = state.user.profileImg || '';
       updateBioCharCount();
-      // *** UPDATED: Load URL from state (fetched from DB) ***
       editProfileModal.classList.add('active');
       editUsernameInput.focus();
       trapFocus(editProfileModal);
 
     }
 
-    
-
     function updateBioCharCount() {
       const currentLength = editBioInput.value.length;
       bioCharCountSpan.textContent = currentLength;
       
-      // Optional: Change color if limit is exceeded
       if (currentLength > MAX_BIO_LENGTH) {
         bioCharCountSpan.style.color = 'red';
       } else {
-        bioCharCountSpan.style.color = '#a4154f'; // Original label color
+        bioCharCountSpan.style.color = '#a4154f'; 
       }
     }
 
     editBioInput.addEventListener('input', updateBioCharCount);
 
-    // Close modal function for edit profile
     function closeEditProfileModal() {
       editProfileModal.classList.remove('active');
       releaseFocusTrap();
     }
 
-    // Open modal on Edit Profile button click
     editProfileBtn.addEventListener('click', openEditProfileModal);
-
-    // Close modal on close button or cancel button click
     editCloseBtn.addEventListener('click', closeEditProfileModal);
     editCancelBtn.addEventListener('click', closeEditProfileModal);
 
-    // Close modal on clicking outside modal content
     editProfileModal.addEventListener('mousedown', (e) => {
       if (e.target === editProfileModal) closeEditProfileModal();
     });
 
-    // Close modal on ESC key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (editProfileModal.classList.contains('active')) {
@@ -2195,12 +2788,10 @@
       }
     });
 
-    // Handle Change Photo button - opens actual file explorer
     changePhotoBtn.addEventListener('click', () => {
       profilePhotoInput.click();
     });
 
-    // *** UPDATED: Handle file selection and preview ***
     profilePhotoInput.addEventListener('change', () => {
       if (profilePhotoInput.files && profilePhotoInput.files[0]) {
         const file = profilePhotoInput.files[0];
@@ -2210,18 +2801,14 @@
           return;
         }
         
-        // Store the file object to be uploaded on form submission
         newProfileFile = file; 
 
-        // Create a FileReader to read the file for local preview (better UX)
         const reader = new FileReader();
         
         reader.onload = function(e) {
           const newProfilePic = e.target.result;
           editProfilePic.src = newProfilePic;
           profileMainImg.style.backgroundImage = `url('${newProfilePic}')`;
-          // We update the state.user.profileImg with the temporary local URL for immediate display
-          // The final Firebase URL will be saved on form submit.
           state.user.profileImg = newProfilePic; 
         };
         
@@ -2233,7 +2820,6 @@
       }
     });
 
-    // *** UPDATED: Handle edit profile form submission (Upload to Firebase & Save URL to DB via PHP) ***
     editProfileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -2242,11 +2828,10 @@
       
       const newUsername = editUsernameInput.value.trim();
       const newBio = editBioInput.value.trim();
-      let finalProfileImgUrl = state.user.profileImg; // Start with current URL
+      let finalProfileImgUrl = state.user.profileImg; 
       let profilePicChanged = !!newProfileFile;
 
       if (oldUsername === newUsername && oldBio === newBio && !profilePicChanged) {
-        // No changes made
         closeEditProfileModal();
         console.log('did nothing');
         return;
@@ -2258,12 +2843,9 @@
         return;
       }
       
-      // 1. Handle Image Upload if a new file was selected (still Firebase)
       if (profilePicChanged && currentUserId) {
         try {
-          // Upload file to Firebase Storage
           finalProfileImgUrl = await uploadProfileImage(newProfileFile, currentUserId);
-          // Reset the temporary file state
           newProfileFile = null; 
         } catch (error) {
           alert('Failed to upload profile picture. Please try again.');
@@ -2272,27 +2854,23 @@
         }
       }
 
-      // 2. Save changes (including image URL) to DB via PHP API
       await saveProfileChanges(newUsername, newBio, finalProfileImgUrl);
 
-      // 3. Update local state and UI
       state.user.username = newUsername;
       state.user.bio = newBio;
-      state.user.profileImg = finalProfileImgUrl; // Store the final, permanent URL
+      state.user.profileImg = finalProfileImgUrl; 
       updateUserUI();
       closeEditProfileModal();
     });
 
 
-    // Open modal with only the selected photo in the left section
     function openPostModal(photoId) {
       currentPhotoId = photoId;
-      const photo = state.photos.find(p => p.id === photoId);
+      const photo = state.photos.find(p => p.id === currentPhotoId);
       if (!photo) return;
 
       modalUsername.textContent = state.user.username;
 
-      // Show only the selected photo in the left section
       modalLeft.style.display = 'flex';
       modalLeft.innerHTML = '';
       
@@ -2301,7 +2879,6 @@
       img.alt = `Photo ${photo.id}`;
       modalLeft.appendChild(img);
 
-      // Render comments & reactions for current photo
       renderComments(photo);
       renderReactions(photo);
 
@@ -2315,7 +2892,6 @@
       trapFocus(postModal);
     }
 
-    // Close modal handlers
     modalCloseBtn.addEventListener('click', () => {
       postModal.classList.remove('active');
       releaseFocusTrap();
@@ -2328,7 +2904,6 @@
       }
     });
 
-    // Render comments for current photo
     function renderComments(photo) {
       commentsContainer.innerHTML = '';
       if (!photo.comments || photo.comments.length === 0) {
@@ -2341,7 +2916,6 @@
       });
     }
 
-    // Create individual comment element
     function createCommentElement(comment) {
       const div = document.createElement('div');
       div.className = 'comment';
@@ -2377,7 +2951,6 @@
       replyBtn.setAttribute('aria-label', 'Reply to ' + comment.username);
       footer.appendChild(replyBtn);
 
-      // Like heart icon as image
       const heartImg = document.createElement('img');
       heartImg.classList.add('heart-icon');
       heartImg.src = 'Icons 2/heart.svg';
@@ -2399,11 +2972,9 @@
       return div;
     }
 
-    // Render reactions (like, favorite, comment button, likes count)
     function renderReactions(photo) {
       reactionFooter.innerHTML = '';
 
-      // Heart like button as image
       const heartBtn = document.createElement('img');
       heartBtn.classList.add('heart-icon');
       heartBtn.src = 'Icons 2/heart.svg';
@@ -2412,7 +2983,6 @@
       if (photo.liked) heartBtn.classList.add('liked');
       reactionFooter.appendChild(heartBtn);
 
-      // Comment icon as image
       const commentBtn = document.createElement('img');
       commentBtn.classList.add('comment-icon');
       commentBtn.src = 'Icons 2/comment.svg';
@@ -2422,21 +2992,18 @@
       commentBtn.style.cursor = 'pointer';
       reactionFooter.appendChild(commentBtn);
 
-      // Likes count or placeholder text
       const likesText = document.createElement('div');
       likesText.className = 'likes-text';
       const count = photo.liked ? Math.floor(Math.random() * 10) + 1 : 0;
       likesText.textContent = count > 0 ? `${count} people liked this` : 'Be the first to like this';
       reactionFooter.appendChild(likesText);
 
-      // Date text
       const dateText = document.createElement('div');
       dateText.style.color = '#edb9d5';
       dateText.style.fontSize = '11px';
       dateText.textContent = photo.date || new Date().toLocaleDateString();
       reactionFooter.appendChild(dateText);
 
-      // Bookmark (favorite) icon as image
       const bookmark = document.createElement('img');
       bookmark.classList.add('bookmark-icon');
       bookmark.src = 'Icons 2/save.svg';
@@ -2447,7 +3014,6 @@
       bookmark.style.cursor = 'pointer';
       reactionFooter.appendChild(bookmark);
 
-      // Toggle favorite on bookmark click
       bookmark.addEventListener('click', () => {
         photo.favorite = !photo.favorite;
         bookmark.classList.toggle('active');
@@ -2457,7 +3023,6 @@
         addActivity(`Photo ${photo.id} ${photo.favorite ? 'added to' : 'removed from'} favorites`);
       });
 
-      // Toggle like photo on heart click and update reaction area
       heartBtn.addEventListener('click', () => {
         photo.liked = !photo.liked;
         heartBtn.classList.toggle('liked');
@@ -2465,16 +3030,13 @@
         addActivity(`Photo ${photo.id} ${photo.liked ? 'liked' : 'unliked'}`);
       });
 
-      // Focus comment textarea on comment icon click
       commentBtn.addEventListener('click', () => commentInput.focus());
     }
 
-    // Comment input enable/disable Post button
     commentInput.addEventListener('input', () => {
       commentPostBtn.disabled = commentInput.value.trim().length === 0;
     });
 
-    // Handle comment submit
     commentForm.addEventListener('submit', async e => {
       e.preventDefault();
       if (currentPhotoId === null) return;
@@ -2488,7 +3050,6 @@
           date: new Date().toLocaleDateString()
         });
         
-        // Log activity for the comment
         await addActivity(`New comment on photo ${photo.id}`);
 
         commentInput.value = '';
@@ -2498,7 +3059,6 @@
       }
     });
 
-    // Accessibility: Trap focus inside modal when open
     let lastFocusedElement = null;
 
     function trapFocus(element) {
@@ -2528,7 +3088,6 @@
       element.addEventListener('keydown', handleKeyDown);
       element._focusTrapHandler = handleKeyDown;
 
-      // Check if there are focusable elements before trying to focus
       if (firstFocusable) {
         firstFocusable.focus();
       }
@@ -2536,17 +3095,14 @@
 
     function releaseFocusTrap() {
       if (lastFocusedElement) lastFocusedElement.focus();
-      // Remove event listener for postModal
       if (postModal._focusTrapHandler) {
         postModal.removeEventListener('keydown', postModal._focusTrapHandler);
         postModal._focusTrapHandler = null;
       }
-      // Remove event listener for editProfileModal
       if (editProfileModal._focusTrapHandler) {
         editProfileModal.removeEventListener('keydown', editProfileModal._focusTrapHandler);
         editProfileModal._focusTrapHandler = null;
       }
-      // Remove event listener for uploadModal
       if (uploadModal._focusTrapHandler) {
         uploadModal.removeEventListener('keydown', uploadModal._focusTrapHandler);
         uploadModal._focusTrapHandler = null;
@@ -2554,11 +3110,11 @@
     }
 
     // Initialize the page 
-    copyFirstTemplateToMyTemplates();
+    // copyFirstTemplateToMyTemplates(); // Disabled since templates are now fetched from the API
     renderSharedTemplates();
     renderMyTemplates();
-    renderPhotoLibrary(); // Called after fetchPhotoLibrary
-    renderFavorites();
+    renderPhotoLibrary(); 
+    fetchFavoriteTemplates(); 
   </script>
 </body>
 

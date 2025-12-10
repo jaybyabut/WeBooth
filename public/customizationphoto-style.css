@@ -367,6 +367,12 @@ textarea.custom-input {
     margin-bottom: 0;
 }
 
+/* 4x6 1-shot layout - image spans full width */
+.photobooth-template-container.layout-4x6.layout-single .photo-strip-image {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
 /* Sticker overlay and Footer positioning for 4x6 grid */
 .photobooth-template-container.layout-4x6 .sticker-overlay-layer,
 .photobooth-template-container.layout-4x6 #text-overlay-layer {

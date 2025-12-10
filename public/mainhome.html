@@ -670,6 +670,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- End Custom Dropdown Setup ---
 
+    function normalizeFrameSizeValue(value) {
+        if (!value) return "";
+        const cleaned = value.toString().toLowerCase().replace(/\s|inches/g, '').replace(/×/g, 'x');
+        if (cleaned === '2x6') return '2 x 6';
+        if (cleaned === '4x6') return '4 x 6';
+        return value;
+    }
+
+    function setFrameSelection(value) {
+        const normalized = normalizeFrameSizeValue(value);
+        if (!normalized) return;
+        const frameOption = customFrameOptions.querySelector(`[data-value="${normalized}"]`);
+        if (!frameOption) return;
+        customFrameOptions.querySelectorAll('.frame-option').forEach(opt => opt.classList.remove('option-active'));
+        frameOption.classList.add('option-active');
+        selectedFrameText.textContent = frameOption.dataset.label || frameOption.textContent;
+        selectedFrameSize = frameOption.dataset.value;
+    }
+
+    function setShotsSelection(value) {
+        const shotValue = String(value ?? '').trim();
+        if (!shotValue) return;
+        const shotsOption = customShotsOptions.querySelector(`[data-value="${shotValue}"]`);
+        if (!shotsOption) return;
+        customShotsOptions.querySelectorAll('.shots-option').forEach(opt => opt.classList.remove('option-active'));
+        shotsOption.classList.add('option-active');
+        selectedShotsText.textContent = shotsOption.dataset.label || shotsOption.textContent;
+        selectedNumShots = parseInt(shotsOption.dataset.value, 10) || 0;
+    }
+
 
     // If retake mode is active, load the existing array of images
     if (retakeIndex !== null) {
@@ -708,6 +738,24 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     const effectButtons = document.querySelectorAll('.effect-button');
 
+    const effectClassMap = {
+        none: 'filter-none',
+        bw: 'filter-bw',
+        warm: 'filter-warm',
+        cool: 'filter-cool',
+        retro: 'filter-retro',
+        noir: 'filter-noir'
+    };
+
+    function applyEffectSelection(effectKey) {
+        const filterClass = effectClassMap[effectKey] || 'filter-none';
+        effectButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filterClass);
+        });
+        cameraPreview.classList.remove(...allFilterClasses);
+        cameraPreview.classList.add(filterClass);
+    }
+
     effectButtons.forEach(button => {
         button.addEventListener('click', () => {
             effectButtons.forEach(btn => btn.classList.remove('active'));
@@ -720,6 +768,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    function applySelectedTemplateSettings() {
+        try {
+            const stored = localStorage.getItem('selectedTemplate');
+            if (!stored) return;
+            const template = JSON.parse(stored);
+            if (!template || typeof template !== 'object') return;
+
+            if (template.frameSize) {
+                setFrameSelection(template.frameSize);
+            }
+
+            if (template.shots) {
+                setShotsSelection(template.shots);
+            }
+
+            if (template.effect) {
+                applyEffectSelection(template.effect);
+            }
+        } catch (error) {
+            console.warn('Failed to apply selected template settings:', error);
+        }
+    }
+
+    applySelectedTemplateSettings();
 
     // -------------------------------------------
     // Core Logic: Capture Functions

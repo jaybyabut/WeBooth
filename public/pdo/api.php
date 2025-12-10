@@ -4,8 +4,8 @@ header('Content-Type: application/json');
 
 // --- START CORS FIX ---
 // 1. Allow access from the specific origin where your front-end is running.
-//    (Change http://localhost:5173 if your front-end port is different)
-header('Access-Control-Allow-Origin: http://localhost:5173');
+// For local development, allow all origins. Tighten this in production.
+header('Access-Control-Allow-Origin: *');
 
 // 2. Allow the necessary methods and headers for complex requests (POST).
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -169,6 +169,11 @@ switch ($action) {
         $share = (bool)($templateData['share'] ?? false);
         $effects = $templateData['effects'];
         $template_img = $templateData['template_img'] ?? null;
+        $name = $templateData['name'] ?? null;
+
+        // Normalize payloads
+        $stickerValue = $sticker === null ? null : (is_string($sticker) ? $sticker : json_encode($sticker));
+        $textValue = $text === null ? null : (is_string($text) ? $text : json_encode($text));
 
         try {
             // Check if a template with this ID already exists for the user
@@ -176,32 +181,44 @@ switch ($action) {
             $stmt_check->execute([$user_id, $template_id]);
             
             if ($stmt_check->fetch()) {
-                // Template already exists, no need to insert
+                // Update existing template
+                $sql = "UPDATE saved_templates SET 
+                            sticker = ?, text = ?, font = ?, text_color = ?, background = ?,
+                            show_logo = ?, show_date = ?, show_time = ?,
+                            frame_size = ?, shot_count = ?, share = ?, effects = ?, template_img = ?, name = ?
+                        WHERE user_id = ? AND template_id = ?";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    $stickerValue, $textValue, $font, $text_color, $background,
+                    $show_logo, $show_date, $show_time,
+                    $frame_size, $shot_count, $share, $effects, $template_img, $name,
+                    $user_id, $template_id
+                ]);
+
                 echo json_encode([
-                    'success' => true, 
-                    'message' => 'Template already exists and was not saved again.', 
+                    'success' => true,
+                    'message' => 'Template updated successfully',
                     'template_id' => $template_id
                 ]);
-                break; // Exit the switch case after sending response
+                break;
             }
 
             // Template does not exist, perform INSERT
-            // NOTE: The saved_templates table must have 'template_id' set as PRIMARY KEY.
             $sql = "INSERT INTO saved_templates (
                         template_id, user_id, sticker, text, font, text_color, background, 
                         show_logo, show_date, show_time, 
-                        frame_size, shot_count, share, effects, template_img
+                        frame_size, shot_count, share, effects, template_img, name
                     ) VALUES (
                         ?, ?, ?, ?, ?, ?, ?, 
                         ?, ?, ?,
-                        ?, ?, ?, ?, ?
+                        ?, ?, ?, ?, ?, ?
                     )";
                     
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
-                $template_id, $user_id, $sticker, json_encode($text), $font, $text_color, $background,
+                $template_id, $user_id, $stickerValue, $textValue, $font, $text_color, $background,
                 $show_logo, $show_date, $show_time,
-                $frame_size, $shot_count, $share, $effects, $template_img
+                $frame_size, $shot_count, $share, $effects, $template_img, $name
             ]);
 
             echo json_encode([
@@ -321,6 +338,120 @@ switch ($action) {
         } catch (\PDOException $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Database error in addActivity: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'addFavoriteTemplate':
+        $template_id = $data['template_id'] ?? null;
+
+        if (!$template_id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Missing template ID']);
+            exit();
+        }
+
+        try {
+            // Avoid duplicate favorites per user/template
+            $stmt_check = $pdo->prepare("SELECT favorite_id FROM favorite_template WHERE user_id = ? AND template_id = ?");
+            $stmt_check->execute([$user_id, $template_id]);
+            $existing = $stmt_check->fetch();
+
+            if ($existing) {
+                echo json_encode(['success' => true, 'message' => 'Already favorited', 'favorite_id' => $existing['favorite_id']]);
+                break;
+            }
+
+            $stmt = $pdo->prepare("INSERT INTO favorite_template (user_id, template_id) VALUES (?, ?) RETURNING favorite_id");
+            $stmt->execute([$user_id, $template_id]);
+            $favoriteId = $stmt->fetchColumn();
+
+            echo json_encode(['success' => true, 'favorite_id' => $favoriteId]);
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Database error in addFavoriteTemplate: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'removeFavoriteTemplate':
+        $template_id = $data['template_id'] ?? null;
+
+        if (!$template_id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Missing template ID']);
+            exit();
+        }
+
+        try {
+            $stmt = $pdo->prepare("DELETE FROM favorite_template WHERE user_id = ? AND template_id = ?");
+            $stmt->execute([$user_id, $template_id]);
+
+            echo json_encode(['success' => true, 'message' => 'Favorite removed']);
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Database error in removeFavoriteTemplate: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'fetchFavoriteTemplates':
+        try {
+            $stmt = $pdo->prepare("SELECT ft.favorite_id, ft.template_id, st.name, st.frame_size, st.shot_count, st.template_img, st.effects, st.share, st.sticker, st.text, st.background
+                                    FROM favorite_template ft
+                                    JOIN saved_templates st ON st.template_id = ft.template_id
+                                    WHERE ft.user_id = ?
+                                    ORDER BY ft.favorite_id DESC");
+            $stmt->execute([$user_id]);
+            $favorites = $stmt->fetchAll();
+
+            echo json_encode(['success' => true, 'data' => $favorites]);
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Database error in fetchFavoriteTemplates: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'deleteSavedTemplate':
+        $template_id = $data['template_id'] ?? null;
+
+        if (!$template_id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Missing template ID']);
+            exit();
+        }
+
+        try {
+            $stmt = $pdo->prepare("DELETE FROM saved_templates WHERE user_id = ? AND template_id = ?");
+            $stmt->execute([$user_id, $template_id]);
+
+            echo json_encode(['success' => true, 'message' => 'Template deleted successfully']);
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Database error in deleteSavedTemplate: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'fetchSavedTemplates':
+        try {
+            $stmt = $pdo->prepare("SELECT template_id, name, frame_size, shot_count, template_img, effects, share, sticker, text, background, created_at FROM saved_templates WHERE user_id = ? ORDER BY created_at DESC");
+            $stmt->execute([$user_id]);
+            $templates = $stmt->fetchAll();
+
+            echo json_encode(['success' => true, 'data' => $templates]);
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Database error in fetchSavedTemplates: ' . $e->getMessage()]);
+        }
+        break;
+
+    case 'fetchSharedTemplates':
+        try {
+            $stmt = $pdo->prepare("SELECT template_id, name, frame_size, shot_count, template_img, effects, share, sticker, text, background, created_at, user_id FROM saved_templates WHERE share = TRUE ORDER BY created_at DESC");
+            $stmt->execute();
+            $templates = $stmt->fetchAll();
+
+            echo json_encode(['success' => true, 'data' => $templates]);
+        } catch (\PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Database error in fetchSharedTemplates: ' . $e->getMessage()]);
         }
         break;
 

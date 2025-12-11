@@ -142,7 +142,7 @@
           if (!userId) return;
 
           try {
-            const response = await fetch('http://localhost:80/api.php', {
+            const response = await fetch('http://localhost:80/public/pdo/api.php', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -1243,7 +1243,7 @@
                             activity: `Saved a new photo: "${title || 'Untitled'}"`
                         };
                         // Note: Ignoring result of activity log
-                        fetch('http://localhost:80/api.php', {
+                        fetch('http://localhost:80/public/pdo/api.php', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(activityPostData)
@@ -1259,7 +1259,7 @@
                             template_hash_id: generateTemplateHashId(collectTemplateState(null, userId)) 
                         };
 
-                        const response = await fetch('http://localhost:80/api.php', {
+                        const response = await fetch('http://localhost:80/public/pdo/api.php', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(postData)
@@ -1347,7 +1347,7 @@
                         templateSaveBtn.textContent = 'Saving to database...';
                         console.log("Saving template to database with NEW ID:", uniqueTemplateId);
                         
-                        const response = await fetch('http://localhost:80/api.php', {
+                        const response = await fetch('http://localhost:80/public/pdo/api.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1366,7 +1366,7 @@
                             
                             // 6. Automatically add template to favorites
                             try {
-                                const favoriteResponse = await fetch('http://localhost:80/api.php', {
+                                const favoriteResponse = await fetch('http://localhost:80/public/pdo/api.php', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',

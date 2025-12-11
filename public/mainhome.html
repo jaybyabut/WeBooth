@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="tab-icon.png" />
     <title>WeBooth - Ready to Snap</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -550,10 +551,11 @@ body {
     }
     
     // --- Auth Listener ---
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUserId = user.uid;
         fetchOrCreateProfile(user.uid, user.email, user.displayName);
+        // Template settings will be applied in DOMContentLoaded after DOM is ready
       } else {
         currentUserId = null;
         // Optionally redirect if not logged in: window.location.href = 'login.html';
@@ -680,24 +682,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setFrameSelection(value) {
         const normalized = normalizeFrameSizeValue(value);
+        console.log('setFrameSelection called with:', value, '-> normalized:', normalized);
         if (!normalized) return;
         const frameOption = customFrameOptions.querySelector(`[data-value="${normalized}"]`);
-        if (!frameOption) return;
+        if (!frameOption) {
+            console.warn('Frame option not found for value:', normalized);
+            return;
+        }
         customFrameOptions.querySelectorAll('.frame-option').forEach(opt => opt.classList.remove('option-active'));
         frameOption.classList.add('option-active');
         selectedFrameText.textContent = frameOption.dataset.label || frameOption.textContent;
         selectedFrameSize = frameOption.dataset.value;
+        console.log('Frame selection updated to:', selectedFrameSize);
     }
 
     function setShotsSelection(value) {
         const shotValue = String(value ?? '').trim();
+        console.log('setShotsSelection called with:', value, '-> shotValue:', shotValue);
         if (!shotValue) return;
         const shotsOption = customShotsOptions.querySelector(`[data-value="${shotValue}"]`);
-        if (!shotsOption) return;
+        if (!shotsOption) {
+            console.warn('Shots option not found for value:', shotValue);
+            return;
+        }
         customShotsOptions.querySelectorAll('.shots-option').forEach(opt => opt.classList.remove('option-active'));
         shotsOption.classList.add('option-active');
         selectedShotsText.textContent = shotsOption.dataset.label || shotsOption.textContent;
         selectedNumShots = parseInt(shotsOption.dataset.value, 10) || 0;
+        console.log('Shots selection updated to:', selectedNumShots);
     }
 
 
@@ -769,30 +781,84 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function applySelectedTemplateSettings() {
+    async function applySelectedTemplateSettings() {
         try {
-            const stored = localStorage.getItem('selectedTemplate');
-            if (!stored) return;
-            const template = JSON.parse(stored);
-            if (!template || typeof template !== 'object') return;
-
-            if (template.frameSize) {
-                setFrameSelection(template.frameSize);
+            const templateId = localStorage.getItem('selectedTemplateId');
+            
+            // Apply localStorage settings first (for immediate UI response)
+            const storedFrameSize = localStorage.getItem('frameSize');
+            const storedShots = localStorage.getItem('numShots');
+            const storedFilter = localStorage.getItem('activeFilter');
+            const storedBackground = localStorage.getItem('templateBackground');
+            
+            console.log('Applying template settings from localStorage:', {
+                storedFrameSize,
+                storedShots,
+                storedFilter,
+                hasBackground: !!storedBackground,
+                storedBackground: storedBackground // Show actual value
+            });
+            
+            // Apply frame size
+            if (storedFrameSize) {
+                setFrameSelection(storedFrameSize);
             }
-
-            if (template.shots) {
-                setShotsSelection(template.shots);
+            
+            // Apply shots
+            if (storedShots) {
+                setShotsSelection(storedShots);
             }
-
-            if (template.effect) {
-                applyEffectSelection(template.effect);
+            
+            // Apply filter/effect
+            if (storedFilter) {
+                applyEffectSelection(storedFilter);
             }
+            
+            // Note: Background will be applied in customizationphoto.html photostrip, not here
+            
+            // If template ID exists, fetch full template details from database
+            if (templateId && currentUserId) {
+                const response = await fetch('http://localhost:80/api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'fetchSavedTemplates',
+                        user_id: currentUserId
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success && result.data) {
+                    // Find the template with matching ID
+                    const dbTemplate = result.data.find(t => t.template_id === templateId);
+                    if (dbTemplate) {
+                        // Apply frame size from DB
+                        if (dbTemplate.frame_size) {
+                            setFrameSelection(dbTemplate.frame_size);
+                        }
+                        
+                        // Apply shots from DB
+                        if (dbTemplate.shot_count) {
+                            setShotsSelection(dbTemplate.shot_count);
+                        }
+                        
+                        // Apply effect from DB
+                        if (dbTemplate.effects) {
+                            applyEffectSelection(dbTemplate.effects);
+                        }
+                        
+                        // Note: Background will be applied in customizationphoto.html photostrip, not here
+                        
+                        console.log('Template settings applied from database:', dbTemplate);
+                    }
+                }
+            }
+            
+            localStorage.removeItem('selectedTemplateId'); // Clear after use
         } catch (error) {
             console.warn('Failed to apply selected template settings:', error);
         }
     }
-
-    applySelectedTemplateSettings();
 
     // -------------------------------------------
     // Core Logic: Capture Functions
@@ -957,10 +1023,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const activeFilter = activeButton ? activeButton.dataset.filter : 'filter-none';
             localStorage.setItem('activeFilter', activeFilter);
             
+            // Save template data before clearing sessionStorage
+            const templateBackgroundToPreserve = sessionStorage.getItem('templateBackground');
+            const templateStickersToPreserve = sessionStorage.getItem('templateStickers');
+            
             sessionStorage.clear();
+            
+            // Restore template data after clearing
+            if (templateBackgroundToPreserve) {
+                sessionStorage.setItem('templateBackground', templateBackgroundToPreserve);
+                console.log('[mainhome] Preserved templateBackground in sessionStorage');
+            }
+            if (templateStickersToPreserve) {
+                sessionStorage.setItem('templateStickers', templateStickersToPreserve);
+                console.log('[mainhome] Preserved templateStickers in sessionStorage');
+            }
+            
             sessionStorage.setItem('capturedImagesArray', JSON.stringify(capturedImages));
             
             console.log(`Successfully completed capture sequence. Redirecting.`);
+            console.log('Template data before redirect:', {
+                templateBackground: sessionStorage.getItem('templateBackground'),
+                templateStickers: sessionStorage.getItem('templateStickers')
+            });
             
             // Perform the redirect to the review page
             window.location.href = 'reviewshots.html';
@@ -1076,7 +1161,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const activeFilter = activeButton ? activeButton.dataset.filter : 'filter-none';
                 localStorage.setItem('activeFilter', activeFilter); 
 
+                // Save template data before clearing sessionStorage
+                const templateBackgroundToPreserve = sessionStorage.getItem('templateBackground');
+                const templateStickersToPreserve = sessionStorage.getItem('templateStickers');
+                
                 sessionStorage.clear();
+                
+                // Restore template data after clearing
+                if (templateBackgroundToPreserve) {
+                    sessionStorage.setItem('templateBackground', templateBackgroundToPreserve);
+                }
+                if (templateStickersToPreserve) {
+                    sessionStorage.setItem('templateStickers', templateStickersToPreserve);
+                }
+                
                 sessionStorage.setItem('capturedImagesArray', JSON.stringify(capturedImages)); 
                 
                 console.log('Settings saved for upload. Redirecting.');
@@ -1150,6 +1248,9 @@ document.addEventListener('DOMContentLoaded', () => {
             cameraPreview.classList.toggle('preview-flipped');
         });
     }
+    
+    // Apply template settings after DOM is ready
+    applySelectedTemplateSettings();
 });
 </script>
 

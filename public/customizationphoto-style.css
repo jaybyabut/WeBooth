@@ -399,18 +399,24 @@ textarea.custom-input {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 0.5rem;
+    height: 2.5rem; /* lock height for consistent export */
 }
 .template-footer .footer-brand img {
-    height: 2.5rem; 
-    width: auto; 
-    margin-right: 0.5rem; 
+    height: 2.5rem;
+    width: auto;
+    margin-right: 0;
     transition: all 0.2s ease;
 }
-.template-footer .footer-brand .footer-text { 
+.template-footer .footer-brand .footer-text {
+    display: inline-flex;
+    align-items: center;
+    height: 2.5rem;
+    line-height: 1;
     font-size: 1rem;
-    color: #dd3d93; 
-    font-weight: 700; 
-    font-family: 'Fredoka One', cursive; 
+    color: #dd3d93;
+    font-weight: 700;
+    font-family: 'Fredoka One', cursive;
     transition: all 0.2s ease;
 }
 
@@ -784,4 +790,25 @@ textarea.custom-input {
 .social-icon-button.saved-state svg {
     /* Style for the icon inside the 'Saved' button */
     color: white !important; 
+}
+
+.social-icon-button.favorited {
+    /* Style for favorited button - disabled state */
+    background-color: #ec4899; /* Pink background */
+    border-color: #db2777;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+.social-icon-button.favorited svg {
+    /* Style for the icon inside the favorited button */
+    color: white !important;
+    fill: white;
+}
+
+.social-icon-button.favorited:hover {
+    /* Prevent hover effects on favorited button */
+    background-color: #ec4899;
+    border-color: #db2777;
+    transform: none;
 }

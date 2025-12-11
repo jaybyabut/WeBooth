@@ -3,10 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="tab-icon.png" />
     <title>Customize Your Photo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="stylesheet" href="customizationphoto-style.css">
+    
+    <style>
+        /* Notification Toast Styles */
+        #notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 50000;
+            pointer-events: none;
+        }
+        .notification-toast {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            pointer-events: auto;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .notification-toast.success {
+            border-left: 4px solid #10b981;
+            color: #065f46;
+        }
+        .notification-toast.error {
+            border-left: 4px solid #ef4444;
+            color: #7f1d1d;
+        }
+        .notification-toast.warning {
+            border-left: 4px solid #f59e0b;
+            color: #78350f;
+        }
+        .notification-toast.info {
+            border-left: 4px solid #3b82f6;
+            color: #1e3a8a;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        .notification-toast.removing {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+    </style>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,6 +98,31 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const storage = getStorage(app);
+
+        // Notification System
+        window.showNotification = function(message, type = 'info', duration = 4000) {
+            const container = document.getElementById('notification-container') || (() => {
+                const div = document.createElement('div');
+                div.id = 'notification-container';
+                document.body.appendChild(div);
+                return div;
+            })();
+            
+            const toast = document.createElement('div');
+            toast.className = `notification-toast ${type}`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.add('removing');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+            
+            return toast;
+        };
 
         // Define a global variable to store the current user's UID
         window.currentUserId = null;
@@ -108,15 +196,41 @@
 
         // 3. REAL FIREBASE STORAGE UPLOAD FUNCTIONS
         
-        // Template Upload Function (for saving templates)
+        // Template Image Upload Function (for saving template previews)
         window.uploadTemplateImage = async (imageBlob, userId) => {
             if (!userId) {
                 throw new Error("User ID is required for image upload.");
             }
             const filename = `template-${Date.now()}.png`;
-            const storageRef = ref(storage, `template/${userId}/${filename}`); 
-            console.log(`Uploading template image to Firebase Storage: template/${userId}/${filename}`);
+            const storageRef = ref(storage, `template/${userId}/template_img/${filename}`); 
+            console.log(`Uploading template image to Firebase Storage: template/${userId}/template_img/${filename}`);
             await uploadBytes(storageRef, imageBlob, { contentType: 'image/png' });
+            const downloadURL = await getDownloadURL(storageRef);
+            return downloadURL;
+        };
+
+        // Background Image Upload Function (for template backgrounds)
+        window.uploadBackgroundImage = async (imageBlob, userId) => {
+            if (!userId) {
+                throw new Error("User ID is required for image upload.");
+            }
+            const filename = `bg-${Date.now()}.png`;
+            const storageRef = ref(storage, `template/${userId}/background/${filename}`);
+            console.log(`Uploading background image to Firebase Storage: template/${userId}/background/${filename}`);
+            await uploadBytes(storageRef, imageBlob, { contentType: 'image/png' });
+            const downloadURL = await getDownloadURL(storageRef);
+            return downloadURL;
+        };
+
+        // Sticker Upload Function (for template stickers)
+        window.uploadSticker = async (stickerBlob, userId, index) => {
+            if (!userId) {
+                throw new Error("User ID is required for image upload.");
+            }
+            const filename = `sticker-${index}-${Date.now()}.png`;
+            const storageRef = ref(storage, `template/${userId}/sticker/${filename}`);
+            console.log(`Uploading sticker to Firebase Storage: template/${userId}/sticker/${filename}`);
+            await uploadBytes(storageRef, stickerBlob, { contentType: 'image/png' });
             const downloadURL = await getDownloadURL(storageRef);
             return downloadURL;
         };
@@ -166,7 +280,7 @@
         // Pass the window.currentUserId check function outside the module
         window.checkAuthAndGetUid = () => {
             if (!window.currentUserId) {
-                alert("Authentication failed. Please log in.");
+                window.showNotification("Authentication failed. Please log in.", 'error');
                 return null;
             }
             return window.currentUserId;
@@ -174,7 +288,7 @@
 
 
         // --- APPLICATION LOGIC MOVED INTO MODULE SCOPE ---
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
         
             const saveBtn = document.getElementById('save-btn');
             const photostripElement = document.getElementById('photostrip-preview');
@@ -188,6 +302,20 @@
             // Initial settings from localStorage
             const frameSize = localStorage.getItem('frameSize') || '2x6';
             const activeFilter = localStorage.getItem('activeFilter') || 'filter-none';
+            
+            console.log('[customizationphoto] DOMContentLoaded - Full localStorage state:');
+            console.log('  - templateBackground:', localStorage.getItem('templateBackground'));
+            console.log('  - templateStickers:', localStorage.getItem('templateStickers'));
+            console.log('  - frameSize:', frameSize);
+            console.log('  - activeFilter:', activeFilter);
+            console.log('  - All localStorage keys:', Object.keys(localStorage));
+            
+            console.log('[customizationphoto] DOMContentLoaded - Full sessionStorage state:');
+            console.log('  - templateBackground:', sessionStorage.getItem('templateBackground'));
+            console.log('  - templateStickers:', sessionStorage.getItem('templateStickers'));
+            console.log('  - All sessionStorage keys:', Object.keys(sessionStorage));
+            
+            console.log('[customizationphoto] Page loaded with settings:', { frameSize, activeFilter });
             
             let capturedImages = [];
             try {
@@ -253,7 +381,7 @@
             const { stickerPathReplace, imagePathSegment } = updateStickerPaths(frameSize);
 
             // --- Initial Sticker Load based on Frame Size ---
-            const storedStickerBase = localStorage.getItem('activeStickerBase');
+            const storedStickerBase = sessionStorage.getItem('activeStickerBase') || localStorage.getItem('activeStickerBase');
             if (storedStickerBase && stickerOverlay) {
                 
                 const initialStickerSrc = storedStickerBase
@@ -263,6 +391,120 @@
                 stickerOverlay.src = initialStickerSrc;
                 stickerOverlay.style.display = 'block';
             }
+            
+            // Load template background - read from both sessionStorage and localStorage
+            const storedTemplateBackground = sessionStorage.getItem('templateBackground') || localStorage.getItem('templateBackground');
+            if (storedTemplateBackground) {
+                console.log('[customizationphoto] Applying template background:', storedTemplateBackground);
+                photoStrip.style.backgroundImage = `url(${storedTemplateBackground})`;
+                photoStrip.style.backgroundColor = 'transparent';
+                photoStrip.style.backgroundSize = 'cover';
+                photoStrip.style.backgroundPosition = 'center';
+                photoStrip.style.backgroundRepeat = 'no-repeat';
+                console.log('[customizationphoto] Template background applied to photostrip');
+                // Only remove after successfully applying
+                sessionStorage.removeItem('templateBackground');
+                localStorage.removeItem('templateBackground');
+            } else {
+                console.log('[customizationphoto] No template background in sessionStorage or localStorage');
+            }
+            
+            // Load template stickers if available - read from both sessionStorage and localStorage
+            const storedTemplateStickers = sessionStorage.getItem('templateStickers') || localStorage.getItem('templateStickers');
+            if (storedTemplateStickers) {
+                try {
+                    const stickerPositions = JSON.parse(storedTemplateStickers);
+                    console.log('[customizationphoto] Loading template stickers:', stickerPositions.length);
+                    
+                    // Apply template stickers to the photostrip
+                    stickerPositions.forEach((stickerData, index) => {
+                        const stickerDiv = document.createElement('div');
+                        stickerDiv.classList.add('template-sticker');
+                        stickerDiv.style.position = 'absolute';
+                        stickerDiv.style.backgroundImage = `url('${stickerData.src}')`;
+                        stickerDiv.style.backgroundSize = 'contain';
+                        stickerDiv.style.backgroundRepeat = 'no-repeat';
+                        stickerDiv.style.backgroundPosition = 'center';
+                        stickerDiv.style.width = '100px';
+                        stickerDiv.style.height = '100px';
+                        stickerDiv.style.top = stickerData.top || '0px';
+                        stickerDiv.style.left = stickerData.left || '0px';
+                        stickerDiv.style.transform = stickerData.rotate || 'rotate(0deg)';
+                        stickerDiv.style.pointerEvents = 'auto';
+                        stickerDiv.style.cursor = 'move';
+                        stickerDiv.style.zIndex = '10';
+                        stickerDiv.style.userSelect = 'none';
+                        stickerDiv.style.overflow = 'visible'; // Allow resize handle to show
+                        
+                        // Add to photostrip FIRST
+                        photoStrip.appendChild(stickerDiv);
+                        
+                        // Create resize handle as separate element added to photostrip (not child of sticker)
+                        const resizeHandle = document.createElement('div');
+                        resizeHandle.style.position = 'absolute';
+                        resizeHandle.style.width = '40px';
+                        resizeHandle.style.height = '40px';
+                        resizeHandle.style.backgroundColor = '#ff00ff'; // Bright magenta for visibility
+                        resizeHandle.style.borderRadius = '50%';
+                        resizeHandle.style.cursor = 'nwse-resize';
+                        resizeHandle.style.zIndex = '9999'; // Extremely high z-index
+                        resizeHandle.style.border = '4px solid yellow'; // Yellow border for visibility
+                        resizeHandle.style.boxShadow = '0 0 15px rgba(255,0,255,0.8)';
+                        resizeHandle.style.pointerEvents = 'auto';
+                        resizeHandle.style.display = 'flex';
+                        resizeHandle.style.alignItems = 'center';
+                        resizeHandle.style.justifyContent = 'center';
+                        resizeHandle.style.fontSize = '20px';
+                        resizeHandle.style.color = 'white';
+                        resizeHandle.style.fontWeight = 'bold';
+                        resizeHandle.innerHTML = '↔'; // Resize icon
+                        resizeHandle.title = 'Drag to resize sticker';
+                        
+                        // Position the resize handle at bottom-right of the sticker
+                        const updateHandlePosition = () => {
+                            const rect = stickerDiv.getBoundingClientRect();
+                            const stripRect = photoStrip.getBoundingClientRect();
+                            // Position handle at bottom-right corner of sticker, centered on the corner
+                            const leftPos = rect.right - stripRect.left - 20;
+                            const topPos = rect.bottom - stripRect.top - 20;
+                            resizeHandle.style.left = `${leftPos}px`;
+                            resizeHandle.style.top = `${topPos}px`;
+                            console.log('[customizationphoto] Resize handle position updated:', {
+                                left: leftPos,
+                                top: topPos,
+                                stickerRect: { right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height },
+                                stripRect: { left: stripRect.left, top: stripRect.top }
+                            });
+                        };
+                        
+                        updateHandlePosition();
+                        console.log('[customizationphoto] Resize handle created and appended:', {
+                            width: resizeHandle.style.width,
+                            height: resizeHandle.style.height,
+                            zIndex: resizeHandle.style.zIndex,
+                            backgroundColor: resizeHandle.style.backgroundColor,
+                            border: resizeHandle.style.border
+                        });
+                        photoStrip.appendChild(resizeHandle);
+                        
+                        // Make sticker draggable and resizable
+                        makeTemplateStickerDraggableAndResizable(stickerDiv, resizeHandle, updateHandlePosition);
+                    });
+                    
+                    console.log('[customizationphoto] Applied template stickers:', stickerPositions.length);
+                    // Only remove after successfully applying
+                    sessionStorage.removeItem('templateStickers');
+                    localStorage.removeItem('templateStickers');
+                } catch (e) {
+                    console.error('[customizationphoto] Failed to parse template stickers:', e);
+                }
+            } else {
+                console.log('[customizationphoto] No template stickers in sessionStorage or localStorage');
+            }
+            
+            // Only remove selectedTemplateId, keep others until applied
+            sessionStorage.removeItem('selectedTemplateId');
+            console.log('[customizationphoto] Cleaned up template settings');
             // ------------------------------------------------
 
 
@@ -408,7 +650,7 @@
                         document.body.removeChild(link);
 
                     } catch (error) {
-                        alert('An error occurred during download. Check the console for details.');
+                        window.showNotification('An error occurred during download. Check the console for details.', 'error');
                     }
                 });
             }
@@ -478,6 +720,14 @@
             }
             
             
+            // --- UUID GENERATOR FOR UNIQUE TEMPLATE IDs ---
+            const generateTemplateUUID = () => {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            };
+
             // --- CONTENT HASH GENERATION ---
             const getTemplateContentString = (templateState) => {
                 const dataToHash = {
@@ -502,7 +752,7 @@
             let lastSavedHash = null; 
 
             // --- Function to Collect Template State ---
-            const collectTemplateState = (templateImgUrl, userId) => {
+            const collectTemplateState = (templateImgUrl, userId, templateName = 'Custom Template') => {
                 
                 // Get all draggable text data
                 const draggableTexts = Array.from(textOverlayLayer.querySelectorAll('.draggable-text')).map(el => {
@@ -526,7 +776,7 @@
                 }
             
                 const templateState = {
-                    sticker: localStorage.getItem('activeStickerBase') || null,
+                    sticker: sessionStorage.getItem('activeStickerBase') || localStorage.getItem('activeStickerBase') || null,
                     text: draggableTexts,
                     font: fontSelect.value,
                     text_color: textColorPicker.value,
@@ -539,7 +789,7 @@
                     share: 'false', 
                     effects: activeFilter,
                     template_img: templateImgUrl, 
-                    name: 'Custom Template', 
+                    name: templateName,
                 };
 
                 const hashId = generateTemplateHashId(templateState);
@@ -602,7 +852,7 @@
                 addTextBtn.addEventListener('click', () => {
                     const text = customTextInput.value; 
                     if (text.trim() === '') {
-                        alert('Please type some text first!');
+                        window.showNotification('Please type some text first!', 'warning');
                         return;
                     }
                     
@@ -635,6 +885,89 @@
 
                     makeDraggableAndResizable(newTextElement, resizeHandleFont, resizeHandleWidth, removeHandle);
                     checkTemplateStatus(); 
+                });
+            }
+            
+            // Make template stickers draggable and resizable
+            function makeTemplateStickerDraggableAndResizable(element, resizeHandle, updateHandlePosition) {
+                console.log('[customizationphoto] Making sticker draggable and resizable:', element, resizeHandle);
+                let isDragging = false;
+                let isResizing = false;
+                let startMouseX, startMouseY;
+                let offsetX, offsetY;
+                let initialWidth, initialHeight;
+
+                element.addEventListener('mousedown', (e) => {
+                    // Check if click was on the resize handle
+                    const handleRect = resizeHandle.getBoundingClientRect();
+                    const clickX = e.clientX;
+                    const clickY = e.clientY;
+                    const onHandle = clickX >= handleRect.left && clickX <= handleRect.right && 
+                                     clickY >= handleRect.top && clickY <= handleRect.bottom;
+                    
+                    if (!onHandle) {
+                        isDragging = true;
+                        offsetX = e.clientX - element.getBoundingClientRect().left;
+                        offsetY = e.clientY - element.getBoundingClientRect().top;
+                        element.style.opacity = '0.8';
+                        console.log('[customizationphoto] Started dragging sticker');
+                        e.preventDefault();
+                    }
+                });
+
+                resizeHandle.addEventListener('mousedown', (e) => {
+                    console.log('[customizationphoto] Resize handle mousedown triggered');
+                    isResizing = true;
+                    startMouseX = e.clientX;
+                    startMouseY = e.clientY;
+                    initialWidth = element.clientWidth;
+                    initialHeight = element.clientHeight;
+                    element.style.opacity = '0.8';
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    const photoStripRect = photoStrip.getBoundingClientRect();
+
+                    if (isDragging) {
+                        let newX = e.clientX - photoStripRect.left - offsetX;
+                        let newY = e.clientY - photoStripRect.top - offsetY;
+                        
+                        // Keep within bounds
+                        newX = Math.max(0, Math.min(newX, photoStripRect.width - element.offsetWidth));
+                        newY = Math.max(0, Math.min(newY, photoStripRect.height - element.offsetHeight));
+
+                        element.style.left = `${newX}px`;
+                        element.style.top = `${newY}px`;
+                        updateHandlePosition(); // Update resize handle position when dragging
+                    } else if (isResizing) {
+                        const dx = e.clientX - startMouseX;
+                        const dy = e.clientY - startMouseY;
+                        
+                        console.log('[customizationphoto] Resizing - dx:', dx, 'dy:', dy);
+                        
+                        // Resize proportionally (use the larger movement)
+                        const movement = Math.max(dx, dy);
+                        const newWidth = Math.max(30, initialWidth + movement);
+                        const newHeight = Math.max(30, initialHeight + movement);
+                        
+                        element.style.width = `${newWidth}px`;
+                        element.style.height = `${newHeight}px`;
+                        updateHandlePosition(); // Update resize handle position when resizing
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        console.log('[customizationphoto] Stopped dragging');
+                    }
+                    if (isResizing) {
+                        console.log('[customizationphoto] Stopped resizing');
+                    }
+                    isDragging = false;
+                    isResizing = false;
+                    element.style.opacity = '1';
                 });
             }
             
@@ -771,6 +1104,8 @@
                             stickerOverlay.style.display = 'block';
                         }
                         
+                        // Store to both sessionStorage and localStorage for persistence
+                        sessionStorage.setItem('activeStickerBase', basePath);
                         localStorage.setItem('activeStickerBase', basePath);
                     }
                     checkTemplateStatus(); 
@@ -780,8 +1115,44 @@
             if (noStickerButton && stickerOverlay && photoStrip) {
                 noStickerButton.addEventListener('click', () => {
                     stickerOverlay.style.display = 'none';
+                    // Remove from both sessionStorage and localStorage
+                    sessionStorage.removeItem('activeStickerBase');
                     localStorage.removeItem('activeStickerBase');
                     checkTemplateStatus(); 
+                });
+            }
+
+            // --- SAVE TEMPLATE MODAL LOGIC (NEW - Following upload template modal pattern from finalprof.html) ---
+            const saveTemplateModalOverlay = document.getElementById('save-template-modal-overlay');
+            const templateNameInput = document.getElementById('template-name-input');
+            const templateCancelBtn = document.getElementById('template-cancel-btn');
+            const templateSaveBtn = document.getElementById('template-save-btn');
+            const templateNameError = document.getElementById('template-name-error');
+
+            function openSaveTemplateModal() {
+                if (saveTemplateModalOverlay) {
+                    saveTemplateModalOverlay.style.display = 'flex';
+                    templateNameInput.value = '';
+                    if (templateNameError) templateNameError.textContent = '';
+                    templateSaveBtn.disabled = false;
+                }
+            }
+
+            function closeSaveTemplateModal() {
+                if (saveTemplateModalOverlay) {
+                    saveTemplateModalOverlay.style.display = 'none';
+                }
+            }
+
+            if (templateCancelBtn) {
+                templateCancelBtn.addEventListener('click', closeSaveTemplateModal);
+            }
+
+            if (saveTemplateModalOverlay) {
+                saveTemplateModalOverlay.addEventListener('click', (e) => {
+                    if (e.target === saveTemplateModalOverlay) {
+                        closeSaveTemplateModal();
+                    }
                 });
             }
 
@@ -792,7 +1163,6 @@
             const modalPostBtn = document.getElementById('modal-post-btn');
             const photoTitleInput = document.getElementById('photo-title-input');
             const photoDescriptionTextarea = document.getElementById('photo-description-textarea');
-            const shareToggle = document.getElementById('share-to-community-toggle');
             const postErrorMsg = document.getElementById('post-error');
 
             const showModal = () => {
@@ -800,7 +1170,6 @@
                     modalOverlay.style.display = 'flex';
                     photoTitleInput.value = '';
                     photoDescriptionTextarea.value = '';
-                    shareToggle.checked = true;
                     if (postErrorMsg) postErrorMsg.textContent = '';
                 }
             };
@@ -838,12 +1207,18 @@
                     
                     const title = (photoTitleInput.value || '').trim();
                     const description = (photoDescriptionTextarea.value || '').trim();
-                    const share = shareToggle.checked;
 
-                    // Basic validation: title and description must not be empty
-                    if (!title || !description) {
+                    // Validation: title and description must not be empty
+                    if (!title) {
                         if (postErrorMsg) {
-                            postErrorMsg.textContent = 'Please enter both a title and a description.';
+                            postErrorMsg.textContent = 'Please enter a title for your photo.';
+                        }
+                        return;
+                    }
+
+                    if (!description) {
+                        if (postErrorMsg) {
+                            postErrorMsg.textContent = 'Please enter a description for your photo.';
                         }
                         return;
                     }
@@ -851,7 +1226,7 @@
                     if (postErrorMsg) postErrorMsg.textContent = '';
 
                     modalPostBtn.disabled = true;
-                    modalPostBtn.textContent = 'Posting...';
+                    modalPostBtn.textContent = 'Saving...';
                     
                     try {
                         // 1. CAPTURE THE FINAL IMAGE
@@ -865,7 +1240,7 @@
                         const activityPostData = {
                             action: 'addActivity',
                             user_id: userId,
-                            activity: `Posted a new photo: "${title || 'Untitled'}"`
+                            activity: `Saved a new photo: "${title || 'Untitled'}"`
                         };
                         // Note: Ignoring result of activity log
                         fetch('http://localhost:80/api.php', {
@@ -874,14 +1249,13 @@
                             body: JSON.stringify(activityPostData)
                         });
                         
-                        // 4. SAVE POST DETAILS TO SUPABASE (PostgreSQL)
+                        // 4. SAVE POST DETAILS TO DATABASE
                         const postData = {
-                            action: 'createPost', // <<< NEW ACTION
+                            action: 'createPost',
                             user_id: userId,
                             image_url: imageURL,
                             title: title,
                             description: description,
-                            share_to_community: String(share),
                             template_hash_id: generateTemplateHashId(collectTemplateState(null, userId)) 
                         };
 
@@ -894,56 +1268,84 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            console.log('Post created successfully with ID:', result.post_id);
+                            console.log('Post saved successfully with ID:', result.post_id);
                             window.location.href = `finalprof.html`;
 
                             
                         } else {
-                            console.error("API Error posting photo:", result.error);
+                            console.error("API Error saving photo:", result.error);
                         
                         }
                         
                     } catch (error) {
-                        console.error("Post creation failed:", error);
-                        alert('A critical error occurred during the posting process.');
+                        console.error("Post save failed:", error);
+                        window.showNotification('A critical error occurred during the save process.', 'error');
                     } finally {
                         modalPostBtn.disabled = false;
-                        modalPostBtn.textContent = 'Post';
+                        modalPostBtn.textContent = 'Save';
                         hideModal();
                     }
                 });
             }
             // --- END POST BUTTON IMPLEMENTATION ---
             
-            // --- SAVE BUTTON IMPLEMENTATION (Modified for Hash ID and Status Update) ---
+            // --- SAVE BUTTON IMPLEMENTATION ---
             if (saveBtn) {
-                
-                // Recheck status when the user becomes authenticated (Moved this outside DOMContentLoaded for proper module scope)
-                // We'll rely on the initial onAuthStateChanged block to set window.currentUserId
-
-                saveBtn.addEventListener('click', async (e) => {
+                saveBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    
-                    // 1. Get User ID 
                     const userId = window.checkAuthAndGetUid();
                     if (!userId) return;
+                    openSaveTemplateModal();
+                });
+            }
+
+            // Handle template save confirmation in modal
+            if (templateSaveBtn) {
+                templateSaveBtn.addEventListener('click', async () => {
+                    // Validate template name
+                    const templateName = templateNameInput.value.trim();
+                    if (!templateName) {
+                        if (templateNameError) {
+                            templateNameError.textContent = 'Please enter a template name';
+                        }
+                        return;
+                    }
+
+                    // Clear error message
+                    if (templateNameError) {
+                        templateNameError.textContent = '';
+                    }
+
+                    // Get User ID
+                    const userId = window.checkAuthAndGetUid();
+                    if (!userId) {
+                        closeSaveTemplateModal();
+                        return;
+                    }
 
                     // Disable button and show loading state
-                    saveBtn.disabled = true;
+                    templateSaveBtn.disabled = true;
+                    templateSaveBtn.textContent = 'Saving...';
 
                     try {
-                        // 2. Create the off-screen template image (placeholder shots)
+                        // 1. Create the off-screen template image
+                        templateSaveBtn.textContent = 'Generating template preview...';
                         const imageBlob = await createOffScreenTemplate(photostripElement);
                         
-                        // 3. Upload the placeholder image using the real Firebase Storage function
+                        // 2. Upload the template image to Firebase Storage
+                        templateSaveBtn.textContent = 'Uploading template...';
                         const templateImgUrl = await window.uploadTemplateImage(imageBlob, userId);
 
-                        // 4. Collect state and get the Hash ID
-                        const postData = collectTemplateState(templateImgUrl, userId);
-                        const currentHash = postData.template_id;
+                        // 3. Collect state with template name
+                        const postData = collectTemplateState(templateImgUrl, userId, templateName);
+                        
+                        // 4. Generate a NEW UNIQUE ID for this save (creates a new row each time)
+                        const uniqueTemplateId = generateTemplateUUID();
+                        postData.template_id = uniqueTemplateId;
 
-                        // 5. Send to PHP backend for UPSERT (Supabase/PostgreSQL)
-                        console.log("Saving template state to Supabase with ID:", currentHash);
+                        // 5. Send to PHP backend to CREATE a new row
+                        templateSaveBtn.textContent = 'Saving to database...';
+                        console.log("Saving template to database with NEW ID:", uniqueTemplateId);
                         
                         const response = await fetch('http://localhost:80/api.php', {
                             method: 'POST',
@@ -956,25 +1358,57 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            // On successful save (or if already existed)
-                            lastSavedHash = currentHash;
-                            setSaveButtonState(true); 
+                            // On successful save
+                            lastSavedHash = null; // Reset hash since this is a new row
+                            setSaveButtonState(false); // Reset to unsaved state
                             
-                            let message = 'Template saved successfully!';
-                            if (result.message.includes('already exists')) {
-                                message = 'Template already saved!';
+                            console.log('Template saved successfully with NEW ID:', uniqueTemplateId);
+                            
+                            // 6. Automatically add template to favorites
+                            try {
+                                const favoriteResponse = await fetch('http://localhost:80/api.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        action: 'addFavoriteTemplate',
+                                        user_id: userId,
+                                        template_id: uniqueTemplateId
+                                    })
+                                });
+
+                                const favoriteResult = await favoriteResponse.json();
+                                if (favoriteResult.success) {
+                                    console.log('Template automatically added to favorites!', 'Favorite ID:', favoriteResult.favorite_id);
+                                } else if (favoriteResult.message && favoriteResult.message.includes('Already favorited')) {
+                                    console.log('Template already in favorites');
+                                } else {
+                                    console.error("Error adding to favorites:", favoriteResult.error);
+                                }
+                            } catch (error) {
+                                console.error("Error during favorite addition:", error);
                             }
-                            console.log(message, 'ID:', currentHash);
+
+                            // 7. Close modal and show success
+                            closeSaveTemplateModal();
                             
                         } else {
-                            console.error("API Error posting template:", result.error);
+                            console.error("API Error saving template:", result.error);
+                            if (templateNameError) {
+                                templateNameError.textContent = 'Failed to save template. Please try again.';
+                            }
                             setSaveButtonState(false);
                         }
                     } catch (error) {
-                        console.error("Unexpected error in template Save:", error);
+                        console.error("Unexpected error in template save:", error);
+                        if (templateNameError) {
+                            templateNameError.textContent = 'An error occurred while saving. Please try again.';
+                        }
                         setSaveButtonState(false);
                     } finally {
-                        saveBtn.disabled = false;
+                        templateSaveBtn.disabled = false;
+                        templateSaveBtn.textContent = 'Save';
                     }
                 });
             }
@@ -1404,6 +1838,23 @@
         </main>
     </div>
 
+    <div id="save-template-modal-overlay" class="modal-overlay">
+        <div class="modal-content" id="save-template-modal-content">
+            <div class="modal-content-inner">
+                <h3 class="modal-title font-fredoka">Save Template</h3>
+                
+                <label for="template-name-input" class="modal-label">Template Name</label>
+                <input type="text" id="template-name-input" placeholder="Name your template..." class="modal-input">
+                <p id="template-name-error" class="modal-error" aria-live="polite"></p>
+                
+                <div class="flex justify-end gap-3 mt-8">
+                    <button id="template-cancel-btn" class="modal-button-cancel">Cancel</button>
+                    <button id="template-save-btn" class="modal-button-post">Save Template</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="post-modal-overlay" class="modal-overlay">
         <div class="modal-content" id="post-modal-content">
             <div class="modal-content-inner">
@@ -1415,18 +1866,10 @@
                 <label for="photo-description-textarea" class="modal-label">Description</label>
                 <textarea id="photo-description-textarea" placeholder="Describe your moment..." class="modal-textarea" rows="3"></textarea>
                 <p id="post-error" class="modal-error" aria-live="polite"></p>
-
-                <div class="custom-toggle">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="share-to-community-toggle" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span class="text-brand-pink font-medium">Share to community</span>
-                </div>
                 
                 <div class="flex justify-end gap-3 mt-8">
                     <button id="modal-cancel-btn" class="modal-button-cancel">Cancel</button>
-                    <button id="modal-post-btn" class="modal-button-post">Post</button>
+                    <button id="modal-post-btn" class="modal-button-post">Save</button>
                 </div>
             </div>
         </div>

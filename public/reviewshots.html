@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="tab-icon.png" />
     <title>Review Your Shots or Retake</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -347,6 +348,16 @@
         const activeFilter = localStorage.getItem('activeFilter') || 'filter-none';
         const frameSize = localStorage.getItem('frameSize') || '4x6'; 
         
+        console.log('[reviewshots] DOMContentLoaded - localStorage state:');
+        console.log('  - templateBackground:', localStorage.getItem('templateBackground'));
+        console.log('  - templateStickers:', localStorage.getItem('templateStickers'));
+        console.log('  - activeFilter:', activeFilter);
+        console.log('  - frameSize:', frameSize);
+        
+        console.log('[reviewshots] DOMContentLoaded - sessionStorage state:');
+        console.log('  - templateBackground:', sessionStorage.getItem('templateBackground'));
+        console.log('  - templateStickers:', sessionStorage.getItem('templateStickers'));
+        
         let capturedImages = [];
         try {
             const imagesJson = sessionStorage.getItem('capturedImagesArray');
@@ -461,6 +472,10 @@
                 e.preventDefault(); 
                 alert('No image selected. Please ensure at least one shot was captured and click on it to proceed, or use RETAKE.');
             } else {
+                console.log('[reviewshots] Before navigating to customizationphoto - sessionStorage state:');
+                console.log('  - templateBackground:', sessionStorage.getItem('templateBackground'));
+                console.log('  - templateStickers:', sessionStorage.getItem('templateStickers'));
+                
                 // Remove retake index before proceeding to customization
                 sessionStorage.removeItem('retakeShotIndex');
                 window.location.href='customizationphoto.html';

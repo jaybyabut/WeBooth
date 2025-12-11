@@ -69,7 +69,7 @@ switch ($action) {
     case 'fetchPhotoLibrary':
         try {
             
-            $sql = "SELECT post_id AS id, image_url AS photo_url, created_at FROM post WHERE user_id = ? ORDER BY created_at DESC";
+            $sql = "SELECT post_id AS id, image_url AS photo_url, title, description, created_at FROM post WHERE user_id = ? ORDER BY created_at DESC";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$user_id]);
             $posts = $stmt->fetchAll();
@@ -102,21 +102,19 @@ switch ($action) {
             // are not in your provided 'post' table schema, but I'll 
             // include them in the query as placeholders for future extension, 
             // assuming you might add them or adjust the schema.
-            // For now, only the fields in your schema are strictly inserted.
+            // Insert post with title and description
 
-            $sql = "INSERT INTO post (user_id, image_url, created_at) VALUES (?, ?, NOW()) RETURNING post_id";
+            $sql = "INSERT INTO post (user_id, image_url, title, description, created_at) VALUES (?, ?, ?, ?, NOW()) RETURNING post_id";
                     
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $user_id, 
-                $image_url
+                $image_url,
+                $title,
+                $description
             ]);
             
             $newPostId = $stmt->fetchColumn(); // Get the newly created post_id
-
-            // Optional: If you want to store title/description/share/template_hash_id, 
-            // the 'post' table schema needs to be updated in Supabase. 
-            // The logic above fulfills the schema provided in your request.
 
             echo json_encode([
                 'success' => true, 

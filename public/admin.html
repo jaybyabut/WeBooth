@@ -5,9 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/png" href="tab-icon.png" />
   <title>Admin Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Fredoka+One&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
+      /* Upload Template Modal styles (copied to match finalprof) */
+      #upload-template-modal {position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items:center; justify-content:center; z-index: 11000;}
+      #upload-template-modal.active {display:flex;}
+      .upload-template-modal {background:#fff;border-radius:14px; width: 860px; max-width:95vw; max-height:90vh; padding:0; box-sizing:border-box; display:flex; font-family:'Poppins',sans-serif; color:#333; position:relative; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.3);} 
+      .upload-close-btn {position:absolute; top:12px; right:16px; background:transparent; border:none; font-size:26px; font-weight:700; color:#d72b7e; cursor:pointer;}
+      .upload-close-btn:hover {color:#a4154f;}
+      .upload-preview-side {width:180px; background:#f9d7e7; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:width .3s ease;}
+      .upload-preview-side.is-4x6 { width:380px; }
+      .preview-title {font-weight:700; font-size:16px; color:#d72b7e; margin-bottom:16px;}
+      .preview-image { width:140px; height:400px; border-radius:10px; border:4px solid #fff; background:#f5f5f5; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; transition: width .3s ease, height .3s ease; }
+      .preview-image.size-2x6 { width:140px; height:400px; }
+      .preview-image.size-4x6 { width:340px; height:510px; max-height:80vh; }
+      .preview-image img {width:100%; height:100%; object-fit:cover; border-radius:6px;}
+      .preview-placeholder { color:#d72b7e; font-size:12px; text-align:center; padding:20px; }
+      .upload-controls-side { flex-grow:1; display:flex; flex-direction:column; padding:20px 24px; box-sizing:border-box; overflow-y:auto; max-height:600px; gap:16px; }
+      .section-heading {font-weight:600; font-size:16px; color:#333; margin-bottom:8px;}
+      .layout-section {display:flex; flex-direction:column; gap:12px;}
+      .layout-options {display:flex; gap:20px; align-items:center;}
+      .layout-option {display:flex; flex-direction:column; gap:8px;}
+      .layout-option select {border:1px solid #ddd; border-radius:6px; padding:8px 12px; font-size:14px; color:#333; background:#fff;}
+      .upload-section {display:flex; flex-direction:column; gap:8px;}
+      .upload-box {border:2px dashed #ddd; border-radius:8px; padding:20px 16px; text-align:center; cursor:pointer; transition:border-color .3s; background:#fafafa; min-height:60px; display:flex; flex-direction:column; justify-content:center; align-items:center;}
+      .upload-box:hover {border-color:#d23481; background:#fff5f9;}
+      .upload-box .upload-text {font-size:14px; color:#333; margin-bottom:4px; font-weight:500;}
+      .effects-section {display:flex; flex-direction:column; gap:8px;}
+      .effects-grid {display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+      .effect-option {padding:10px 12px; border:1px solid #ddd; border-radius:6px; text-align:center; font-size:13px; color:#666; cursor:pointer; transition: all .3s; background:#fff; font-weight:500;}
+      .effect-option:hover {border-color:#d23481; color:#d23481;}
+      .effect-option.selected {border-color:#d23481; background:#d23481; color:#fff;}
+      .modal-divider {height:1px; background:#eee; margin:8px 0;}
+      .share-section {display:flex; align-items:center; gap:12px; font-size:14px; color:#333; margin-bottom:0; font-weight:500;}
+      .toggle-input {width:44px; height:22px; appearance:none; background:#ddd; border-radius:11px; position:relative; cursor:pointer; transition: background-color .3s;}
+      .toggle-input:checked {background:#d23481;}
+      .toggle-input::before {content:''; position:absolute; width:18px; height:18px; border-radius:50%; background:#fff; top:2px; left:2px; transition: transform .3s;}
+      .toggle-input:checked::before {transform: translateX(22px);}
+      .tags-section {display:flex; flex-direction:column; gap:8px;}
+      .tags-input {border:1px solid #ddd; border-radius:6px; padding:12px; font-size:14px; color:#333;}
+      .publish-section {display:flex; justify-content:flex-end; margin-top:8px;}
+      #publishBtn {background:#d23481; border:none; border-radius:20px; padding:12px 36px; font-weight:600; color:#fff; cursor:pointer; font-size:14px;}
+      #publishBtn:disabled {background:#ccc; cursor:not-allowed;}
+
+      /* Template preview container helpers (from finalprof) */
+      .photobooth-template-container { position:relative; width:100%; height:100%; display:flex; flex-direction:column; background-size:cover; background-position:center; padding:4px; box-sizing:border-box; }
+      .photobooth-template-container.layout-grid-2x2 { display:grid; grid-template-columns:1fr 1fr; align-content:flex-start; gap:0.5rem; padding-bottom:0.5rem; }
+      .photobooth-template-container.layout-2cols { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; align-content:center; padding-bottom:0.5rem; }
+      .photobooth-template-container.layout-grid-3shots { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; align-content:flex-start; padding-bottom:0.5rem; }
+      .photobooth-template-container.layout-grid-3shots .photo-strip-image:nth-child(3) { grid-column:1 / -1; }
+      .photobooth-template-container.layout-single { display:grid; grid-template-columns:1fr 1fr; align-items:center; justify-content:center; padding:0.5rem; }
+      .photobooth-template-container.layout-4x6.layout-single .photo-strip-image { grid-column:1 / -1; width:100%; }
+      .photo-strip-image { width:100%; flex-shrink:0; margin-bottom:4px; position:relative; overflow:hidden; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center; }
+      .photo-strip-image .photo-slot { width:100%; height:100%; }
+      .sticker-overlay { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2; }
+      .sticker { position:absolute; width:40px; height:40px; background-size:contain; background-repeat:no-repeat; background-position:center; cursor:grab; transition:transform 0.2s ease, box-shadow 0.2s ease; z-index:3; }
+      .sticker.dragging { cursor:grabbing; box-shadow:0 4px 15px rgba(0,0,0,0.3); transform:scale(1.1); z-index:10; }
+      .sticker-resize-handle { position:absolute; bottom:-6px; right:-6px; width:24px; height:24px; background-color:#f645b1; border-radius:50%; cursor:nwse-resize; border:2px solid #fff; box-shadow:0 0 5px rgba(0,0,0,0.3); z-index:10; }
+      .template-footer { flex-shrink:0; margin-top:auto; text-align:center; color:#555; font-size:10px; padding-top:5px; align-self:flex-end; }
     body {font-family: 'Poppins', sans-serif;background-color: #ffe6f3;margin: 0; color: #d23481;}
     .container { display: flex; min-height: 100vh; }
     .sidebar { width: 80px; border-right: 2px solid #d23481; display: flex; flex-direction: column; align-items: center; padding: 1rem 0; gap: 2rem;background-color: #ffe6f3;border-radius: 0 16px 16px 0;}
@@ -158,7 +219,7 @@
     .edit-left {flex: 1 1 200px;}
     .edit-right {flex: 1 1 220px; border-left: 1px solid #e0e0e0; padding-left: 0.6rem; text-align: center;}
     .preview-title {font-weight: 700; margin-bottom: 0.4rem; color: #4caf50; font-size: 0.95rem;}
-    .preview-img {width: 100%; height: auto; border-radius: 8px; border: 1px solid #bdbdbd; margin-bottom: 0.6rem; max-height: 140px; object-fit: contain;}
+    .preview-img {width: 100%; height: auto; border-radius: 8px; border: 1px solid #bdbdbd; margin-bottom: 0.6rem; max-height: 320px; object-fit: contain;}
     /* Compact edit modal specific rules */
     #editModal .modal { width: 720px; max-height: none; overflow-y: visible; padding: 1rem 1.25rem; }
     #editModal .modal .modal-footer { margin-top: 1rem; }
@@ -206,6 +267,68 @@
     .favorites-vertical-container.drop-zone {border: 2px dashed #ea5a9f;border-radius: 16px;min-height: 200px;display: flex;align-items: center;justify-content: center;background-color: rgba(234, 90, 159, 0.05);transition: all 0.3s ease;}
     .favorites-vertical-container.drop-zone.active {background-color: rgba(234, 90, 159, 0.1);border-color: #d23481;}
     .drop-message {color: #d23481;font-weight: 600;font-size: 1.2rem;text-align: center;padding: 20px;}
+    /* Notification Toast Styles */
+    #notification-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 50000;
+        pointer-events: none;
+    }
+    .notification-toast {
+        background: white;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        pointer-events: auto;
+        animation: slideIn 0.3s ease-out;
+        max-width: 400px;
+        font-size: 14px;
+        line-height: 1.5;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+    .notification-toast.success {
+        border-left: 4px solid #10b981;
+        color: #065f46;
+    }
+    .notification-toast.error {
+        border-left: 4px solid #ef4444;
+        color: #7f1d1d;
+    }
+    .notification-toast.warning {
+        border-left: 4px solid #f59e0b;
+        color: #78350f;
+    }
+    .notification-toast.info {
+        border-left: 4px solid #3b82f6;
+        color: #1e3a8a;
+    }
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+    .notification-toast.removing {
+        animation: slideOut 0.3s ease-in forwards;
+    }
     /* Activity Section */
     #section-activity { user-select: none; display: none; }
     #section-activity.active { display: block; }
@@ -349,40 +472,38 @@
           </section>
           <section class="charts">
             <div class="chart-card">
-              <h3>User Growth</h3>
-              <div class="chart-placeholder" id="user-growth-chart">[Line Chart Placeholder]</div>
+              <h3>New Users Created Per Day</h3>
+              <div class="chart-placeholder" id="user-growth-chart" style="display:none;"></div>
+              <p id="user-growth-summary" style="margin-top:0.8rem; color:#d23481; font-weight:600;">No user data available for the last 30 days.</p>
             </div>
             <div class="chart-card">
-              <h3>Photo Volume</h3>
-              <div class="chart-placeholder" id="photo-volume-chart">[Bar Chart Placeholder]</div>
+              <h3>User Status Distribution</h3>
+              <div class="chart-placeholder" id="status-distribution-chart">[Pie Chart Placeholder]</div>
+            </div>
+            <div class="chart-card">
+              <h3>Top Favorited Templates</h3>
+              <div class="chart-placeholder" id="provider-distribution-chart" style="display:none;"></div>
+              <div id="top-favorites-summary" style="margin-top:0.8rem; color:#d23481; font-weight:600;">
+                No favorites data available.
+              </div>
             </div>
           </section>
         </section>
         <section class="tab-panel" style="display:none;">
           <div class="template">
-            <button class="upload-btn" onclick="openModal()">
-              +<br>Upload New Template/Pack
-            </button>
             <form class="template-search" onsubmit="event.preventDefault();">
               <div class="template-search-row-top">
                 <input type="text" id="templateSearch" placeholder="Search Template Name..." />
               </div>
               <div class="template-search-row-bottom">
-                <label for="typeFilter">Type</label>
-                <select id="typeFilter">
-                  <option>All</option>
-                  <option>Sticker Pack</option>
-                  <option>Background</option>
-                  <option>Filter</option>
+                <label for="shareFilter">Share</label>
+                <select id="shareFilter">
+                  <option value="">All</option>
+                  <option value="shared">Shared</option>
+                  <option value="private">Private</option>
                 </select>
-                <label for="statusFilter">Status</label>
-                <select id="statusFilter">
-                  <option>Active</option>
-                  <option>Needs Review</option>
-                  <option>Draft</option>
-                </select>
-                <label for="dateFilter">Date</label>
-                <input type="date" id="dateFilter" value="clear"/>
+                <label for="ownerFilter">Owner</label>
+                <input type="text" id="ownerFilter" placeholder="Search owner username" />
               </div>
             </form>
           </div>
@@ -390,50 +511,16 @@
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Type</th>
-                <th>Usage Count</th>
-                <th>Status</th>
-                <th>Date Added</th>
+                <th>Owner</th>
+                <th>Frame</th>
+                <th>Shots</th>
+                <th>Shared</th>
+                <th>Created</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="templateTableBody">
-              <tr>
-                <td>Warm Filter</td>
-                <td>Filter</td>
-                <td>159</td>
-                <td>Active</td>
-                <td>2025-11-10</td>
-                <td style="white-space: nowrap;">
-                  <button aria-label="View" title="View" onclick="openViewModal(exampleFilterTemplate)" >
-                    <img src="Icons 3/view.svg" alt="View logo" />
-                  </button>
-                  <button aria-label="Edit" title="Edit" onclick="openEditModal(exampleFilterTemplate)" >
-                    <img src="Icons 2/edit.svg" alt="View logo" />
-                  </button>
-                  <button aria-label="Delete" title="Delete" onclick="openDeleteModal('Warm Filter')" >
-                    <img src="Icons 3/delete.svg" alt="Delete logo" />
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                  <td>Sunset Background</td>
-                  <td>Background</td>
-                  <td>42</td>
-                  <td>Active</td>
-                  <td>2025-11-12</td>
-                  <td style="white-space: nowrap;">
-                    <button aria-label="View" title="View" onclick="openViewModal(exampleBackgroundTemplate)">
-                      <img src="Icons 3/view.svg" alt="View logo" />
-                    </button>
-                    <button aria-label="Edit" title="Edit" onclick="openEditModal(exampleBackgroundTemplate)">
-                      <img src="Icons 2/edit.svg" alt="Edit logo" />
-                    </button>
-                    <button aria-label="Delete" title="Delete" onclick="openDeleteModal('Sunset Background')">
-                      <img src="Icons 3/delete.svg" alt="Delete logo" />
-                    </button>
-                  </td>
-                </tr>
+              <!-- Populated dynamically -->
             </tbody>
           </table>
         </section>
@@ -470,20 +557,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>kath</td>
-                <td>kath@example.com</td>
-                <td>Admin</td>
-                <td>Active</td>
-                <td><a class="manage-link" href="#">Manage</a></td>
-              </tr>
-              <tr>
-                <td>JaneSmith</td>
-                <td>jane@example.com</td>
-                <td>User</td>
-                <td>Inactive</td>
-                <td><a class="manage-link" href="#">Manage</a></td>
-              </tr>
+              
             </tbody>
           </table>
         </section>
@@ -492,24 +566,13 @@
             <div class="user-controls">
               <input 
               type="text" 
-              id="userSearchInput" 
+              id="auditSearchInput" 
               class="user-select1" 
               style="border: 2px solid #d23481;; height: 50px; padding: 10px;" 
-              placeholder="Search Username or Email..." 
+              placeholder="Search Username or Action..." 
               />
-              <select id="userGroupFilter" class="user-select">
-                <option>User Type</option>
-                <option>System</option>
-                <option>Regular User</option>
-                <option>Admin</option>
-              </select>
-              <select id="userStatusFilter" class="user-select">
-                <option>Action Type</option>
-                <option>Login</option>
-                <option>Deletion</option>
-                <option>Content Upload</option>
-                <option>Configuration Change</option>
-                <option>System Error</option>
+              <select id="auditActionTypeFilter" class="user-select">
+                <option value="">All actions</option>
               </select>
             </div>
           </div>
@@ -519,16 +582,10 @@
                 <th>Timestamp</th>
                 <th>User</th>
                 <th>Action</th>
-                <th>IP Address</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>2025-11-15 10:23:45</td>
-                <td>admin_user</td>
-                <td>Deleted template "Old Filter"</td>
-                <td>192.168.1.1</td>
-              </tr>
+            <tbody id="auditTrailTableBody">
+              <!-- Dynamically populated -->
             </tbody>
           </table>
         </section>
@@ -545,12 +602,6 @@
         </section>
         <section id="tab-mytemplates" role="tabpanel" aria-labelledby="tab-mytemplates-btn" style="display:none;">
           <div class="vertical-templates-container" aria-live="polite" aria-label="My templates grid">
-            <div class="template-upload-card" tabindex="0" role="button" aria-label="Upload your template" 
-              id="open-upload-modal-btn"
-              onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); alert('Upload template modal would open here'); }">
-              <div class="plus-sign">+</div>
-              Upload your template
-            </div>
           </div>
         </section>
       </section>
@@ -565,59 +616,279 @@
       </section>
     </main>
   </div>
-  <div class="modal-overlay" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="display:none;">
-    <div class="modal">
-      <h2 id="modalTitle">Upload New Template</h2>
-      <form id="uploadForm" onsubmit="event.preventDefault(); submitForm();">
-        <label for="templateName">Template Name</label>
-        <input type="text" id="templateName" name="templateName" placeholder="e.g., Soft Blur Filter" required />
+  <script>
+    // Global app state used across dashboard (activities, templates)
+    const state = { myTemplates: [], activities: [] };
+    // Shared templates collection used by feed/favorites sections
+    const sharedTemplates = Array.isArray(window.sharedTemplates) ? window.sharedTemplates : [];
+    // Define missing helper to avoid runtime error if referenced
+    function copyFirstTemplateToMyTemplates() {}
+    // Upload Template modal logic (adapted from finalprof, uses API_ENDPOINT directly)
+    (function(){
+      const uploadModal = document.getElementById('upload-template-modal');
+      const openUploadModalBtn = document.getElementById('open-upload-modal-btn');
+      const uploadCloseBtn = document.getElementById('upload-close-btn');
+      const publishBtn = document.getElementById('publishBtn');
+      const backgroundUploadInput = document.getElementById('backgroundUpload');
+      const stickersUploadInput = document.getElementById('stickersUpload');
+      const shareToggle = document.getElementById('shareToggle');
+      const tagsInput = document.getElementById('tagsInput');
+      const frameSizeSelect = document.getElementById('frameSize');
+      const shotsSelect = document.getElementById('shots');
+      const templatePreview = document.getElementById('template-preview');
+      const previewSide = document.getElementById('uploadPreviewSide');
 
-        <div class="upload-form-row">
-          <div class="form-group">
-            <label for="templateType">Template Type</label>
-            <select id="templateType" name="templateType" required onchange="updateUploadFields()">
-              <option value="Filter">Filter</option>
-              <option value="Background">Background</option>
-              <option value="Sticker Pack">Sticker Pack</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="tags">Tags</label>
-            <input type="text" id="tags" name="tags" placeholder="e.g., soft, blur, light" />
-          </div>
+      let uploadedBackground = null;
+      let uploadedStickers = [];
+      let currentEffect = 'none';
+
+      function openUploadTemplateModal(){
+        uploadModal.style.display = 'flex';
+        resetUploadModal();
+      }
+      window.openUploadTemplateModal = openUploadTemplateModal;
+
+      function closeUploadModal(){
+        uploadModal.style.display = 'none';
+      }
+
+      function resetUploadModal(){
+        backgroundUploadInput.value='';
+        stickersUploadInput.value='';
+        uploadedBackground=null;
+        uploadedStickers=[];
+        shareToggle.checked=false;
+        tagsInput.value='';
+        frameSizeSelect.value='2x6';
+        shotsSelect.value='1';
+        currentEffect='none';
+        Array.from(document.querySelectorAll('.effect-option')).forEach(b=>b.classList.toggle('selected', b.dataset.effect==='none'));
+        templatePreview.innerHTML='<div class="preview-placeholder">Template preview will appear here</div>';
+        templatePreview.className='preview-image size-2x6';
+        previewSide.classList.remove('is-4x6');
+        publishBtn.disabled = true;
+        const titleEl = document.getElementById('upload-template-title');
+        if (titleEl) titleEl.textContent='Upload Template';
+        publishBtn.textContent='Publish';
+      }
+
+      function readFileAsDataURL(file){
+        return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file); });
+      }
+
+      // Effects selection
+      Array.from(document.querySelectorAll('.effect-option')).forEach(option=>{
+        option.addEventListener('click', ()=>{
+          document.querySelectorAll('.effect-option').forEach(o=>o.classList.remove('selected'));
+          option.classList.add('selected');
+          currentEffect = option.dataset.effect;
+          updatePreview();
+        });
+      });
+
+      if (backgroundUploadInput) {
+        backgroundUploadInput.addEventListener('change', async ()=>{
+          if (backgroundUploadInput.files.length===0){ uploadedBackground=null; updatePreview(); }
+          else { try { uploadedBackground = await readFileAsDataURL(backgroundUploadInput.files[0]); updatePreview(); } catch(e){ console.error(e); uploadedBackground=null; } }
+          checkPublish();
+        });
+      }
+
+      if (stickersUploadInput) {
+        stickersUploadInput.addEventListener('change', async ()=>{
+          if (stickersUploadInput.files.length===0){ uploadedStickers=[]; }
+          else { try { const reads = Array.from(stickersUploadInput.files).map(readFileAsDataURL); uploadedStickers = await Promise.all(reads); } catch(e){ console.error(e); uploadedStickers=[]; } }
+          updatePreview();
+        });
+      }
+
+      function createPreviewTemplate(frameSize, shots, backgroundUrl, effect, stickerPositions){
+        let shotAspectRatio='4/3'; let layoutClass='';
+        if (frameSize==='2x6'){ shotAspectRatio='4/3'; }
+        else if (frameSize==='4x6'){
+          layoutClass=' layout-4x6';
+          if (shots===4){ shotAspectRatio='4/3'; layoutClass+=' layout-grid-2x2 layout-4shots'; }
+          else if (shots===3){ shotAspectRatio='1/1'; layoutClass+=' layout-grid-3shots'; }
+          else if (shots===2){ shotAspectRatio='3/2'; layoutClass+=' layout-2cols'; }
+          else if (shots===1){ shotAspectRatio='3/2'; layoutClass+=' layout-single'; }
+        }
+        let templateHTML = `<div class="photobooth-template-container${layoutClass}" style="background-image: ${backgroundUrl.startsWith('#')?'none':`url('${backgroundUrl}')`}; background-color: ${backgroundUrl.startsWith('#')?backgroundUrl:'transparent'}; width:100%; height:100%;">`;
+        const photoDivs = Array.from({length:shots}, (_,i)=>`<div class=\"photo-strip-image\" style=\"aspect-ratio:${shotAspectRatio}; background-color:#d1d5db; display:flex; align-items:center; justify-content:center; color:#4b5563; font-size:10px; border-radius:4px;\"><div class=\"photo-slot effect-${effect}\" style=\"padding:10px; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.9);\">Photo Slot ${i+1}</div></div>`).join('');
+        templateHTML += photoDivs;
+        templateHTML += `<div id="text-overlay-layer"></div>`;
+        if (stickerPositions.length>0){
+          const stickersHTML = stickerPositions.map((s,idx)=>{
+            const pos = s.top? {top:s.top,left:s.left,rotate:s.rotate||'0deg'} : {top:'10%', left:'10%', rotate:'0deg'};
+            const src = typeof s==='string'? s : s.src;
+            return `<div class=\"sticker\" style=\"background-image:url('${src}'); top:${pos.top}; left:${pos.left}; transform: rotate(${pos.rotate}); width:40px; height:40px; pointer-events:auto;\" data-sticker-index=\"${idx}\"></div>`;
+          }).join('');
+          templateHTML += `<div class=\"sticker-overlay\">${stickersHTML}</div>`;
+        }
+        templateHTML += `<div class=\"template-footer\">Webooth Template Preview</div>`;
+        templateHTML += `</div>`;
+        return templateHTML;
+      }
+
+      function addStickerDragFunctionality(container){
+        const stickers = container.querySelectorAll('.photobooth-template-container .sticker');
+        stickers.forEach(sticker=>{
+          const handle = document.createElement('div');
+          handle.className='sticker-resize-handle';
+          sticker.appendChild(handle);
+          let dragged=null, offX=0, offY=0, resizing=false, startW=0, startH=0, startX=0, startY=0;
+          function start(e){
+            const rect=handle.getBoundingClientRect();
+            const cx = e.type==='mousedown'? e.clientX : e.touches[0].clientX;
+            const cy = e.type==='mousedown'? e.clientY : e.touches[0].clientY;
+            const onHandle = cx>=rect.left && cx<=rect.right && cy>=rect.top && cy<=rect.bottom;
+            if (onHandle){ resizing=true; startW=sticker.offsetWidth; startH=sticker.offsetHeight; startX=cx; startY=cy; document.addEventListener('mousemove', resize); document.addEventListener('mouseup', stop); document.addEventListener('touchmove', resize,{passive:false}); document.addEventListener('touchend', stop);} else { dragged=sticker; const r=dragged.getBoundingClientRect(); offX=cx-r.left; offY=cy-r.top; document.addEventListener('mousemove', drag); document.addEventListener('mouseup', stop); document.addEventListener('touchmove', drag,{passive:false}); document.addEventListener('touchend', stop);} }
+          function drag(e){ if(!dragged) return; e.preventDefault(); const cont=dragged.closest('.photobooth-template-container'); if(!cont) return; const cr=cont.getBoundingClientRect(); const cx=e.type==='mousemove'? e.clientX: e.touches[0].clientX; const cy=e.type==='mousemove'? e.clientY: e.touches[0].clientY; const nl=cx-cr.left-offX; const nt=cy-cr.top-offY; dragged.style.left=`${nl}px`; dragged.style.top=`${nt}px`; dragged.style.transform='none'; }
+          function resize(e){ if(!resizing) return; e.preventDefault(); const cx=e.type==='mousemove'? e.clientX: e.touches[0].clientX; const cy=e.type==='mousemove'? e.clientY: e.touches[0].clientY; const dx=cx-startX; const dy=cy-startY; const m=Math.max(dx,dy); sticker.style.width=`${Math.max(30,startW+m)}px`; sticker.style.height=`${Math.max(30,startH+m)}px`; }
+          function stop(){ dragged=null; resizing=false; document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', stop); document.removeEventListener('touchmove', drag); document.removeEventListener('touchend', stop); document.removeEventListener('mousemove', resize); document.removeEventListener('touchmove', resize); }
+          sticker.addEventListener('mousedown', start); sticker.addEventListener('touchstart', start, {passive:false});
+        });
+      }
+
+      function updatePreview(){
+        const frameSize = frameSizeSelect.value; const shots = parseInt(shotsSelect.value);
+        const backgroundValue = uploadedBackground || '#FFFFFF';
+        const stickers = uploadedStickers.map(src=>({src}));
+        templatePreview.classList.remove('size-2x6','size-4x6');
+        templatePreview.classList.add(`size-${frameSize}`);
+        previewSide.classList.toggle('is-4x6', frameSize==='4x6');
+        if (!uploadedBackground){ templatePreview.innerHTML='<div class="preview-placeholder">Template preview will appear here</div>'; publishBtn.disabled=true; return; }
+        const html = createPreviewTemplate(frameSize, shots, backgroundValue, currentEffect, stickers);
+        templatePreview.innerHTML = html;
+        addStickerDragFunctionality(templatePreview);
+        checkPublish();
+      }
+
+      function checkPublish(){ publishBtn.disabled = !uploadedBackground; }
+
+      async function handlePublishTemplate(){
+        if (!uploadedBackground) return;
+        try {
+          publishBtn.disabled=true; publishBtn.textContent='Publishing...';
+          const container = templatePreview.querySelector('.photobooth-template-container');
+          const canvas = await window.html2canvas(container, {backgroundColor:null, scale:2, logging:false, useCORS:true, allowTaint:true});
+          const templateImgDataUrl = canvas.toDataURL('image/png');
+          const stickers = Array.from(container.querySelectorAll('.sticker')).map((st,idx)=>({
+            src: (uploadedStickers[idx] || ''),
+            top: st.style.top || '10%',
+            left: st.style.left || '10%',
+            rotate: st.style.transform || '0deg'
+          }));
+          const templateId = (window.crypto?.randomUUID && crypto.randomUUID()) || (Math.random().toString(36).slice(2)+Date.now());
+          const payload = {
+            action: 'saveTemplateState',
+            user_id: ADMIN_USER_ID,
+            template_id: templateId,
+            template_state: {
+              sticker: stickers.length? JSON.stringify(stickers): null,
+              text: tagsInput.value.trim() || `Uploaded Template` ,
+              font: null,
+              text_color: null,
+              background: uploadedBackground,
+              show_logo: String(false),
+              show_date: String(false),
+              show_time: String(false),
+              frame_size: frameSizeSelect.value,
+              shot_count: shotsSelect.value,
+              share: String(!!shareToggle.checked),
+              effects: currentEffect,
+              template_img: templateImgDataUrl,
+              name: tagsInput.value.trim() || `Uploaded Template`,
+            }
+          };
+          const res = await fetch(API_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+          const json = await res.json();
+          if (!json.success) throw new Error(json.error || 'Failed to save template');
+          showToast('Template uploaded', 'success');
+          closeUploadModal();
+          if (typeof fetchAdminTemplates==='function') await fetchAdminTemplates();
+        } catch(e){ console.error('handlePublishTemplate error:', e); showToast('Failed to upload template','error'); }
+        finally { publishBtn.disabled=false; publishBtn.textContent='Publish'; }
+      }
+
+      // Events
+      if (openUploadModalBtn) openUploadModalBtn.addEventListener('click', openUploadTemplateModal);
+      if (uploadCloseBtn) uploadCloseBtn.addEventListener('click', ()=>{ closeUploadModal(); });
+      if (uploadModal) uploadModal.addEventListener('click', (e)=>{ if (e.target===uploadModal) closeUploadModal(); });
+      if (publishBtn) publishBtn.addEventListener('click', handlePublishTemplate);
+      if (frameSizeSelect) frameSizeSelect.addEventListener('change', updatePreview);
+      if (shotsSelect) shotsSelect.addEventListener('change', updatePreview);
+    })();
+  </script>
+  <!-- Upload Template Modal copied from finalprof (UI) -->
+  <div id="upload-template-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="upload-template-title" style="display:none;">
+    <div class="upload-template-modal">
+      <button class="upload-close-btn" id="upload-close-btn" aria-label="Close upload modal">&times;</button>
+      <div class="upload-preview-side" id="uploadPreviewSide">
+        <div class="preview-title">Preview</div>
+        <div class="preview-image size-2x6" id="template-preview">
+          <div class="preview-placeholder">Template preview will appear here</div>
         </div>
-        <div id="dualUploadContainer" style="display:none;">
-          <p class="upload-instruction">Dual Size Assets (Requires 2x6 and 4x6 PNGs)</p>
-          <div class="dual-upload-group">
-            <div class="dual-upload-item">
-              <span>1. 2x6 Inch Asset (.PNG)</span>
-              <label class="upload-label" for="upload2x6">Upload 2x6 File</label>
-              <input type="file" id="upload2x6" name="upload2x6" accept=".png" required />
+      </div>
+      <div class="upload-controls-side">
+        <h2 class="modal-title" id="upload-template-title">Upload Template</h2>
+        <div class="layout-section">
+          <div class="section-heading">Layout</div>
+          <div class="layout-options">
+            <div class="layout-option">
+              <label for="frameSize">Frame Size</label>
+              <select id="frameSize" name="frameSize" required>
+                <option value="2x6">2 x 6 inches</option>
+                <option value="4x6">4 x 6 inches</option>
+              </select>
             </div>
-            <div class="dual-upload-item">
-              <span>2. 4x6 Inch Asset (.PNG)</span>
-              <label class="upload-label" for="upload4x6">Upload 4x6 File</label>
-              <input type="file" id="upload4x6" name="upload4x6" accept=".png" required />
+            <div class="layout-option">
+              <label for="shots">Shots</label>
+              <select id="shots" name="shots" required>
+                <option value="1">1 shot</option>
+                <option value="2">2 shots</option>
+                <option value="3">3 shots</option>
+                <option value="4">4 shots</option>
+              </select>
             </div>
           </div>
         </div>
-        <div id="singleUploadContainer">
-          <p class="upload-instruction" id="uploadInstruction">Upload Asset File (Filter Config or Single PNG)</p>
-          <div class="single-upload-box">
-            <label class="upload-label" for="singleUpload">Browse Files</label>
-            <input type="file" id="singleUpload" name="singleUpload" accept=".png,.json" required />
+        <div class="upload-section">
+          <div class="section-heading">Upload background image here</div>
+          <label for="backgroundUpload" class="upload-box" tabindex="0" role="button">
+            <div class="upload-text">in jpeg or png format</div>
+            <input type="file" id="backgroundUpload" class="upload-template-input" accept=".jpeg,.jpg,.png" />
+          </label>
+        </div>
+        <div class="effects-section">
+          <div class="section-heading">Effects</div>
+          <div class="effects-grid">
+            <button type="button" class="effect-option selected" data-effect="none">None</button>
+            <button type="button" class="effect-option" data-effect="bw">B&W</button>
+            <button type="button" class="effect-option" data-effect="warm">Warm</button>
+            <button type="button" class="effect-option" data-effect="cool">Cool</button>
+            <button type="button" class="effect-option" data-effect="retro">Retro</button>
+            <button type="button" class="effect-option" data-effect="noir">Noir</button>
           </div>
         </div>
-        <div class="status-group">
-          <label>Initial Status</label>
-          <label><input type="radio" name="status" value="Draft" checked /> Draft</label>
-          <label><input type="radio" name="status" value="Active" /> Active</label>
+        <div class="upload-section">
+          <div class="section-heading">Upload sticker pack design here</div>
+          <label for="stickersUpload" class="upload-box" tabindex="0" role="button">
+            <div class="upload-text">in png format</div>
+            <input type="file" id="stickersUpload" class="upload-template-input" accept=".png" multiple />
+          </label>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-          <button type="submit" class="btn-submit">Upload & Submit</button>
+        <div class="modal-divider"></div>
+        <div class="share-section">
+          <input type="checkbox" id="shareToggle" class="toggle-input" />
+          <label for="shareToggle">Share to community</label>
         </div>
-      </form>
+        <div class="tags-section">
+          <input type="text" id="tagsInput" class="tags-input" placeholder="Template name..." aria-label="Template name" maxlength="50" />
+        </div>
+        <div class="publish-section">
+          <button id="publishBtn" disabled>Publish</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="modal-overlay" id="deleteModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
@@ -646,55 +917,28 @@
               <input type="text" id="viewTemplateName" readonly />
             </div>
             <div class="view-field">
-              <label class="view-label">Tags</label>
-              <input type="text" id="viewTags" readonly />
+              <label class="view-label">Number of Shots</label>
+              <input type="text" id="viewShotCount" readonly />
             </div>
-            <div style="display:flex; gap:0.8rem;">
-              <div style="flex:1;">
-                <label class="view-label">Type</label>
-                <input type="text" id="viewType" readonly />
-              </div>
-              <div style="width:120px;">
-                <label class="view-label">Usage Count</label>
-                <input type="text" id="viewUsageCount" readonly />
-              </div>
+            <div class="view-field">
+              <label class="view-label">Type</label>
+              <input type="text" id="viewType" readonly />
             </div>
             <div class="view-field" style="margin-top:0.6rem;">
-              <label class="view-label">Uploader / Date Added</label>
-              <input type="text" id="viewUploader" readonly />
+              <label class="view-label">Effects / Filter</label>
+              <input type="text" id="viewEffects" readonly />
             </div>
           </div>
           <div class="view-right">
-            <div class="asset-title">Asset Files</div>
-            <div class="asset-config" id="viewConfigContainer">
-              <label class="view-label">Configuration File:</label>
-              <input type="text" id="viewConfigFile" readonly />
+            <div class="asset-title">Template Preview</div>
+            <div class="asset-preview">
+              <img id="viewTemplatePreviewImg" class="preview-img" alt="Template preview" />
             </div>
-            <div id="viewDualAssets" style="display:none;">
-              <div style="margin-block-end:0.6rem;font-weight:700;color:#d23481;">Dual Assets:</div>
-              <div class="view-field">
-                <label class="view-label">2x6 Inch File:</label>
-                <input type="text" id="view2x6FileName" readonly />
-              </div>
-              <div class="view-field">
-                <label class="view-label">4x6 Inch File:</label>
-                <input type="text" id="view4x6FileName" readonly />
-              </div>
-              <div style="display:flex; gap:0.6rem; margin-top:0.6rem;">
-                <div style="flex:1; max-inline-size:100px;">
-                  <div class="asset-preview" id="viewAssetPreview2x6"></div>
-                </div>
-                <div style="flex:1; max-inline-size:100px;">
-                  <div class="asset-preview" id="viewAssetPreview4x6"></div>
-                </div>
-              </div>
-            </div>
-            <div class="asset-preview" id="viewAssetPreview"></div>
           </div>
         </div>
         <div class="modal-actions">
           <button class="btn-close" onclick="closeViewModal()">Close</button>
-          <button class="btn-gotoedit" onclick="openEditModal(exampleFilterTemplate)">Go to Edit</button>
+          <button class="btn-gotoedit" onclick="closeViewModal(); openEditModal(CURRENT_VIEWED_TEMPLATE)">Go to Edit</button>
         </div>
       </div>
     </div>
@@ -704,18 +948,24 @@
       <form id="editForm" onsubmit="event.preventDefault(); saveChanges();">
         <div class="edit-content">
           <div class="edit-left">
+            <input type="hidden" id="editTemplateId" />
             <label for="editTemplateName">Template Name</label>
             <input type="text" id="editTemplateName" name="templateName" required />
-            <label for="editTags">Tags</label>
-            <input type="text" id="editTags" name="tags" />
-            <label for="editType">Type</label>
-            <select id="editType" name="type" required>
-              <option value="Filter">Filter</option>
-              <option value="Background">Background</option>
-              <option value="Sticker Pack">Sticker Pack</option>
+            <label for="editShare">Share to Community</label>
+            <select id="editShare" name="share" required>
+              <option value="true">True</option>
+              <option value="false">False</option>
             </select>
 
-            <div class="usage-count" id="editUsageCount">Usage Count: 0 times</div>
+            <label for="editEffects">Effects / Filter</label>
+            <select id="editEffects" name="effects">
+              <option value="none">None</option>
+              <option value="bw">Black &amp; White</option>
+              <option value="warm">Warm</option>
+              <option value="cool">Cool</option>
+              <option value="retro">Retro</option>
+              <option value="noir">Noir</option>
+            </select>
 
             <label for="editStatus">Template Status</label>
             <select id="editStatus" name="templateStatus" required>
@@ -763,6 +1013,7 @@
         <button id="activityContentsTab" class="tab-button" onclick="switchTab('activityContents')" style="flex: 1; padding: 0.5rem; background: none; border: none; border-bottom: 3px solid transparent; color: #d23481; font-weight: 700; cursor: pointer;">Activity & Contents</button>
       </div>
       <div id="accountDetailsContent" class="tab-content" style="display: block; overflow-y: auto;">
+        <input type="hidden" id="manageUserId" />
         <div style="display: flex; gap: 2rem;">
           <div style="flex: 1;">
             <div style="display: flex; flex-direction: column; gap: 1rem;">
@@ -806,23 +1057,11 @@
       <div id="activityContentsContent" class="tab-content" style="display: none; overflow-y: auto; overflow-x: hidden;">
         <div style="display: flex; flex-direction: column; gap: 2rem;">
           <div>
-            <h3 style="font-family: 'Fredoka One', cursive; font-size: 20px; color: #d23481; margin-bottom: 1rem;">Recent Activity Log</h3>
-            <div style="padding: 1rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff6f9; min-height: 200px;">
-              <ul style="margin: 0; padding-left: 1rem; color: #d23481;">
-                <li>Last login: 2023-10-01 at 14:30</li>
-                <li>Uploaded 5 photos on 2023-09-15</li>
-                <li>Changed profile picture on 2023-08-20</li>
-                <li>Joined event "Summer Party" on 2023-07-10</li>
-              </ul>
-            </div>
-          </div>
-          <div>
-            <h3 style="font-family: 'Fredoka One', cursive; font-size: 20px; color: #d23481; margin-bottom: 1rem;">Capture Photos</h3>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-              <img src="https://placehold.co/150x100?text=Photo+1" alt="Captured Photo 1" style="width: 100%; border-radius: 8px; border: 1px solid #f4c1d9;" />
-              <img src="https://placehold.co/150x100?text=Photo+2" alt="Captured Photo 2" style="width: 100%; border-radius: 8px; border: 1px solid #f4c1d9;" />
-              <img src="https://placehold.co/150x100?text=Photo+3" alt="Captured Photo 3" style="width: 100%; border-radius: 8px; border: 1px solid #f4c1d9;" />
-              <img src="https://placehold.co/150x100?text=Photo+4" alt="Captured Photo 4" style="width: 100%; border-radius: 8px; border: 1px solid #f4c1d9;" />
+            <h3 style="font-family: 'Fredoka One', cursive; font-size: 20px; color: #d23481; margin-bottom: 1rem;">Logs</h3>
+            <div style="padding: 1rem; border: 1px solid #f4c1d9; border-radius: 8px; background: #fff6f9; min-height: 300px; max-height: 400px; overflow-y: auto;">
+              <div id="manageUserActivityList" style="display: flex; flex-direction: column; gap: 0.8rem; color: #d23481;">
+                <p style="color: #999; font-style: italic;">Loading activity logs...</p>
+              </div>
             </div>
           </div>
         </div>
@@ -848,183 +1087,6 @@
   </div>
 
   <script>
-    const sharedTemplates = [
-      {
-        id: 1,
-        photos: [],
-        favorite: false,
-        name: 'Holiday Template',
-        frameSize: '2x6',
-        shots: '1',
-        effect: 'warm',
-        shareToCommunity: true,
-        tags: '#holiday #fun'
-      },
-     
-    ];
-
-    const state = {
-      user: {
-        username: 'Username',
-        bio: 'bio',
-        photoCount: 0,
-        profileImg: ''
-      },
-      photos: [
-        {
-          id: 1,
-          src: '',
-          liked: false,
-          favorite: false,
-          date: 'October 29',
-          comments: []
-        },
-       
-      ],
-      activities: [],
-      myTemplates: []
-    };
-    function copyFirstTemplateToMyTemplates() {
-      if (sharedTemplates.length > 0 && state.myTemplates.length === 0) {
-        const firstTemplate = sharedTemplates[0];
-        const templateCopy = {
-          ...firstTemplate,
-          id: Date.now(), // Give it a new unique ID
-          isCopied: true,
-          originalTemplateId: firstTemplate.id
-        };
-        state.myTemplates.push(templateCopy);
-        addActivity(`Template "${firstTemplate.name}" automatically added to My Templates`);
-      }
-    }
-    // Function to create Shared Template card - VERTICAL DESIGN
-    function createSharedTemplateCard(template) {
-      const article = document.createElement('article');
-      article.className = 'vertical-template-card';
-      article.draggable = true;
-      article.dataset.templateId = template.id;
-      article.dataset.templateType = 'shared';
-      // Set background image if available
-      if (template.photos && template.photos.length > 0) {
-        article.style.backgroundImage = `url('${template.photos[0]}')`;
-      }
-      article.setAttribute('aria-label', `Shared template: ${template.name}`);
-      // Template photo container
-      const photoContainer = document.createElement('div');
-      photoContainer.className = 'template-photo-container';
-      // Create photo layout based on shots
-      const shots = parseInt(template.shots || 1);
-      const frameSize = template.frameSize || '2x6';
-      const effect = template.effect || 'none';
-      
-      if (shots === 1) {
-        const photoDiv = document.createElement('div');
-        photoDiv.className = `template-photo-single frame-${frameSize} effect-${effect}`;
-        photoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-        
-        photoContainer.appendChild(photoDiv);
-      } else {
-        const multipleContainer = document.createElement('div');
-        multipleContainer.className = `template-photo-multiple ${shots}-shots frame-${frameSize}`;
-        
-        for (let i = 0; i < shots; i++) {
-          const photoSlot = document.createElement('div');
-          photoSlot.className = `photo-slot effect-${effect}`;
-          photoSlot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-          multipleContainer.appendChild(photoSlot);
-        }
-        photoContainer.appendChild(multipleContainer);
-      }
-      // Add stickers
-      if (template.photos && template.photos.length > 1) {
-        const stickerOverlay = document.createElement('div');
-        stickerOverlay.className = 'sticker-overlay';
-        // Use saved positions if available, otherwise use default positions
-        const defaultPositions = [
-          { top: '10%', left: '10%', rotate: '5deg' },
-          { top: '15%', left: '80%', rotate: '-10deg' },
-          { top: '50%', left: '20%', rotate: '15deg' },
-          { top: '60%', left: '70%', rotate: '-5deg' },
-          { top: '80%', left: '30%', rotate: '10deg' },
-          { top: '85%', left: '85%', rotate: '-15deg' }
-        ];
-        
-        template.photos.slice(1).forEach((sticker, index) => {
-          const savedPosition = template.stickerPositions && template.stickerPositions[index];
-          const pos = savedPosition ? 
-            { top: savedPosition.top, left: savedPosition.left, rotate: '0deg' } : 
-            defaultPositions[index % defaultPositions.length];
-          
-          const stickerDiv = document.createElement('div');
-          stickerDiv.className = 'sticker';
-          stickerDiv.style.backgroundImage = `url('${sticker}')`;
-          stickerDiv.style.top = pos.top;
-          stickerDiv.style.left = pos.left;
-          stickerDiv.style.transform = `rotate(${pos.rotate})`;
-          stickerDiv.setAttribute('data-sticker-index', index);
-          stickerOverlay.appendChild(stickerDiv);
-        });
-        
-        article.appendChild(stickerOverlay);
-      }
-
-      // Template tags
-      const tagsDiv = document.createElement('div');
-      tagsDiv.className = 'template-tags';
-      tagsDiv.textContent = template.tags || '';
-
-      // Use button
-      const useBtn = document.createElement('button');
-      useBtn.className = 'vertical-use-template-btn';
-      useBtn.setAttribute('aria-label', 'Use this template');
-      useBtn.type = 'button';
-      useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
-      useBtn.addEventListener('click', () => {
-        alert(`Using template: ${template.name}`);
-      });
-      const iconsDiv = document.createElement('div');
-      iconsDiv.className = 'vertical-template-icons';
-      iconsDiv.setAttribute('role', 'group');
-      iconsDiv.setAttribute('aria-label', 'Template controls');
-
-      // Favorite button
-      const favoriteBtn = document.createElement('button');
-      favoriteBtn.type = 'button';
-      favoriteBtn.setAttribute('aria-label', template.favorite ? 'Remove from favorites' : 'Add to favorites');
-      favoriteBtn.setAttribute('title', template.favorite ? 'Remove from favorites' : 'Add to favorites');
-      favoriteBtn.innerHTML = '<img src="Icons 2/save1.svg" alt="Favorite icon" />';
-            if (template.favorite) {
-        favoriteBtn.querySelector('img').classList.add('favorite-active');
-      }
-      
-      favoriteBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleSharedTemplateFavorite(template.id);
-      });
-
-      // Add only favorite button to icons container
-      iconsDiv.appendChild(favoriteBtn);
-
-      // Add drag events to the shared template card
-      article.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', template.id);
-        e.dataTransfer.setData('template-type', 'shared');
-        article.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'copy';
-      });
-      
-      article.addEventListener('dragend', () => {
-        article.classList.remove('dragging');
-      });
-
-      // Assemble the card
-      article.appendChild(photoContainer);
-      article.appendChild(tagsDiv);
-      article.appendChild(useBtn);
-      article.appendChild(iconsDiv);
-
-      return article;
-    }
 
     // Function to create My Template card - VERTICAL DESIGN
     function createMyTemplateCard(template) {
@@ -1116,7 +1178,7 @@
       useBtn.type = 'button';
       useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
       useBtn.addEventListener('click', () => {
-        alert(`Using template: ${template.name}`);
+        showToast(`Using template: ${template.name}`, 'success');
       });
 
       // Icon buttons - FAVORITE, EDIT, AND DELETE
@@ -1150,7 +1212,7 @@
       editBtn.innerHTML = '<img src="Icons 2/btnedit1.svg" alt="Edit icon" />';
       editBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        alert(`Edit template: ${template.name}`);
+        showToast(`Edit template: ${template.name}`, 'info');
       });
 
       // Delete button
@@ -1227,7 +1289,7 @@
             <img src="Icons 2/templates.svg" alt="No templates">
             <h3>No Shared Templates Yet</h3>
             <p>When community members share templates, they'll appear here.</p>
-            <button onclick="alert('Creating your first template!')">Create Your First Template</button>
+            <button onclick="showToast('Creating your first template!', 'info')">Create Your First Template</button>
           </div>
         `;
       } else {
@@ -1242,16 +1304,6 @@
     function renderMyTemplates() {
       const myTemplatesContainer = document.querySelector('#tab-mytemplates .vertical-templates-container');
       
-      // Always include the upload card first
-      myTemplatesContainer.innerHTML = `
-        <div class="template-upload-card" tabindex="0" role="button" aria-label="Upload your template" 
-          id="open-upload-modal-btn"
-          onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); alert('Upload template modal would open here'); }">
-          <div class="plus-sign">+</div>
-          Upload your template
-        </div>
-      `;
-
       // Add existing templates if any
       if (state.myTemplates && state.myTemplates.length > 0) {
         state.myTemplates.forEach(template => {
@@ -1405,7 +1457,7 @@
       useBtn.type = 'button';
       useBtn.innerHTML = `<img src="Icons/2.svg" alt="Camera icon" /> Use this template`;
       useBtn.addEventListener('click', () => {
-        alert(`Using favorite template: ${template.name}`);
+        showToast(`Using favorite template: ${template.name}`, 'success');
       });
 
       // Icon buttons - FAVORITE (to remove from favorites) and DELETE (for my templates)
@@ -1565,6 +1617,26 @@
         btn.classList.remove('active');
       });
       document.querySelector('[data-target="feed"]').classList.add('active');
+
+      // Tab-specific lazy loads
+      if (idx === 0) {
+        // Usage stats tab
+        renderUsageStats();
+      }
+      if (idx === 1) {
+        // Template Management
+        fetchAdminTemplates();
+        const s = document.getElementById('templateSearch');
+        const sh = document.getElementById('shareFilter');
+        const ow = document.getElementById('ownerFilter');
+        if (s && !s._wired) { s.addEventListener('input', () => renderTemplateTable(applyTemplateFilters())); s._wired = true; }
+        if (sh && !sh._wired) { sh.addEventListener('change', () => renderTemplateTable(applyTemplateFilters())); sh._wired = true; }
+        if (ow && !ow._wired) { ow.addEventListener('input', () => renderTemplateTable(applyTemplateFilters())); ow._wired = true; }
+      }
+      if (idx === 3) {
+        // Audit Trail tab
+        fetchAllActivityLogs();
+      }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1577,25 +1649,36 @@
       renderActivity();
     });
 
-    // Sidebar navigation - Independent from subnav
+    // Sidebar navigation - Only redirect to finalprof with target parameter
     const sidebarButtons = document.querySelectorAll('.left-buttons button');
 
     sidebarButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const target = btn.dataset.target;
 
         if (target === 'logout') {
-          alert('Logging out...');
-          // Redirect to finalprof.html with logout action (assuming finalprof handles the actual sign-out)
-          window.location.href = 'finalprof.html?action=logout';
+          try {
+            showToast('Logging out...', 'info');
+            // Sign out from Firebase
+            if (window.auth && typeof window.auth.signOut === 'function') {
+              await window.auth.signOut();
+            } else {
+              // Fallback: Import and sign out
+              const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+              const auth = getAuth();
+              await signOut(auth);
+            }
+            showToast('Logged out successfully', 'success');
+            // Redirect to login page
+            window.location.href = 'login.html';
+          } catch (error) {
+            console.error('Logout error:', error);
+            showToast('Logout failed: ' + error.message, 'error');
+          }
           return;
         }
 
-        
-       
         window.location.href = `finalprof.html?target=${target}`;
-        
-
       });
     });
 
@@ -1650,7 +1733,7 @@
     }
     
     function confirmDelete() {
-      alert('Template deleted!');
+      showToast('Template deleted!', 'success');
       closeDeleteModal();
     }
 
@@ -1673,13 +1756,28 @@
       dateAdded: '2025-11-12'
     };
 
+    let CURRENT_VIEWED_TEMPLATE = null;
+
     function openViewModal(template) {
+      CURRENT_VIEWED_TEMPLATE = template || null;
       document.getElementById('viewModal').style.display = 'flex';
       document.getElementById('viewTemplateName').value = template.name;
-      document.getElementById('viewTags').value = template.tags;
+      const shotsVal = template.shots ? String(template.shots) : '';
+      const shotEl = document.getElementById('viewShotCount');
+      if (shotEl) shotEl.value = shotsVal;
       document.getElementById('viewType').value = template.type;
-      document.getElementById('viewUsageCount').value = template.usageCount;
-      document.getElementById('viewUploader').value = `Admin - ${template.dateAdded}`;
+      const effEl = document.getElementById('viewEffects');
+      if (effEl) effEl.value = template.effect || template.effects || '';
+      const img = document.getElementById('viewTemplatePreviewImg');
+      if (img) {
+        if (template.template_img) {
+          img.src = template.template_img;
+          img.style.display = 'block';
+        } else {
+          img.removeAttribute('src');
+          img.style.display = 'none';
+        }
+      }
     }
 
     function closeViewModal() {
@@ -1688,29 +1786,105 @@
 
     function openEditModal(template) {
       document.getElementById('editModal').style.display = 'flex';
-      document.getElementById('editTemplateName').value = template.name;
-      document.getElementById('editTags').value = template.tags;
-      document.getElementById('editType').value = template.type;
-      document.getElementById('editUsageCount').textContent = `Usage Count: ${template.usageCount} times`;
-      document.getElementById('editStatus').value = template.status;
+      const nameEl = document.getElementById('editTemplateName');
+      if (nameEl) nameEl.value = template?.name || '';
+      const idEl = document.getElementById('editTemplateId');
+      if (idEl) idEl.value = template?.id || template?.template_id || '';
+      const shareEl = document.getElementById('editShare');
+      if (shareEl) shareEl.value = (template?.share ? 'true' : 'false');
+      const effEl = document.getElementById('editEffects');
+      if (effEl) {
+        let val = (template?.effects || template?.effect || 'none').toString().toLowerCase();
+        // normalize a few common aliases
+        if (val === 'black & white' || val === 'black_and_white' || val === 'blackandwhite' || val === 'grayscale') val = 'bw';
+        // set if exists, otherwise create a temporary option to preserve unknown value
+        const hasOption = Array.from(effEl.options).some(o => o.value === val);
+        if (!hasOption && val) {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = val.charAt(0).toUpperCase() + val.slice(1);
+          effEl.appendChild(opt);
+        }
+        effEl.value = val || 'none';
+      }
+      const statusEl = document.getElementById('editStatus');
+      if (statusEl) statusEl.value = template?.status || 'Active';
+      const ap = document.getElementById('assetPreviewContainer');
+      if (ap) {
+        if (template?.template_img) {
+          ap.innerHTML = '<img class="preview-img" alt="Current asset preview" src="' + template.template_img + '" />';
+        } else {
+          ap.innerHTML = '<div class="file-status">No preview available</div>';
+        }
+      }
     }
 
     function closeEditModal() {
       document.getElementById('editModal').style.display = 'none';
     }
 
-    function saveChanges() {
-      alert('Changes saved!');
-      closeEditModal();
+    async function saveChanges() {
+      try {
+        const id = document.getElementById('editTemplateId')?.value || '';
+        const name = document.getElementById('editTemplateName')?.value?.trim() || '';
+        const shareVal = document.getElementById('editShare')?.value || 'false';
+        const effects = document.getElementById('editEffects')?.value || 'none';
+        const status = document.getElementById('editStatus')?.value || 'Active';
+        if (!id) { showToast('Missing template id', 'error'); return; }
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'adminUpdateTemplate',
+            user_id: ADMIN_USER_ID,
+            template_id: id,
+            update: {
+              name: name,
+              share: (shareVal === 'true'),
+              effects: effects,
+              status: status
+            }
+          })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Update failed');
+        showToast('Template updated', 'success');
+        closeEditModal();
+        await fetchAdminTemplates();
+      } catch (e) {
+        console.error('saveChanges error:', e);
+        showToast('Failed to save changes', 'error');
+      }
     }
 
     // User management functions
     function switchTab(tabName) {
-      document.getElementById('accountDetailsContent').style.display = tabName === 'accountDetails' ? 'block' : 'none';
-      document.getElementById('activityContentsContent').style.display = tabName === 'activityContents' ? 'block' : 'none';
+      // Hide all tab contents
+      document.getElementById('accountDetailsContent').style.display = 'none';
+      document.getElementById('activityContentsContent').style.display = 'none';
       
-      document.getElementById('accountDetailsTab').classList.toggle('active', tabName === 'accountDetails');
-      document.getElementById('activityContentsTab').classList.toggle('active', tabName === 'activityContents');
+      // Show selected tab content
+      if (tabName === 'accountDetails') {
+        document.getElementById('accountDetailsContent').style.display = 'block';
+      } else if (tabName === 'activityContents') {
+        document.getElementById('activityContentsContent').style.display = 'block';
+      }
+      
+      // Update tab button styles
+      const accountTab = document.getElementById('accountDetailsTab');
+      const activityTab = document.getElementById('activityContentsTab');
+      
+      if (tabName === 'accountDetails') {
+        accountTab.style.borderBottom = '3px solid #ea3b91';
+        accountTab.style.color = '#ea3b91';
+        activityTab.style.borderBottom = '3px solid transparent';
+        activityTab.style.color = '#d23481';
+      } else {
+        accountTab.style.borderBottom = '3px solid transparent';
+        accountTab.style.color = '#d23481';
+        activityTab.style.borderBottom = '3px solid #ea3b91';
+        activityTab.style.color = '#ea3b91';
+      }
     }
 
     function closeManageUserModal() {
@@ -1742,6 +1916,944 @@
     document.getElementById('deleteUserBtn').addEventListener('click', function() {
       document.getElementById('deleteUserModal').style.display = 'flex';
     });
+
+const API_ENDPOINT = 'http://localhost/public/pdo/api.php'; // IMPORTANT: Replace with your actual PHP API URL
+
+// Initialize Firebase
+(async () => {
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
+    const firebaseConfig = {
+      apiKey: "AIzaSyBbSE2lqLfQCZU4L4a0hNfpM1ud11I854w",
+      authDomain: "photobooth-c42a9.firebaseapp.com",
+      projectId: "photobooth-c42a9",
+      storageBucket: "photobooth-c42a9.firebasestorage.app",
+      messagingSenderId: "994496567051",
+      appId: "1:994496567051:web:81d507ace1fbd2db77b40e",
+      measurementId: "G-4FHWWBR2BJ"
+    };
+    const app = initializeApp(firebaseConfig);
+    const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+    window.auth = getAuth(app);
+    
+    // Check if user is admin
+    onAuthStateChanged(window.auth, async (user) => {
+      if (!user) {
+        // User not logged in, redirect to login
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Check if user has admin role
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: 'fetchOrCreateProfile', 
+            user_id: user.uid,
+            email: user.email,
+            display_name: user.displayName
+          })
+        });
+        const result = await response.json();
+        
+        console.log('Admin check response:', result);
+        console.log('User UID:', user.uid);
+        console.log('User admin status:', result.data?.admin);
+        
+        if (!result.success || !result.data?.admin) {
+          // User is not an admin, redirect to finalprof
+          console.log('User is not admin. Admin value:', result.data?.admin);
+          window.location.href = 'finalprof.html';
+        } else {
+          console.log('User is admin, access granted');
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        // On error, redirect to finalprof for safety
+        window.location.href = 'finalprof.html';
+      }
+    });
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+  }
+})();
+
+// Toast notification helper - matching finalprof.html style
+const showToast = (message, type = 'success', duration = 3000) => {
+    const container = (() => {
+        let div = document.getElementById('notification-container');
+        if (!div) {
+            div = document.createElement('div');
+            div.id = 'notification-container';
+            document.body.appendChild(div);
+        }
+        return div;
+    })();
+    
+    const toast = document.createElement('div');
+    toast.className = `notification-toast ${type}`;
+    toast.textContent = message;
+    
+    container.appendChild(toast);
+    
+    if (duration > 0) {
+        setTimeout(() => {
+            toast.classList.add('removing');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+    
+    return toast;
+};
+
+// =========================
+// Template Management (Admin)
+// =========================
+const ADMIN_USER_ID = 'admin_placeholder_id';
+let adminTemplatesCache = [];
+
+async function fetchAdminTemplates() {
+  try {
+    const res = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'adminFetchAllTemplates', user_id: ADMIN_USER_ID })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Failed to load templates');
+    adminTemplatesCache = json.data || [];
+    renderTemplateTable(applyTemplateFilters());
+  } catch (e) {
+    console.error('fetchAdminTemplates error:', e);
+    showToast('Failed to load templates', 'error');
+  }
+}
+
+function applyTemplateFilters() {
+  const search = document.getElementById('templateSearch')?.value?.toLowerCase() || '';
+  const shareFilter = document.getElementById('shareFilter')?.value || '';
+  const ownerFilter = document.getElementById('ownerFilter')?.value?.toLowerCase() || '';
+
+  let filtered = [...adminTemplatesCache];
+  if (search) {
+    filtered = filtered.filter(t => (t.name || '').toLowerCase().includes(search));
+  }
+  if (ownerFilter) {
+    filtered = filtered.filter(t => (t.owner_name || '').toLowerCase().includes(ownerFilter));
+  }
+  if (shareFilter) {
+    if (shareFilter === 'shared') filtered = filtered.filter(t => !!t.share);
+    if (shareFilter === 'private') filtered = filtered.filter(t => !t.share);
+  }
+  return filtered;
+}
+
+function renderTemplateTable(templates) {
+  const tbody = document.getElementById('templateTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  if (!templates.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 7;
+    td.textContent = 'No templates found';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
+  templates.forEach(t => {
+    const tr = document.createElement('tr');
+    const created = t.created_at ? new Date(t.created_at).toLocaleString() : '';
+    const sharedLabel = t.share ? 'Yes' : 'No';
+    tr.innerHTML = `
+      <td>${t.name || '(unnamed)'}</td>
+      <td>${t.owner_name || t.user_id || ''}</td>
+      <td>${t.frame_size || ''}</td>
+      <td>${t.shot_count || ''}</td>
+      <td>${sharedLabel}</td>
+      <td>${created}</td>
+      <td style="white-space:nowrap;">
+        <button title="View" aria-label="View" onclick='viewTemplateDetails(${JSON.stringify({id:t.template_id,name:t.name,frame:t.frame_size,shots:t.shot_count,img:t.template_img,effects:t.effects,share:!!t.share}).replace(/'/g,"&#39;")})'>
+          <img src="Icons 3/view.svg" alt="View" />
+        </button>
+        <button title="Edit Details" aria-label="Edit Details" onclick='openEditModal(${JSON.stringify({id: ""}).replace("{\"id\":\"\"}", JSON.stringify({
+            id: t.template_id,
+            name: t.name,
+            frame: t.frame_size,
+            shots: t.shot_count,
+            effects: t.effects,
+            share: !!t.share,
+            status: t.status || "Active",
+            template_img: t.template_img
+          })).replace(/'/g, "&#39;")})'>
+          <img src="Icons 2/edit.svg" alt="Edit" />
+        </button>
+        <button title="Delete" aria-label="Delete" onclick="adminDeleteTemplate('` + t.template_id + `')">
+          <img src="Icons 3/delete.svg" alt="Delete" />
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function viewTemplateDetails(info) {
+  // Re-use existing view modal if present
+  try {
+    if (typeof CURRENT_VIEWED_TEMPLATE !== 'undefined') {
+      CURRENT_VIEWED_TEMPLATE = {
+        ...info,
+        template_img: info.img || info.template_img || null,
+        share: typeof info.share === 'boolean' ? info.share : !!info.share,
+      };
+    }
+    document.getElementById('viewModal').style.display = 'flex';
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
+    setVal('viewTemplateName', info.name || '');
+    setVal('viewType', info.frame || '');
+    setVal('viewShotCount', info.shots ? String(info.shots) : '');
+    setVal('viewEffects', info.effects || '');
+    const img = document.getElementById('viewTemplatePreviewImg');
+    if (img) {
+      if (info.img) {
+        img.src = info.img;
+        img.style.display = 'block';
+      } else {
+        img.removeAttribute('src');
+        img.style.display = 'none';
+      }
+    }
+  } catch (e) {
+    console.warn('View modal not configured, showing toast only');
+    showToast(info.name ? info.name : 'Template', 'info');
+  }
+}
+
+async function toggleTemplateShare(templateId, currentShare) {
+  try {
+    const res = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'adminUpdateTemplate',
+        user_id: ADMIN_USER_ID,
+        template_id: templateId,
+        update: { share: !currentShare }
+      })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Update failed');
+    showToast('Template updated', 'success');
+    await fetchAdminTemplates();
+  } catch (e) {
+    console.error('toggleTemplateShare error:', e);
+    showToast('Failed to update template', 'error');
+  }
+}
+
+async function adminDeleteTemplate(templateId) {
+  try {
+    const res = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'adminDeleteTemplate', user_id: ADMIN_USER_ID, template_id: templateId })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Delete failed');
+    showToast('Template deleted', 'success');
+    await fetchAdminTemplates();
+  } catch (e) {
+    // Upload helpers similar to finalprof save flow
+    function updateUploadFields() {
+      const type = document.getElementById('templateType').value;
+      const dual = document.getElementById('dualUploadContainer');
+      const single = document.getElementById('singleUploadContainer');
+      const instr = document.getElementById('uploadInstruction');
+      if (type === 'Sticker Pack') {
+        dual.style.display = 'block';
+        single.style.display = 'none';
+      } else {
+        dual.style.display = 'none';
+        single.style.display = 'block';
+        instr.textContent = type === 'Filter' ? 'Upload Filter Config (.json)' : 'Upload Single PNG asset';
+        const singleUpload = document.getElementById('singleUpload');
+        singleUpload.accept = type === 'Filter' ? '.json' : '.png';
+      }
+    }
+
+    function generateTemplateId() {
+      const rand = Math.random().toString(36).slice(2, 8);
+      return 'tpl_' + Date.now() + '_' + rand;
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function submitForm() {
+      const name = document.getElementById('templateName').value.trim();
+      const type = document.getElementById('templateType').value;
+      const tags = document.getElementById('tags').value.trim();
+      const frame_size = document.getElementById('frameSize').value;
+      const shot_count = document.getElementById('shotCount').value;
+      const effect = document.getElementById('effectSelect').value;
+      const status = (document.querySelector('input[name="status"]:checked')?.value || 'Draft');
+      const share = document.getElementById('shareCheckbox').checked || status === 'Active';
+
+      let template_img = null;
+      let effects = effect; // keep simple string like finalprof presets
+      let sticker = null;
+      let text = [];
+      let background = '#ffffff';
+      let font = 'Inter';
+      let show_logo = false, show_date = false, show_time = false;
+
+      try {
+        if (type === 'Sticker Pack') {
+          const f2 = document.getElementById('upload2x6').files[0];
+          if (!f2) return showToast('Please select 2x6 PNG', 'error');
+          template_img = await readFileAsDataUrl(f2);
+        } else {
+          const f = document.getElementById('singleUpload').files[0];
+          if (!f) return showToast('Please select a file to upload', 'error');
+          if (type === 'Filter') {
+            // For filter config, just keep the effects name and ignore JSON detailed parsing for now
+            if (!f.name.endsWith('.json')) return showToast('Please upload a .json config for Filter', 'error');
+            // Optionally parse to validate
+            const txt = await f.text();
+            try { JSON.parse(txt); } catch { /* ignore */ }
+          } else {
+            // Background - use PNG preview as template_img
+            if (!f.type.includes('png')) return showToast('Please upload a PNG for Background', 'error');
+            template_img = await readFileAsDataUrl(f);
+          }
+        }
+
+        const template_id = generateTemplateId();
+        const payload = {
+          action: 'saveTemplateState',
+          user_id: 'admin_placeholder_id',
+          template_id,
+          template_state: {
+            name,
+            frame_size,
+            shot_count,
+            effects,
+            sticker,
+            text,
+            font,
+            text_color: '#000000',
+            background,
+            show_logo,
+            show_date,
+            show_time,
+            share,
+            template_img
+          }
+        };
+
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Upload failed');
+
+        showToast('Template uploaded', 'success');
+        closeModal();
+        // refresh admin templates table
+        if (typeof fetchAdminTemplates === 'function') fetchAdminTemplates();
+      } catch (e) {
+        console.error('submitForm error:', e);
+        showToast('Failed to upload template', 'error');
+      }
+    }
+    console.error('adminDeleteTemplate error:', e);
+    showToast('Failed to delete template', 'error');
+  }
+}
+
+    // Helper function to update the stat cards (explicit growth id to avoid mismatches)
+    function updateStatCard(numberId, growthId, value, growth, isPercentage = false) {
+      const numberElement = document.getElementById(numberId);
+      const growthElement = document.getElementById(growthId);
+        
+        numberElement.textContent = value.toLocaleString();
+
+        const growthAbs = Math.abs(growth);
+        const iconClass = growth >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+        const colorStyle = growth >= 0 ? 'color:#7fc97f;' : 'color:#d32f2f;';
+        const growthText = `${isPercentage ? growthAbs + '%' : growthAbs} this week`;
+
+        growthElement.innerHTML = `<i class="percentage fa ${iconClass}"></i> ${growthText}`;
+        growthElement.style.cssText = colorStyle;
+        growthElement.classList.toggle('negative-growth', growth < 0);
+    }
+
+    async function renderUsageStats() {
+        try {
+            const response = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'fetchUsageStats', user_id: 'admin_placeholder_id' }) // user_id is optional here, but good practice
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const result = await response.json();
+
+            if (!result.success) throw new Error(result.error || 'Failed to fetch usage stats.');
+
+            const data = result.data;
+
+            // 1. Update Stat Cards
+            updateStatCard('total-users', 'user-growth', data.total_users, data.user_growth_percentage, true);
+            updateStatCard('photos-captured', 'photo-growth', data.total_photos, data.photo_growth_percentage, true);
+
+            // 2. Render User Growth Line Chart (Daily Signups)
+            if (data.daily_user_signups && data.daily_user_signups.length > 0) {
+                const lineChartSpec = {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                    "width": "container",
+                    "height": 180,
+                    "data": { "values": data.daily_user_signups },
+                    "mark": { "type": "line", "point": true, "color": "#ea3b91" },
+                    "encoding": {
+                        "x": { 
+                            "field": "date", 
+                            "type": "temporal", 
+                            "title": "Date",
+                            "axis": { "format": "%b %d", "grid": false }
+                        },
+                        "y": { 
+                            "field": "count", 
+                            "type": "quantitative", 
+                            "title": "New Users",
+                            "axis": { "grid": true, "tickCount": 5 }
+                        },
+                        "tooltip": [
+                            { "field": "date", "type": "temporal", "title": "Date", "format": "%Y-%m-%d" },
+                            { "field": "count", "type": "quantitative", "title": "New Users" }
+                        ]
+                    },
+                    "config": {
+                        "view": { "stroke": "transparent" },
+                        "axis": { "labelColor": "#d23481", "titleColor": "#d23481" }
+                    }
+                };
+                
+                vegaEmbed('#user-growth-chart', lineChartSpec, { actions: false });
+            } else {
+                document.getElementById('user-growth-chart').textContent = "No user data available for the last 30 days.";
+            }
+
+
+              // 4. Render User Status Distribution Pie Chart
+              if (data.status_distribution && data.status_distribution.length > 0) {
+                const statusChartSpec = {
+                  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                  "width": 300,
+                  "height": 300,
+                  "data": { "values": data.status_distribution },
+                  "mark": { "type": "arc", "tooltip": true },
+                  "encoding": {
+                    "theta": { "field": "count", "type": "quantitative" },
+                    "color": { "field": "status", "type": "nominal", "scale": { "scheme": "set2" } },
+                    "tooltip": [
+                      { "field": "status", "type": "nominal", "title": "Status" },
+                      { "field": "count", "type": "quantitative", "title": "Count" }
+                    ]
+                  },
+                  "config": {
+                    "view": { "stroke": "transparent" }
+                  }
+                };
+                vegaEmbed('#status-distribution-chart', statusChartSpec, { actions: false });
+              } else {
+                document.getElementById('status-distribution-chart').textContent = "No status data available.";
+              }
+
+              // 5. Render Top Favorited Templates as text summary (Top 3)
+              // Build robust top favorites: handle both aggregated and raw rows
+              let topFavs = [];
+              const aggregated = Array.isArray(data.top_favorited_templates) ? data.top_favorited_templates : [];
+              const rawRows = Array.isArray(data.favorite_template) ? data.favorite_template : [];
+
+              if (aggregated.length > 0) {
+                topFavs = aggregated.map(t => ({
+                  template: (t.title ?? t.template ?? t.name ?? 'Unknown'),
+                  favorites: Number(t.favorite_count ?? t.favorites ?? t.count ?? 0) || 0
+                }));
+              } else if (rawRows.length > 0) {
+                // Compute frequency by title from raw favorite_template rows
+                const freq = {};
+                rawRows.forEach(r => {
+                  const key = (r.title ?? r.template ?? r.name ?? 'Unknown');
+                  freq[key] = (freq[key] || 0) + 1;
+                });
+                topFavs = Object.entries(freq).map(([template, favorites]) => ({ template, favorites }));
+              }
+
+              topFavs = topFavs
+                .filter(d => d.favorites > 0)
+                .sort((a, b) => b.favorites - a.favorites)
+                .slice(0, 3);
+
+              const favContainer = document.getElementById('top-favorites-summary');
+              if (favContainer) {
+                if (topFavs.length > 0) {
+                  const list = document.createElement('ol');
+                  list.style.margin = '0';
+                  list.style.paddingLeft = '1.2rem';
+                  topFavs.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.template} — ${item.favorites} favorites`;
+                    list.appendChild(li);
+                  });
+                  favContainer.innerHTML = '';
+                  favContainer.appendChild(list);
+                } else {
+                  favContainer.textContent = 'No favorites data available.';
+                }
+              }
+
+            } catch (error) {
+            console.error('Error rendering usage stats:', error);
+            const ug = document.getElementById('user-growth-summary');
+            if (ug) ug.textContent = `Error loading data: ${error.message}`;
+            const sd = document.getElementById('status-distribution-chart');
+            if (sd) sd.textContent = `Error loading data: ${error.message}`;
+            const tf = document.getElementById('top-favorites-summary');
+            if (tf) tf.textContent = `Error loading data: ${error.message}`;
+        }
+    }
+
+    // =========================
+    // User Management Functions
+    // =========================
+    async function fetchUsers({ search = '', role = '', admin_only = '' } = {}) {
+      try {
+        const payload = { action: 'fetchUsers' };
+        if (search) payload.search = search;
+        if (role) payload.role = role;
+        if (admin_only !== '') {
+          payload.admin_only = admin_only === 'true';
+        }
+
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Failed to fetch users');
+        return json.data;
+      } catch (err) {
+        console.error('fetchUsers error:', err);
+        return [];
+      }
+    }
+
+    function renderUsersTable(users) {
+      const tbody = document.querySelector('.user-table tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (!users.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.textContent = 'No users found';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      users.forEach(u => {
+        const tr = document.createElement('tr');
+        // Use the status field from database
+        const displayStatus = u.status ? u.status.charAt(0).toUpperCase() + u.status.slice(1) : 'Active';
+        // Use admin field to determine role display
+        const displayRole = u.admin ? 'Admin' : 'User';
+        tr.innerHTML = `
+          <td>${u.username ?? ''}</td>
+          <td>${u.email ?? ''}</td>
+          <td>${displayRole}</td>
+          <td>${displayStatus}</td>
+          <td>
+            <button class="manage-link" data-user-id="${u.user_id}">Manage</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Wire manage/delete actions
+      tbody.querySelectorAll('.manage-link').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.getAttribute('data-user-id');
+          const user = users.find(x => x.user_id === userId);
+          if (!user) return;
+          // Populate manage modal fields
+          document.getElementById('manageUserModal').style.display = 'flex';
+          document.getElementById('accountDetailsContent').style.display = 'block';
+          document.getElementById('activityContentsContent').style.display = 'none';
+          
+          // Reset tab styles
+          const accountTab = document.getElementById('accountDetailsTab');
+          const activityTab = document.getElementById('activityContentsTab');
+          accountTab.style.borderBottom = '3px solid #ea3b91';
+          accountTab.style.color = '#ea3b91';
+          activityTab.style.borderBottom = '3px solid transparent';
+          activityTab.style.color = '#d23481';
+
+          // Assuming inputs exist with these IDs in the manage modal (adjust if different)
+          const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
+          setVal('manageUserId', user.user_id);
+          setVal('manageUsername', user.username);
+          setVal('manageEmail', user.email);
+          // Set role based on admin field: if admin is true → "Admin", else → "User"
+          setVal('manageRole', user.admin ? 'Admin' : 'User');
+          setVal('manageBio', user.bio ?? '');
+          // Set status based on status field: capitalize the first letter
+          const statusValue = user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Active';
+          setVal('manageStatus', statusValue);
+          const adminCheckbox = document.getElementById('manageAdmin');
+          if (adminCheckbox) adminCheckbox.checked = !!user.admin;
+          
+          // Fetch and display photo count and activity logs
+          await fetchAndDisplayUserStats(user.user_id, user.created_at);
+          await fetchAndDisplayActivityLogs(user.user_id);
+        });
+      });
+    }
+    
+    // Fetch user photo count and display statistics
+    async function fetchAndDisplayUserStats(userId, createdAt) {
+      try {
+        // Format the joined date
+        const joinedDate = new Date(createdAt).toLocaleDateString();
+        document.getElementById('manageJoined').value = joinedDate;
+        
+        // Fetch photo count
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'fetchUserPhotoCount', target_user_id: userId })
+        });
+        const json = await res.json();
+        if (json.success) {
+          document.getElementById('manageTotalPhotos').value = json.data.photo_count || 0;
+        }
+      } catch (err) {
+        console.error('Error fetching user stats:', err);
+        document.getElementById('manageTotalPhotos').value = '0';
+      }
+    }
+    
+    // Fetch and display user activity logs
+    async function fetchAndDisplayActivityLogs(userId) {
+      try {
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'fetchActivityLog', target_user_id: userId })
+        });
+        const json = await res.json();
+        const activityList = document.getElementById('manageUserActivityList');
+        
+        if (json.success && json.data && json.data.length > 0) {
+          activityList.innerHTML = '';
+          json.data.forEach(activity => {
+            const activityItem = document.createElement('div');
+            activityItem.style.cssText = 'padding: 0.8rem; background: #fff; border: 1px solid #f4c1d9; border-radius: 6px; font-size: 0.95rem;';
+            const timestamp = new Date(activity.created_at).toLocaleString();
+            activityItem.innerHTML = `
+              <div style="font-weight: 600; margin-bottom: 0.3rem;">${activity.action}</div>
+              <div style="font-size: 0.85rem; color: #999;">${timestamp}</div>
+            `;
+            activityList.appendChild(activityItem);
+          });
+        } else {
+          activityList.innerHTML = '<p style="color: #999; font-style: italic;">No activity logs found.</p>';
+        }
+      } catch (err) {
+        console.error('Error fetching activity logs:', err);
+        document.getElementById('manageUserActivityList').innerHTML = '<p style="color: #d32f2f;">Failed to load activity logs.</p>';
+      }
+    }
+
+    async function refreshUsersFromFilters() {
+      const search = document.getElementById('userSearchInput')?.value || '';
+      const role = document.getElementById('userGroupFilter')?.value || '';
+      
+      // Convert role filter to admin_only parameter
+      let admin_only = '';
+      if (role && role !== 'All groups') {
+        admin_only = role === 'Admin' ? 'true' : 'false';
+      }
+      
+      const users = await fetchUsers({ search, admin_only });
+      renderUsersTable(users);
+    }
+
+    // Save changes from manage modal
+    async function saveChangesUser() {
+      const target_user_id = document.getElementById('manageUserId')?.value;
+      if (!target_user_id) return showToast('Missing user id', 'error');
+      
+      const roleValue = document.getElementById('manageRole')?.value;
+      const statusValue = document.getElementById('manageStatus')?.value;
+      
+      // Ensure admin is always a boolean: Admin = true, User = false
+      const isAdmin = roleValue === 'Admin';
+      
+      const update = {
+        admin: isAdmin,
+        status: statusValue ? statusValue.toLowerCase() : 'active'
+      };
+      
+      // Only include username/email if they have actual values
+      const username = document.getElementById('manageUsername')?.value;
+      const email = document.getElementById('manageEmail')?.value;
+      if (username && username.trim()) update.username = username;
+      if (email && email.trim()) update.email = email;
+      
+      const res = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updateUser', target_user_id, update })
+      });
+      const json = await res.json();
+      if (!json.success) return showToast(json.error || 'Failed to update user', 'error');
+      showToast('User changes saved!', 'success');
+      document.getElementById('manageUserModal').style.display = 'none';
+      refreshUsersFromFilters();
+    }
+
+    // Confirm delete user
+    async function confirmDeleteUser() {
+      const modal = document.getElementById('deleteUserModal');
+      const target_user_id = modal?.getAttribute('data-target-user-id');
+      if (!target_user_id) return showToast('Missing user id', 'error');
+      const res = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'deleteUser', target_user_id })
+      });
+      const json = await res.json();
+      if (!json.success) return showToast(json.error || 'Failed to delete user', 'error');
+      showToast('User deleted!', 'success');
+      modal.style.display = 'none';
+      refreshUsersFromFilters();
+    }
+
+    // Wire filters
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initial load
+      refreshUsersFromFilters();
+
+      const searchInput = document.getElementById('userSearchInput');
+      const roleSelect = document.getElementById('userGroupFilter');
+      const statusSelect = document.getElementById('userStatusFilter');
+      if (searchInput) searchInput.addEventListener('input', () => refreshUsersFromFilters());
+      if (roleSelect) roleSelect.addEventListener('change', () => refreshUsersFromFilters());
+      if (statusSelect) statusSelect.addEventListener('change', () => refreshUsersFromFilters());
+    });
+    // Call the function when the Usage Stats tab is active
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initial load for the first tab
+        renderUsageStats(); 
+    });
+
+    // =========================
+    // Audit Trail Functions
+    // =========================
+    let allAuditLogs = [];
+    let userIdToNameMap = {}; // Map user_id to username
+    
+    async function buildUserIdToNameMap() {
+      try {
+        const users = await fetchUsers({});
+        userIdToNameMap = {};
+        users.forEach(u => {
+          if (u.user_id && u.username) {
+            userIdToNameMap[u.user_id] = u.username;
+          }
+        });
+      } catch (err) {
+        console.error('Error building user map:', err);
+      }
+    }
+    
+    function categorizeAction(action) {
+      if (!action) return 'Other';
+      const a = action.toLowerCase();
+      if (a.includes('login')) return 'Login';
+      if (a.includes('deleted') || a.includes('delet')) return 'Deletion';
+      if (a.includes('upload')) return 'Content Upload';
+      if (a.includes('configuration') || a.includes('settings') || a.includes('config')) return 'Configuration Change';
+      if (a.includes('error') || a.includes('failed')) return 'System Error';
+      if (a.includes('profile')) return 'Profile';
+      if (a.includes('comment')) return 'Comments';
+      if (a.includes('liked') || a.includes('unliked')) return 'Likes';
+      if (a.includes('favorite')) return 'Favorites';
+      if (a.includes('template')) return 'Templates';
+      if (a.includes('photo')) return 'Photos';
+      return 'Other';
+    }
+    
+    async function fetchAllActivityLogs() {
+      try {
+        // First, build the user ID to name mapping
+        await buildUserIdToNameMap();
+        
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'fetchActivityLog' })
+        });
+        const json = await res.json();
+        if (json.success && json.data) {
+          // enrich with category
+          allAuditLogs = json.data.map(log => ({
+            ...log,
+            category: categorizeAction(log.action)
+          }));
+          populateActionTypeFilter();
+          refreshAuditTrail();
+        } else {
+          console.error('Failed to fetch activity logs:', json.error);
+        }
+      } catch (err) {
+        console.error('Error fetching activity logs:', err);
+      }
+    }
+    
+    function populateActionTypeFilter() {
+      const filterSelect = document.getElementById('auditActionTypeFilter');
+      if (!filterSelect) return;
+      
+      // Clear existing (keep first default option)
+      filterSelect.innerHTML = '';
+      const allOpt = document.createElement('option');
+      allOpt.value = '';
+      allOpt.textContent = 'All categories';
+      filterSelect.appendChild(allOpt);
+
+      // Get unique categories from logs
+      const categories = Array.from(new Set(allAuditLogs.map(l => l.category))).sort();
+      categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        filterSelect.appendChild(option);
+      });
+    }
+    
+    function renderAuditTrailTable(logs) {
+      const tbody = document.getElementById('auditTrailTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!logs.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 3;
+        td.textContent = 'No audit logs found';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      // Group by category
+      const grouped = logs.reduce((acc, log) => {
+        const cat = log.category || 'Other';
+        (acc[cat] = acc[cat] || []).push(log);
+        return acc;
+      }, {});
+
+      // Render groups in alphabetical order
+      Object.keys(grouped).sort().forEach(cat => {
+        // Group header row
+        const headerTr = document.createElement('tr');
+        const headerTd = document.createElement('td');
+        headerTd.colSpan = 3;
+        headerTd.style.cssText = 'font-weight:700;background:#fff4f8;border-top:2px solid #f4c1d9;color:#c32d6c;';
+        headerTd.textContent = cat;
+        headerTr.appendChild(headerTd);
+        tbody.appendChild(headerTr);
+
+        // Entries under this category
+        grouped[cat].forEach(log => {
+          const tr = document.createElement('tr');
+          const timestamp = new Date(log.created_at).toLocaleString();
+          // Try to get username from map first, then fall back to various name fields, then user_id, then 'System'
+          const displayName = userIdToNameMap[log.user_id] || 
+                             log.user_name || 
+                             log.username || 
+                             log.name || 
+                             (log.user_id && log.user_id !== 'System' ? `User ${log.user_id}` : 'System');
+          tr.innerHTML = `
+            <td>${timestamp}</td>
+            <td>${displayName}</td>
+            <td>${log.action ?? ''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+    
+    function refreshAuditTrail() {
+      const searchInput = document.getElementById('auditSearchInput')?.value || '';
+      const actionFilter = document.getElementById('auditActionTypeFilter')?.value || '';
+      
+      let filtered = allAuditLogs;
+      
+      // Filter by search term (username or action)
+      if (searchInput) {
+        const searchLower = searchInput.toLowerCase();
+        filtered = filtered.filter(log => {
+          // Check the mapped username first, then fall back to other fields
+          const displayName = userIdToNameMap[log.user_id] || 
+                             log.user_name || 
+                             log.username || 
+                             log.name || 
+                             log.user_id || 
+                             '';
+          return (
+            (displayName && String(displayName).toLowerCase().includes(searchLower)) ||
+            (log.action && log.action.toLowerCase().includes(searchLower))
+          );
+        });
+      }
+      
+      // Filter by category
+      if (actionFilter) {
+        filtered = filtered.filter(log => log.category === actionFilter);
+      }
+      
+      renderAuditTrailTable(filtered);
+    }
+    
+    // Wire up audit trail filters
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchAllActivityLogs();
+      
+      const auditSearchInput = document.getElementById('auditSearchInput');
+      const auditActionFilter = document.getElementById('auditActionTypeFilter');
+      
+      if (auditSearchInput) auditSearchInput.addEventListener('input', () => refreshAuditTrail());
+      if (auditActionFilter) auditActionFilter.addEventListener('change', () => refreshAuditTrail());
+    });
+
   </script>
 </body>
 </html>

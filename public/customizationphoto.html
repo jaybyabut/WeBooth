@@ -593,6 +593,11 @@
                     // Capture the image after filters are applied and handles are hidden
                     setTimeout(async () => {
                         try {
+                            // Ensure custom fonts are loaded so text aligns consistently in export
+                            if (document.fonts && document.fonts.ready) {
+                                await document.fonts.ready;
+                            }
+
                             const canvas = await html2canvas(photostripElement, {
                                 scale: 3, 
                                 useCORS: true, 
@@ -655,7 +660,96 @@
                 });
             }
             // --- END DOWNLOAD LOGIC ---
+            
+            // ***************************************************************
+            // *** NEW: SEND/SHARE BUTTON LOGIC (MODAL) ***
+            // ***************************************************************
+            const shareModalOverlay = document.getElementById('share-modal-overlay');
+            const shareLinkInput = document.getElementById('share-link-input');
+            const copyLinkBtn = document.getElementById('copy-link-btn');
+            const modalCancelShareBtn = document.getElementById('modal-cancel-share-btn');
+            const shareStatusMsg = document.getElementById('share-status');
 
+            const hideShareModal = () => {
+                if (shareModalOverlay) {
+                    shareModalOverlay.style.display = 'none';
+                    if (shareStatusMsg) shareStatusMsg.textContent = '';
+                }
+            };
+
+            const showShareModal = async () => {
+                const userId = window.checkAuthAndGetUid();
+                if (!userId) return;
+
+                if (shareModalOverlay) shareModalOverlay.style.display = 'flex';
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" class="opacity-75"></path></svg>';
+                
+                if (shareLinkInput) shareLinkInput.value = 'Generating link...';
+
+                try {
+                    // 1. Capture the image
+                    const canvas = await capturePhotoStripForUpload();
+                    
+                    // 2. Convert to Blob and upload to Firebase
+                    const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                    const imageURL = await window.uploadPostImage(imageBlob, userId); 
+
+                    // 3. Update the modal with the generated URL
+                    if (shareLinkInput) shareLinkInput.value = imageURL;
+                    if (shareStatusMsg) shareStatusMsg.textContent = 'Ready to share!';
+
+                } catch (error) {
+                    console.error("Error during send/share process:", error);
+                    if (shareLinkInput) shareLinkInput.value = 'Error generating link.';
+                    if (shareStatusMsg) shareStatusMsg.textContent = 'Link generation failed.';
+                } finally {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>';
+                }
+            };
+            
+            if (sendBtn) {
+                sendBtn.addEventListener('click', showShareModal);
+            }
+
+            if (modalCancelShareBtn) {
+                modalCancelShareBtn.addEventListener('click', hideShareModal);
+            }
+
+            if (shareModalOverlay) {
+                shareModalOverlay.addEventListener('click', (e) => {
+                    if (e.target === shareModalOverlay) {
+                        hideShareModal();
+                    }
+                });
+            }
+
+            // Clipboard Copy Logic
+            if (copyLinkBtn) {
+                copyLinkBtn.addEventListener('click', async () => {
+                    const link = shareLinkInput.value;
+                    if (!link || link === 'Generating link...' || link === 'Error generating link.') {
+                        if (shareStatusMsg) shareStatusMsg.textContent = 'Please wait for the link to generate.';
+                        return;
+                    }
+
+                    try {
+                        await navigator.clipboard.writeText(link);
+                        if (shareStatusMsg) shareStatusMsg.textContent = 'Copied to clipboard! ✅';
+                        setTimeout(() => {
+                            hideShareModal();
+                        }, 1000);
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                        if (shareStatusMsg) shareStatusMsg.textContent = 'Failed to copy. Please copy manually.';
+                        shareLinkInput.select();
+                    }
+                });
+            }
+            // ***************************************************************
+            // *** END: NEW SEND/SHARE BUTTON LOGIC (MODAL) ***
+            // ***************************************************************
 
             // Background Functionality (Original logic preserved)
             const bgColorPicker = document.getElementById('bg-color');
@@ -1381,13 +1475,31 @@
                                 const favoriteResult = await favoriteResponse.json();
                                 if (favoriteResult.success) {
                                     console.log('Template automatically added to favorites!', 'Favorite ID:', favoriteResult.favorite_id);
+                                    window.showNotification('Template saved and added to favorites!', 'success');
+                                    
+                                    // Disable the save button and mark as favorited
+                                    if (saveBtn) {
+                                        saveBtn.disabled = true;
+                                        saveBtn.classList.add('favorited');
+                                        saveBtn.title = 'Already in Favorites';
+                                    }
                                 } else if (favoriteResult.message && favoriteResult.message.includes('Already favorited')) {
                                     console.log('Template already in favorites');
+                                    window.showNotification('Template saved (already in favorites)', 'info');
+                                    
+                                    // Disable the save button since it's already favorited
+                                    if (saveBtn) {
+                                        saveBtn.disabled = true;
+                                        saveBtn.classList.add('favorited');
+                                        saveBtn.title = 'Already in Favorites';
+                                    }
                                 } else {
                                     console.error("Error adding to favorites:", favoriteResult.error);
+                                    window.showNotification('Template saved, but could not add to favorites', 'warning');
                                 }
                             } catch (error) {
                                 console.error("Error during favorite addition:", error);
+                                window.showNotification('Template saved, but could not add to favorites', 'warning');
                             }
 
                             // 7. Close modal and show success
@@ -1466,7 +1578,50 @@
                     });
                 });
 
-                // 5. Capture the off-screen clone
+                // 4b. Force footer brand to be vertically centered to match preview
+                const templateFooter = clonedStrip.querySelector('.template-footer');
+                if (templateFooter) {
+                    templateFooter.style.display = 'flex';
+                    templateFooter.style.flexDirection = 'column';
+                    templateFooter.style.alignItems = 'center';
+                    templateFooter.style.justifyContent = 'center';
+                    templateFooter.style.textAlign = 'center';
+                }
+                
+                const footerBrand = clonedStrip.querySelector('.footer-brand');
+                if (footerBrand) {
+                    footerBrand.style.display = 'flex';
+                    footerBrand.style.alignItems = 'center';
+                    footerBrand.style.justifyContent = 'center';
+                    footerBrand.style.gap = '0.5rem';
+                    footerBrand.style.height = '2.5rem';
+                }
+                
+                const footerImg = clonedStrip.querySelector('.footer-brand img');
+                if (footerImg) {
+                    footerImg.style.height = '2.5rem';
+                    footerImg.style.width = 'auto';
+                    footerImg.style.margin = '0';
+                }
+                
+                const footerText = clonedStrip.querySelector('.footer-brand .footer-text');
+                if (footerText) {
+                    footerText.style.display = 'flex';
+                    footerText.style.alignItems = 'center';
+                    footerText.style.justifyContent = 'center';
+                    footerText.style.height = '2.5rem';
+                    footerText.style.lineHeight = '2.5rem';
+                    footerText.style.margin = '0';
+                    footerText.style.padding = '0';
+                }
+
+                // 5. Capture the off-screen clone (ensure fonts are ready for consistent alignment)
+                if (document.fonts && document.fonts.ready) {
+                    await document.fonts.ready;
+                }
+                // Force reflow so flex heights are resolved before capture
+                clonedStrip.offsetHeight;
+
                 const canvas = await html2canvas(clonedStrip, {
                     scale: 3, 
                     useCORS: true, 
@@ -1870,6 +2025,46 @@
                 <div class="flex justify-end gap-3 mt-8">
                     <button id="modal-cancel-btn" class="modal-button-cancel">Cancel</button>
                     <button id="modal-post-btn" class="modal-button-post">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="share-modal-overlay" class="modal-overlay" style="display: none;">
+        <div class="modal-content" id="share-modal-content">
+            <div class="modal-content-inner">
+                <h3 class="modal-title font-fredoka">Share Your Photo</h3>
+                
+                <p class="text-gray-600 mb-4">Your image has been uploaded. Click the button below to copy the direct link.</p>
+
+                <label for="share-link-input" class="modal-label">Shareable Link</label>
+                <div class="flex gap-2">
+                    <input type="text" id="share-link-input" value="Click 'Share' first." class="modal-input flex-grow" readonly>
+                    <button id="copy-link-btn" class="modal-button-post flex-shrink-0 w-24">Copy</button>
+                </div>
+                <p id="share-status" class="modal-error" aria-live="polite"></p>
+                
+                <div class="flex justify-end gap-3 mt-8">
+                    <button id="modal-cancel-share-btn" class="modal-button-cancel">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal-overlay" class="modal-overlay" style="display: none;">
+        <div class="modal-content" id="share-modal-content">
+            <div class="modal-content-inner">
+                <h3 class="modal-title font-fredoka">Share Your Photo</h3>
+                <p class="text-gray-600 mb-4">Your image has been uploaded. Click below to copy the direct link.</p>
+                <label for="share-link-input" class="modal-label">Shareable Link</label>
+                <div class="flex gap-2">
+                    <input type="text" id="share-link-input" value="Click 'Share' first." class="modal-input flex-grow" readonly>
+                    <button id="copy-link-btn" class="modal-button-post flex-shrink-0 w-24">Copy</button>
+                </div>
+                <p id="share-status" class="modal-error" aria-live="polite"></p>
+                <div class="flex justify-end gap-3 mt-8">
+                    <button id="modal-cancel-share-btn" class="modal-button-cancel">Close</button>
                 </div>
             </div>
         </div>

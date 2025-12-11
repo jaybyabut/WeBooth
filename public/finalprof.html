@@ -1026,9 +1026,9 @@
             <div class="effects-section">
               <div class="section-heading">Effects</div>
               <div class="effects-grid">
-                <button type="button" class="effect-option" data-effect="none">None</button>
+                <button type="button" class="effect-option selected" data-effect="none">None</button>
                 <button type="button" class="effect-option" data-effect="bw">B&W</button>
-                <button type="button" class="effect-option selected" data-effect="warm">Warm</button>
+                <button type="button" class="effect-option" data-effect="warm">Warm</button>
                 <button type="button" class="effect-option" data-effect="cool">Cool</button>
                 <button type="button" class="effect-option" data-effect="retro">Retro</button>
                 <button type="button" class="effect-option" data-effect="noir">Noir</button>
@@ -1954,7 +1954,7 @@
 
     let uploadedBackground = null;
     let uploadedStickers = [];
-    let currentEffect = 'warm';
+    let currentEffect = 'none';
     let draggedSticker = null;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
@@ -2045,9 +2045,9 @@
       shotsSelect.value = '1';
       
       effectOptions.forEach(opt => opt.classList.remove('selected'));
-      const warmBtn = document.querySelector('[data-effect="warm"]');
-      if (warmBtn) warmBtn.classList.add('selected');
-      currentEffect = 'warm';
+      const noneBtn = document.querySelector('[data-effect="none"]');
+      if (noneBtn) noneBtn.classList.add('selected');
+      currentEffect = 'none';
       
       templatePreview.innerHTML = '<div class="preview-placeholder">Template preview will appear here</div>';
       templatePreview.className = 'preview-image size-2x6';
@@ -3172,9 +3172,9 @@
       shareToggle.checked = template.shareToCommunity || false;
       
       effectOptions.forEach(opt => opt.classList.remove('selected'));
-      const effectBtn = document.querySelector(`[data-effect="${template.effect || 'warm'}"]`);
+      const effectBtn = document.querySelector(`[data-effect="${template.effect || 'none'}"]`);
       if (effectBtn) effectBtn.classList.add('selected');
-      currentEffect = template.effect || 'warm';
+      currentEffect = template.effect || 'none';
       
       // Use background field if available, otherwise fall back to template_img
       uploadedBackground = template.background || template.template_img || null; 

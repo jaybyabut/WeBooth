@@ -511,7 +511,7 @@ body {
       if (!userId) return;
 
       try {
-        const response = await fetch('http://localhost:80/api.php', {
+        const response = await fetch('http://localhost:80/public/pdo/api.php', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -818,7 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // If template ID exists, fetch full template details from database
             if (templateId && currentUserId) {
-                const response = await fetch('http://localhost:80/api.php', {
+                const response = await fetch('http://localhost:80/public/pdo/api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
